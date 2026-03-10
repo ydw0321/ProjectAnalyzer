@@ -20,15 +20,26 @@ class LLMProcessor:
 ```"""
 
         try:
+            headers = {
+                "Authorization": f"Bearer {Config.LLM_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": Config.LLM_MODEL,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ],
+                "stream": False
+            }
             response = requests.post(
                 Config.LLM_API_URL,
-                json={
-                    "model": Config.LLM_MODEL,
-                    "prompt": prompt,
-                    "stream": False
-                },
+                headers=headers,
+                json=payload,
                 timeout=Config.LLM_TIMEOUT
             )
-            return response.json().get("response", "大模型未返回有效内容")
+            result = response.json()
+            if "choices" in result and len(result["choices"]) > 0:
+                return result["choices"][0]["message"]["content"]
+            return result.get("content", "大模型未返回有效内容")
         except Exception as e:
             return f"大模型生成失败: {str(e)}"
