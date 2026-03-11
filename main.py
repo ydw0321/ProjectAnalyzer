@@ -26,10 +26,15 @@ def phase1_parse_and_index(graph_store=None):
 
     method_index = []
     all_classes = {}  # file_path -> list of class names
-    all_calls = []    # list of (caller, callee) tuples
+    all_calls = []    # 包含 internal_calls 和 external_calls
 
     for file_path in tqdm(business_files, desc="解析业务层"):
-        classes, methods, calls = parser.extract_with_calls(file_path)
+        result = parser.extract_with_calls(file_path)
+        
+        classes = result.get('classes', [])
+        methods = result.get('methods', [])
+        internal_calls = result.get('internal_calls', [])
+        external_calls = result.get('external_calls', [])
 
         # 存储类节点到 Neo4j
         if graph_store and classes:
@@ -42,9 +47,9 @@ def phase1_parse_and_index(graph_store=None):
             for method in methods:
                 graph_store.add_method_node(method['name'], method.get('class_name', ''), file_path)
 
-        # 收集调用关系
-        if calls:
-            all_calls.extend(calls)
+        # 收集调用关系（包括内部和外部）
+        all_calls.extend(internal_calls)
+        all_calls.extend(external_calls)
 
         for method in methods:
             method_index.append({
@@ -134,12 +139,27 @@ def main():
     # 阶段1.5：存储调用关系到 Neo4j
     if graph_store and all_calls:
         print(f"\n📊 存储 {len(all_calls)} 条调用关系到 Neo4j...")
+        internal_count = 0
+        external_count = 0
         for call in all_calls:
             try:
-                graph_store.add_call_relationship(call['caller'], call['callee'])
+                call_type = call.get('type', 'internal')
+                caller_class = call.get('caller_class')
+                callee_class = call.get('callee_class')
+                graph_store.add_call_relationship(
+                    call['caller'], 
+                    call['callee'],
+                    caller_class=caller_class,
+                    callee_class=callee_class,
+                    call_type=call_type
+                )
+                if call_type == 'external':
+                    external_count += 1
+                else:
+                    internal_count += 1
             except Exception as e:
                 pass  # 忽略单个关系存储失败
-        print("✅ 调用关系存储完成")
+        print(f"✅ 调用关系存储完成 (内部: {internal_count}, 跨类: {external_count})")
 
     # 阶段2：分析热点节点
     hot_nodes = phase2_find_caller_nodes(method_index)

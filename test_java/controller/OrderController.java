@@ -1,31 +1,44 @@
 package com.example.controller;
 
-import com.example.service.PaymentService;
+import com.example.biz.OrderBiz;
+import com.example.model.Order;
+import com.example.util.IdGenerator;
 
 public class OrderController {
     
-    private PaymentService paymentService = new PaymentService();
+    private OrderBiz orderBiz = new OrderBiz();
     
-    public String createOrder(String productId, int quantity) {
-        String orderId = generateOrderId();
-        double price = calculatePrice(productId, quantity);
-        return orderId;
+    public String createOrder(String userId, String productId, int quantity, String paymentMethod) {
+        try {
+            Order order = orderBiz.submitOrder(userId, productId, quantity, paymentMethod);
+            return buildSuccessResponse(order.getOrderId());
+        } catch (Exception e) {
+            return buildErrorResponse(e.getMessage());
+        }
     }
     
-    public void payOrder(String orderId, double amount) {
-        paymentService.processPayment(orderId, amount);
-        sendConfirmation(orderId);
+    public String cancelOrder(String orderId) {
+        try {
+            orderBiz.handleOrderCancellation(orderId);
+            return buildSuccessResponse("Order cancelled");
+        } catch (Exception e) {
+            return buildErrorResponse(e.getMessage());
+        }
     }
     
-    private String generateOrderId() {
-        return "ORD-" + System.currentTimeMillis();
+    public String queryOrder(String orderId) {
+        if (orderId == null || orderId.isEmpty()) {
+            return buildErrorResponse("Order ID is required");
+        }
+        
+        return buildSuccessResponse("Order details");
     }
     
-    private double calculatePrice(String productId, int quantity) {
-        return 100.0 * quantity;
+    private String buildSuccessResponse(String data) {
+        return "{\"status\":\"success\",\"data\":\"" + data + "\"}";
     }
     
-    private void sendConfirmation(String orderId) {
-        System.out.println("Order confirmed: " + orderId);
+    private String buildErrorResponse(String message) {
+        return "{\"status\":\"error\",\"message\":\"" + message + "\"}";
     }
 }

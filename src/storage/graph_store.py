@@ -33,18 +33,45 @@ class GraphStore:
                 file_path=file_path
             )
 
-    def add_call_relationship(self, caller, callee):
-        """创建方法调用关系"""
+    def add_call_relationship(self, caller, callee, caller_class=None, callee_class=None, call_type='internal'):
+        """创建方法调用关系（支持跨类调用）"""
         with self.driver.session() as session:
-            session.run(
-                """
-                MATCH (caller:Method {name: $caller})
-                MATCH (callee:Method {name: $callee})
-                MERGE (caller)-[:CALLS]->(callee)
-                """,
-                caller=caller,
-                callee=callee
-            )
+            # 动态构建查询
+            if call_type == 'external':
+                # 跨类调用 - 通过类名匹配
+                if caller_class and callee_class and callee_class != 'Unknown':
+                    session.run(
+                        """
+                        MATCH (caller:Method {name: $caller})
+                        MATCH (callee:Method {name: $callee, class_name: $callee_class})
+                        MERGE (caller)-[:CALLS {via_field: $via_field, type: 'external'}]->(callee)
+                        """,
+                        caller=caller,
+                        callee=callee,
+                        callee_class=callee_class,
+                        via_field=caller + '_to_' + callee
+                    )
+                else:
+                    # 目标类未知，仅记录调用关系
+                    session.run(
+                        """
+                        MATCH (caller:Method {name: $caller})
+                        MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(callee:ExternalMethod {name: $callee})
+                        """,
+                        caller=caller,
+                        callee=callee
+                    )
+            else:
+                # 内部调用
+                session.run(
+                    """
+                    MATCH (caller:Method {name: $caller})
+                    MATCH (callee:Method {name: $callee})
+                    MERGE (caller)-[:CALLS {type: 'internal'}]->(callee)
+                    """,
+                    caller=caller,
+                    callee=callee
+                )
 
     def add_belongs_to_relationship(self, method_name, class_name):
         """创建方法属于类的关系"""
