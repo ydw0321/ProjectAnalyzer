@@ -69,6 +69,7 @@ class JavaParser:
                     find_class_declarations(child)
 
         def find_method_declarations(node):
+            nonlocal class_info
             if node.type == 'method_declaration':
                 name_node = node.child_by_field_name('name')
                 method_name = name_node.text.decode('utf-8') if name_node else ''
@@ -102,9 +103,46 @@ class JavaParser:
             for child in node.children:
                 find_method_invocations(child)
 
-        find_class_declarations(root_node)
-        find_method_declarations(root_node)
-        find_method_invocations(root_node)
+        # 合并遍历：先找类，再在同一遍历中找方法
+        def find_class_and_methods(node):
+            nonlocal class_info
+            if node.type == 'class_declaration':
+                name_node = node.child_by_field_name('name')
+                class_name = name_node.text.decode('utf-8') if name_node else ''
+                classes.append(class_name)
+                
+                old_class = class_info
+                class_info = {'name': class_name, 'start': node.start_byte, 'end': node.end_byte}
+                
+                # 在类内部查找方法
+                for child in node.children:
+                    find_class_and_methods(child)
+                
+                class_info = old_class
+            elif node.type == 'method_declaration':
+                name_node = node.child_by_field_name('name')
+                method_name = name_node.text.decode('utf-8') if name_node else ''
+                
+                start_byte = node.start_byte
+                end_byte = node.end_byte
+                method_code = source_code[start_byte:end_byte]
+                
+                methods.append({
+                    'name': method_name,
+                    'class_name': class_info['name'],
+                    'code': method_code,
+                    'start_byte': start_byte,
+                    'end_byte': end_byte
+                })
+                
+                # 继续在方法内查找调用
+                for child in node.children:
+                    find_method_invocations(child)
+            else:
+                for child in node.children:
+                    find_class_and_methods(child)
+
+        find_class_and_methods(root_node)
 
         all_method_names = {m['name'] for m in methods}
         filtered_calls = []

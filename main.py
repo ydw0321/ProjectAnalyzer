@@ -4,6 +4,7 @@ from src.config import Config
 from src.scanner.scanner import scan_java_files
 from src.parser.java_parser import JavaParser
 from src.storage.vector_store import KnowledgeBase
+from src.storage.graph_store import GraphStore
 
 ONLY_ANALYZE_KEYWORDS = {'action', 'controller', 'service', 'facade', 'biz', 'bl'}
 
@@ -13,7 +14,8 @@ def is_business_layer(file_path: str) -> bool:
     return any(kw in path_lower for kw in ONLY_ANALYZE_KEYWORDS)
 
 
-def phase1_parse_and_index():
+def phase1_parse_and_index(graph_store=None):
+    """解析业务层并可选地存储到图数据库"""
     print("📊 阶段1：解析业务层...")
 
     parser = JavaParser()
@@ -23,9 +25,26 @@ def phase1_parse_and_index():
     print(f"📂 业务层文件: {len(business_files)} 个")
 
     method_index = []
+    all_classes = {}  # file_path -> list of class names
+    all_calls = []    # list of (caller, callee) tuples
 
     for file_path in tqdm(business_files, desc="解析业务层"):
         classes, methods, calls = parser.extract_with_calls(file_path)
+
+        # 存储类节点到 Neo4j
+        if graph_store and classes:
+            all_classes[file_path] = classes
+            for class_name in classes:
+                graph_store.add_class_node(class_name, file_path)
+
+        # 存储方法节点到 Neo4j
+        if graph_store:
+            for method in methods:
+                graph_store.add_method_node(method['name'], method.get('class_name', ''), file_path)
+
+        # 收集调用关系
+        if calls:
+            all_calls.extend(calls)
 
         for method in methods:
             method_index.append({
@@ -36,7 +55,7 @@ def phase1_parse_and_index():
             })
 
     print(f"✅ 共解析 {len(method_index)} 个业务层方法")
-    return method_index
+    return method_index, all_calls
 
 
 def phase2_find_caller_nodes(method_index):
@@ -101,9 +120,47 @@ def phase3_analyze_hot_nodes(method_index, hot_nodes):
 def main():
     print("🚀 Code-GraphRAG 构建流水线\n")
 
-    method_index = phase1_parse_and_index()
+    # 初始化图数据库（可选）
+    graph_store = None
+    try:
+        graph_store = GraphStore()
+        print("✅ Neo4j 连接成功")
+    except Exception as e:
+        print(f"⚠️ Neo4j 连接失败: {e}")
+
+    # 阶段1：解析并存储到图数据库
+    method_index, all_calls = phase1_parse_and_index(graph_store)
+
+    # 阶段1.5：存储调用关系到 Neo4j
+    if graph_store and all_calls:
+        print(f"\n📊 存储 {len(all_calls)} 条调用关系到 Neo4j...")
+        for call in all_calls:
+            try:
+                graph_store.add_call_relationship(call['caller'], call['callee'])
+            except Exception as e:
+                pass  # 忽略单个关系存储失败
+        print("✅ 调用关系存储完成")
+
+    # 阶段2：分析热点节点
     hot_nodes = phase2_find_caller_nodes(method_index)
+
+    # 阶段2.5：存储 BELONGS_TO 关系到 Neo4j
+    if graph_store:
+        print("\n📊 存储 BELONGS_TO 关系到 Neo4j...")
+        for method in method_index:
+            try:
+                if method['class_name']:
+                    graph_store.add_belongs_to_relationship(method['name'], method['class_name'])
+            except Exception as e:
+                pass
+        print("✅ BELONGS_TO 关系存储完成")
+
+    # 阶段3：LLM 分析
     phase3_analyze_hot_nodes(method_index, hot_nodes)
+
+    # 关闭图数据库连接
+    if graph_store:
+        graph_store.close()
 
     print("\n✨ 完成！")
 

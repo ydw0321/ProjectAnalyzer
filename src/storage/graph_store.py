@@ -46,6 +46,19 @@ class GraphStore:
                 callee=callee
             )
 
+    def add_belongs_to_relationship(self, method_name, class_name):
+        """创建方法属于类的关系"""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (m:Method {name: $method_name})
+                MATCH (c:Class {name: $class_name})
+                MERGE (m)-[:BELONGS_TO]->(c)
+                """,
+                method_name=method_name,
+                class_name=class_name
+            )
+
     def get_hot_nodes(self, limit=50):
         """获取被调用最多的方法节点"""
         with self.driver.session() as session:
