@@ -2,7 +2,8 @@ import os
 
 
 class Config:
-    PROJECT_PATH = "/workspace/test_java"
+    # 使用原始字符串 r"" 避免 Windows 路径警告
+    PROJECT_PATH = r"./test_java"
     CHROMA_DB_PATH = "./chroma_data"
 
     NEO4J_URI = "bolt://localhost:7687"

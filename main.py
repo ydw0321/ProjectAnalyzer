@@ -7,12 +7,9 @@ from src.storage.vector_store import KnowledgeBase
 from src.storage.graph_store import GraphStore
 from src.tree import ArchitectureTreeGenerator
 
-ONLY_ANALYZE_KEYWORDS = {'action', 'controller', 'service', 'facade', 'biz', 'bl'}
-
-
 def is_business_layer(file_path: str) -> bool:
-    path_lower = file_path.lower()
-    return any(kw in path_lower for kw in ONLY_ANALYZE_KEYWORDS)
+    # 分析所有 Java 文件，不过滤业务层
+    return True
 
 
 def phase1_parse_and_index(graph_store=None):
