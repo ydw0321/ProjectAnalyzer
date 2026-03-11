@@ -139,7 +139,7 @@ def main():
         print(f"\n📊 存储 {len(all_calls)} 条调用关系到 Neo4j...")
         internal_count = 0
         external_count = 0
-        for call in all_calls:
+        for call in tqdm(all_calls, desc="存储调用关系"):
             try:
                 call_type = call.get('type', 'internal')
                 caller_class = call.get('caller_class')
@@ -164,8 +164,8 @@ def main():
 
     # 阶段2.5：存储 BELONGS_TO 关系到 Neo4j
     if graph_store:
-        print("\n📊 存储 BELONGS_TO 关系到 Neo4j...")
-        for method in method_index:
+        print(f"\n📊 存储 {len(method_index)} 个 BELONGS_TO 关系到 Neo4j...")
+        for method in tqdm(method_index, desc="存储 BELONGS_TO 关系"):
             try:
                 if method['class_name']:
                     graph_store.add_belongs_to_relationship(method['name'], method['class_name'])
