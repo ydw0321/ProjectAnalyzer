@@ -18,10 +18,30 @@
 | Level | 层级名称 | 描述 | 节点类型 | 示例 |
 |-------|---------|------|---------|------|
 | L0 | 系统根节点 | 应用/项目入口 | System | OrderSystem |
-| L1 | 包/模块 | 按目录或业务分包 | Package | controller, service, dal |
-| L2 | 类 | 具体业务类 | Class | OrderService, UserDao |
-| L3 | 方法 | 类中的方法 | Method | placeOrder(), createUser() |
-| L4 | 代码片段 | 方法内具体逻辑 | CodeBlock | 循环/条件块（可选） |
+| L1 | 基础层 | 按业务分层（controller/service/facade/biz/dal） | Layer | controller, service |
+| L2+ | 子包层 | 中间目录（可选多层） | SubPackage | order, inner, config |
+| Ln | 类层 | 具体业务类 | Class | OrderService, UserDao |
+| Ln+1 | 方法层 | 类中的方法 | Method | placeOrder(), createUser() |
+
+**层级映射规则**：
+- `L1` = 匹配关键词的最外层目录（controller/service/facade/biz/dal/model）
+- `L2+` = L1 和类文件之间的所有中间目录
+- `Ln` = 包含 Java 类的最终目录
+
+**示例**：
+```
+controller/          → L1: controller
+  order/            → L2: order (子包)
+    OrderController.java → L3: OrderController (类)
+```
+
+**配置选项**：
+```python
+class TreeConfig:
+    BASE_LAYERS = {'controller', 'service', 'facade', 'biz', 'dal', 'model'}  # L1
+    SUB_PACKAGE_ENABLED = True   # 是否展开子包
+    MAX_SUB_PACKAGE_DEPTH = 3    # 子包最大深度
+```
 
 ### 2.2 架构分层模式（Java 典型）
 
@@ -41,6 +61,49 @@
 ├─────────────────────────────────────────────┤
 │  L1: Model 层 (model/entity/vo)              │
 └─────────────────────────────────────────────┘
+```
+
+---
+
+### 2.3 子包展开策略
+
+当存在多层目录时，树结构支持两种模式：
+
+**模式 A：紧凑模式（默认）**
+```
+L1: controller
+└── L2: OrderController  (跳过中间目录)
+```
+
+**模式 B：展开模式**
+```
+L1: controller
+└── L2: order (子包)
+    └── L3: OrderController
+```
+
+**层级识别算法**：
+```python
+def classify_path(relative_path: str) -> List[str]:
+    """
+    输入: "src/main/java/com/example/controller/order/OrderController.java"
+    输出: ['controller', 'order', 'OrderController']
+    """
+    parts = relative_path.split(os.sep)
+    layers = []
+    sub_packages = []
+    
+    for part in parts:
+        if part in BASE_LAYERS:
+            layers.append(part)
+            sub_packages.clear()  # 新的基础层，重置子包
+        elif part.endswith('.java'):
+            layers.append(part.replace('.java', ''))  # 类名
+        else:
+            sub_packages.append(part)  # 中间目录
+    
+    # 组装：基础层 + 子包(可选) + 类
+    return layers + sub_packages
 ```
 
 ---
