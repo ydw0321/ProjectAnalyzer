@@ -1,0 +1,208 @@
+{
+  "project": "Project",
+  "type": "layer_tree",
+  "layers": [
+    {
+      "name": "controller",
+      "type": "layer",
+      "classes": [
+        {
+          "name": "OrderController",
+          "type": "class",
+          "method_count": 5,
+          "methods": [
+            "createOrder",
+            "payOrder",
+            "generateOrderId",
+            "calculatePrice",
+            "queryOrder"
+          ]
+        },
+        {
+          "name": "ProductController",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "getProduct",
+            "listProducts",
+            "updatePrice"
+          ]
+        },
+        {
+          "name": "UserController",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "buildSuccessResponse",
+            "buildErrorResponse",
+            "listUsers"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "facade",
+      "type": "layer",
+      "classes": [
+        {
+          "name": "OrderFacade",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "cancelOrder",
+            "placeOrder",
+            "confirmOrder"
+          ]
+        },
+        {
+          "name": "ProductFacade",
+          "type": "class",
+          "method_count": 4,
+          "methods": [
+            "getProductsByCategory",
+            "adjustStock",
+            "getProductDetails",
+            "calculateFinalPrice"
+          ]
+        },
+        {
+          "name": "UserFacade",
+          "type": "class",
+          "method_count": 5,
+          "methods": [
+            "sendConfirmation",
+            "getAllUsers",
+            "register",
+            "updateProfile",
+            "validateRegistrationInput"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "service",
+      "type": "layer",
+      "classes": [
+        {
+          "name": "PaymentService",
+          "type": "class",
+          "method_count": 9,
+          "methods": [
+            "processPayment",
+            "validatePayment",
+            "invokePaymentGateway",
+            "updateOrderStatus",
+            "refundPayment",
+            "processCreditCardPayment",
+            "processAlipayPayment",
+            "processWechatPayment",
+            "notifyRefundCompleted"
+          ]
+        },
+        {
+          "name": "OrderService",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "processRefund",
+            "validateOrderRequest",
+            "notifyOrderCreated"
+          ]
+        },
+        {
+          "name": "ProductService",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "updateStock",
+            "calculateProductPrice",
+            "notifyStockChanged"
+          ]
+        },
+        {
+          "name": "UserService",
+          "type": "class",
+          "method_count": 4,
+          "methods": [
+            "updateUserProfile",
+            "validateUserInfo",
+            "sendWelcomeEmail",
+            "notifyProfileUpdated"
+          ]
+        },
+        {
+          "name": "InventoryService",
+          "type": "class",
+          "method_count": 5,
+          "methods": [
+            "checkStock",
+            "reserveStock",
+            "releaseStock",
+            "notifyStockReserved",
+            "notifyStockReleased"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "biz",
+      "type": "layer",
+      "classes": [
+        {
+          "name": "OrderBiz",
+          "type": "class",
+          "method_count": 9,
+          "methods": [
+            "submitOrder",
+            "handleOrderCancellation",
+            "validateOrderInput",
+            "checkProductAvailability",
+            "checkUserOrderLimit",
+            "logOrderSubmission",
+            "validateCancellation",
+            "checkCancellationTime",
+            "notifyOrderCancelled"
+          ]
+        },
+        {
+          "name": "ProductBiz",
+          "type": "class",
+          "method_count": 13,
+          "methods": [
+            "validateCategory",
+            "updateProductPrice",
+            "queryProduct",
+            "listProductsByCategory",
+            "adjustInventory",
+            "validateProductId",
+            "checkProductStatus",
+            "validatePrice",
+            "checkPriceChangePermission",
+            "logPriceChange",
+            "validateInventoryAdjustment",
+            "checkInventoryPermission",
+            "notifyInventoryChanged"
+          ]
+        },
+        {
+          "name": "UserBiz",
+          "type": "class",
+          "method_count": 11,
+          "methods": [
+            "registerUser",
+            "modifyUserProfile",
+            "fetchAllUsers",
+            "validateRegistration",
+            "checkUsernameAvailability",
+            "checkEmailFormat",
+            "logUserRegistration",
+            "validateUserId",
+            "checkUserExists",
+            "logProfileModification",
+            "checkAdminPermission"
+          ]
+        }
+      ]
+    }
+  ]
+}

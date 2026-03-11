@@ -5,6 +5,7 @@ from src.scanner.scanner import scan_java_files
 from src.parser.java_parser import JavaParser
 from src.storage.vector_store import KnowledgeBase
 from src.storage.graph_store import GraphStore
+from src.tree import ArchitectureTreeGenerator
 
 ONLY_ANALYZE_KEYWORDS = {'action', 'controller', 'service', 'facade', 'biz', 'bl'}
 
@@ -177,6 +178,37 @@ def main():
 
     # 阶段3：LLM 分析
     phase3_analyze_hot_nodes(method_index, hot_nodes)
+
+    # 阶段4：构建层级节点并生成架构树
+    if graph_store:
+        print("\n📊 阶段4：构建层级节点...")
+        try:
+            # 构建 Layer 节点
+            graph_store.build_layer_nodes_from_classes()
+            print("✅ Layer 节点构建完成")
+
+            # 生成架构树并导出
+            with ArchitectureTreeGenerator() as tree_gen:
+                # 层级树
+                layer_tree = tree_gen.generate_layer_tree("Project")
+                tree_gen.export_tree_json(layer_tree, "output/layer_tree.json")
+                tree_gen.export_mermaid(layer_tree, "output/layer_tree.md")
+
+                # 包结构树
+                package_tree = tree_gen.generate_package_tree("Project")
+                tree_gen.export_tree_json(package_tree, "output/package_tree.json")
+
+                # 调用链树
+                chain_tree = tree_gen.generate_call_chain_tree()
+                tree_gen.export_tree_json(chain_tree, "output/call_chain_tree.json")
+                tree_gen.export_plantuml(chain_tree, "output/call_chain_tree.puml")
+
+                # 打印汇总
+                print(tree_gen.get_tree_summary())
+
+            print("✅ 架构树导出完成 (output/ 目录)")
+        except Exception as e:
+            print(f"⚠️ 架构树生成失败: {e}")
 
     # 关闭图数据库连接
     if graph_store:

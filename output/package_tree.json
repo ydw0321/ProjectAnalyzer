@@ -1,0 +1,244 @@
+{
+  "project": "Project",
+  "type": "package_tree",
+  "root": {
+    "name": "root",
+    "type": "root",
+    "children": {
+      "service": {
+        "name": "service",
+        "type": "package",
+        "children": {
+          "PaymentService": {
+            "name": "PaymentService",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/service/PaymentService.java",
+            "methods": [
+              "processPayment",
+              "validatePayment",
+              "invokePaymentGateway",
+              "updateOrderStatus",
+              "refundPayment",
+              "processCreditCardPayment",
+              "processAlipayPayment",
+              "processWechatPayment",
+              "notifyRefundCompleted"
+            ],
+            "method_count": 9
+          },
+          "OrderService": {
+            "name": "OrderService",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/service/OrderService.java",
+            "methods": [
+              "processRefund",
+              "validateOrderRequest",
+              "notifyOrderCreated"
+            ],
+            "method_count": 3
+          },
+          "ProductService": {
+            "name": "ProductService",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/service/ProductService.java",
+            "methods": [
+              "updateStock",
+              "calculateProductPrice",
+              "notifyStockChanged"
+            ],
+            "method_count": 3
+          },
+          "UserService": {
+            "name": "UserService",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/service/UserService.java",
+            "methods": [
+              "updateUserProfile",
+              "validateUserInfo",
+              "sendWelcomeEmail",
+              "notifyProfileUpdated"
+            ],
+            "method_count": 4
+          },
+          "InventoryService": {
+            "name": "InventoryService",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/service/InventoryService.java",
+            "methods": [
+              "checkStock",
+              "reserveStock",
+              "releaseStock",
+              "notifyStockReserved",
+              "notifyStockReleased"
+            ],
+            "method_count": 5
+          }
+        },
+        "file_path": null
+      },
+      "controller": {
+        "name": "controller",
+        "type": "package",
+        "children": {
+          "OrderController": {
+            "name": "OrderController",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/controller/OrderController.java",
+            "methods": [
+              "createOrder",
+              "payOrder",
+              "generateOrderId",
+              "calculatePrice",
+              "queryOrder"
+            ],
+            "method_count": 5
+          },
+          "ProductController": {
+            "name": "ProductController",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/controller/ProductController.java",
+            "methods": [
+              "getProduct",
+              "listProducts",
+              "updatePrice"
+            ],
+            "method_count": 3
+          },
+          "UserController": {
+            "name": "UserController",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/controller/UserController.java",
+            "methods": [
+              "buildSuccessResponse",
+              "buildErrorResponse",
+              "listUsers"
+            ],
+            "method_count": 3
+          }
+        },
+        "file_path": null
+      },
+      "facade": {
+        "name": "facade",
+        "type": "package",
+        "children": {
+          "OrderFacade": {
+            "name": "OrderFacade",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/facade/OrderFacade.java",
+            "methods": [
+              "cancelOrder",
+              "placeOrder",
+              "confirmOrder"
+            ],
+            "method_count": 3
+          },
+          "ProductFacade": {
+            "name": "ProductFacade",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/facade/ProductFacade.java",
+            "methods": [
+              "getProductsByCategory",
+              "adjustStock",
+              "getProductDetails",
+              "calculateFinalPrice"
+            ],
+            "method_count": 4
+          },
+          "UserFacade": {
+            "name": "UserFacade",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/facade/UserFacade.java",
+            "methods": [
+              "sendConfirmation",
+              "getAllUsers",
+              "register",
+              "updateProfile",
+              "validateRegistrationInput"
+            ],
+            "method_count": 5
+          }
+        },
+        "file_path": null
+      },
+      "biz": {
+        "name": "biz",
+        "type": "package",
+        "children": {
+          "OrderBiz": {
+            "name": "OrderBiz",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/biz/OrderBiz.java",
+            "methods": [
+              "submitOrder",
+              "handleOrderCancellation",
+              "validateOrderInput",
+              "checkProductAvailability",
+              "checkUserOrderLimit",
+              "logOrderSubmission",
+              "validateCancellation",
+              "checkCancellationTime",
+              "notifyOrderCancelled"
+            ],
+            "method_count": 9
+          },
+          "ProductBiz": {
+            "name": "ProductBiz",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/biz/ProductBiz.java",
+            "methods": [
+              "validateCategory",
+              "updateProductPrice",
+              "queryProduct",
+              "listProductsByCategory",
+              "adjustInventory",
+              "validateProductId",
+              "checkProductStatus",
+              "validatePrice",
+              "checkPriceChangePermission",
+              "logPriceChange",
+              "validateInventoryAdjustment",
+              "checkInventoryPermission",
+              "notifyInventoryChanged"
+            ],
+            "method_count": 13
+          },
+          "UserBiz": {
+            "name": "UserBiz",
+            "type": "class",
+            "children": null,
+            "file_path": "/workspace/test_java/biz/UserBiz.java",
+            "methods": [
+              "registerUser",
+              "modifyUserProfile",
+              "fetchAllUsers",
+              "validateRegistration",
+              "checkUsernameAvailability",
+              "checkEmailFormat",
+              "logUserRegistration",
+              "validateUserId",
+              "checkUserExists",
+              "logProfileModification",
+              "checkAdminPermission"
+            ],
+            "method_count": 11
+          }
+        },
+        "file_path": null
+      }
+    }
+  }
+}

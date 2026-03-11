@@ -330,3 +330,114 @@ class ArchitectureTreeGenerator:
         lines.append("    classDef unknown fill:#fcc,stroke:#f00")
         
         return lines
+    
+    def export_plantuml(self, tree: Dict, output_path: str = None) -> str:
+        """导出为 PlantUML 格式"""
+        lines = ["@startuml", ""]
+        
+        if tree.get('type') == 'layer_tree':
+            lines.extend(self._export_plantuml_layer_tree(tree))
+        elif tree.get('type') == 'call_chain':
+            lines.extend(self._export_plantuml_call_chain(tree))
+        elif tree.get('type') == 'package_tree':
+            lines.extend(self._export_plantuml_package_tree(tree))
+        
+        lines.append("@enduml")
+        
+        plantuml_code = '\n'.join(lines)
+        
+        if output_path:
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(plantuml_code)
+            print(f"✅ PlantUML 已导出: {output_path}")
+        
+        return plantuml_code
+    
+    def _export_plantuml_layer_tree(self, tree: Dict) -> List[str]:
+        """导出层级树的 PlantUML 代码"""
+        lines = []
+        
+        # 样式定义
+        lines.append("skinparam packageStyle rectangle")
+        lines.append("")
+        
+        for layer in tree.get('layers', []):
+            layer_name = layer['name']
+            
+            for cls in layer.get('classes', []):
+                class_name = cls['name']
+                method_count = cls.get('method_count', 0)
+                
+                # 创建类节点
+                lines.append(f'package "{layer_name}" {{')
+                lines.append(f'  class {class_name} {{')
+                lines.append(f'    + {method_count} methods')
+                lines.append(f'  }}')
+                lines.append('}')
+                lines.append('')
+        
+        # 添加层级间关系
+        layers = tree.get('layers', [])
+        for i in range(len(layers) - 1):
+            current_layer = layers[i]['name']
+            next_layer = layers[i + 1]['name']
+            
+            for cls in layers[i].get('classes', []):
+                class_name = cls['name']
+                lines.append(f'{class_name} --> {next_layer}')
+        
+        return lines
+    
+    def _export_plantuml_call_chain(self, tree: Dict) -> List[str]:
+        """导出调用链的 PlantUML 代码"""
+        lines = []
+        
+        def add_nodes(node: Dict):
+            class_name = node.get('class', '')
+            method_name = node['name']
+            node_name = f"{class_name}_{method_name}" if class_name else method_name
+            
+            # 节点定义
+            call_type = node.get('call_type', '')
+            if call_type == 'external':
+                lines.append(f'class "{method_name}" as {node_name} #pink')
+            elif call_type == 'external_unknown':
+                lines.append(f'class "{method_name}" as {node_name} #red')
+            else:
+                lines.append(f'class "{method_name}" as {node_name}')
+            
+            # 递归子节点
+            for child in node.get('calls', []):
+                child_name = f"{child.get('class', '')}_{child['name']}" if child.get('class') else child['name']
+                lines.append(f'{node_name} --> {child_name}')
+                add_nodes(child)
+        
+        if 'tree' in tree:
+            add_nodes(tree['tree'])
+        
+        return lines
+    
+    def _export_plantuml_package_tree(self, tree: Dict) -> List[str]:
+        """导出包结构树的 PlantUML 代码"""
+        lines = ["skinparam packageStyle folder", ""]
+        
+        def traverse(node: Dict, indent: int = 0):
+            prefix = "  " * indent
+            node_type = node.get('type', 'package')
+            
+            if node_type == 'package':
+                lines.append(f'{prefix}package "{node["name"]}" {{')
+                for child in node.get('children', {}).values():
+                    traverse(child, indent + 1)
+                lines.append(f'{prefix}}}')
+            elif node_type == 'class':
+                method_count = node.get('method_count', 0)
+                lines.append(f'{prefix}class {node["name"]} {{')
+                lines.append(f'{prefix}  + {method_count} methods')
+                lines.append(f'{prefix}}}')
+        
+        if 'root' in tree:
+            for child in tree['root'].get('children', {}).values():
+                traverse(child)
+        
+        return lines

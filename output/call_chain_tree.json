@@ -1,0 +1,12 @@
+{
+  "entry": "UserController.buildErrorResponse",
+  "type": "call_chain",
+  "max_depth": 10,
+  "tree": {
+    "name": "buildErrorResponse",
+    "class": "UserController",
+    "type": "method",
+    "depth": 0,
+    "calls": []
+  }
+}

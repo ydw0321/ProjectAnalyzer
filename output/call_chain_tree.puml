@@ -1,0 +1,4 @@
+@startuml
+
+class "buildErrorResponse" as UserController_buildErrorResponse
+@enduml

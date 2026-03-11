@@ -113,6 +113,115 @@ class GraphStore:
             result = session.run("MATCH ()-[r:CALLS]->() RETURN count(r) as count")
             return result.single()["count"]
 
+    # ==================== Layer 节点管理 ====================
+
+    def add_layer_node(self, layer_name: str, layer_type: str = 'base'):
+        """创建层级节点（controller/service/facade等）"""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MERGE (l:Layer {name: $name})
+                SET l.layer_type = $layer_type
+                """,
+                name=layer_name,
+                layer_type=layer_type
+            )
+
+    def add_package_node(self, package_name: str, class_count: int = 0, method_count: int = 0):
+        """创建包节点"""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MERGE (p:Package {name: $name})
+                SET p.class_count = $class_count, p.method_count = $method_count
+                """,
+                name=package_name,
+                class_count=class_count,
+                method_count=method_count
+            )
+
+    def add_contains_relationship(self, layer_name: str, class_name: str):
+        """创建层级包含类的关系"""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (l:Layer {name: $layer_name})
+                MATCH (c:Class {name: $class_name})
+                MERGE (l)-[:CONTAINS]->(c)
+                """,
+                layer_name=layer_name,
+                class_name=class_name
+            )
+
+    def add_package_contains_relationship(self, package_name: str, class_name: str):
+        """创建包包含类的关系"""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (p:Package {name: $package_name})
+                MATCH (c:Class {name: $class_name})
+                MERGE (p)-[:CONTAINS]->(c)
+                """,
+                package_name=package_name,
+                class_name=class_name
+            )
+
+    def add_call_path_relationship(self, start_method: str, end_method: str, depth: int):
+        """创建调用路径关系"""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (m1:Method {name: $start_method})
+                MATCH (m2:Method {name: $end_method})
+                MERGE (m1)-[:CALL_PATH {depth: $depth}]->(m2)
+                """,
+                start_method=start_method,
+                end_method=end_method,
+                depth=depth
+            )
+
+    def get_all_layers(self) -> list:
+        """获取所有层级节点"""
+        with self.driver.session() as session:
+            result = session.run("MATCH (l:Layer) RETURN l.name as name, l.layer_type as layer_type")
+            return [dict(record) for record in result]
+
+    def get_layer_classes(self, layer_name: str) -> list:
+        """获取指定层级下的所有类"""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (l:Layer {name: $layer_name})-[:CONTAINS]->(c:Class)
+                RETURN c.name as class_name, c.file_path as file_path
+                """,
+                layer_name=layer_name
+            )
+            return [dict(record) for record in result]
+
+    def build_layer_nodes_from_classes(self):
+        """从现有类节点构建层级关系"""
+        # 获取所有类并分析其层级
+        with self.driver.session() as session:
+            result = session.run("MATCH (c:Class) RETURN c.name as name, c.file_path as file_path")
+            classes = [dict(record) for record in result]
+
+        # 提取层级并创建节点
+        for cls in classes:
+            file_path = cls.get('file_path', '')
+            layer_name = self._extract_layer_from_path(file_path)
+            if layer_name:
+                self.add_layer_node(layer_name)
+                self.add_contains_relationship(layer_name, cls['name'])
+
+    def _extract_layer_from_path(self, file_path: str) -> str:
+        """从文件路径提取层级"""
+        base_layers = {'controller', 'service', 'facade', 'biz', 'bl', 'dal', 'dao', 'model', 'entity', 'vo', 'dto'}
+        path_lower = file_path.lower()
+        for layer in base_layers:
+            if f'/{layer}/' in path_lower or path_lower.endswith(f'/{layer}') or path_lower.endswith(f'/{layer}.java'):
+                return layer
+        return None
+
     def close(self):
         self.driver.close()
 
