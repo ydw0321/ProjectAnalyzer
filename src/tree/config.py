@@ -5,7 +5,7 @@
 class TreeConfig:
     # 基础层级关键词
     BASE_LAYERS = {
-        'controller', 'service', 'facade', 'biz', 'bl',
+        'controller', 'action', 'service', 'facade', 'biz', 'bl',
         'dal', 'dao', 'model', 'entity', 'vo', 'dto',
         'util', 'utils', 'helper', 'common'
     }
@@ -35,6 +35,7 @@ class TreeConfig:
         """获取层级优先级（数字越小越上层）"""
         priority_map = {
             'controller': 1,
+            'action': 1,
             'facade': 2,
             'service': 3,
             'biz': 4,

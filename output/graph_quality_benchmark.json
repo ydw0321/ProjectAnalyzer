@@ -1,28 +1,28 @@
 {
-  "timestamp": "2026-03-12 10:10:55",
+  "timestamp": "2026-03-12 22:28:58",
   "metrics": {
-    "broken_chain_rate": 0.3014354066985646,
-    "business_broken_chain_rate": 0.014354066985645933,
-    "reachability_rate": 0.8040540540540541,
+    "broken_chain_rate": 0.3544973544973545,
+    "business_broken_chain_rate": 0.14638447971781304,
+    "reachability_rate": 0.5633802816901409,
     "key_chain_hit_rate": 1.0
   },
   "details": {
-    "total_methods": 148,
-    "reachable_methods": 119,
-    "entry_method_count": 16,
-    "total_calls": 209,
-    "unknown_calls": 63,
-    "internal_calls": 67,
-    "external_calls": 79,
+    "total_methods": 355,
+    "reachable_methods": 200,
+    "entry_method_count": 30,
+    "total_calls": 567,
+    "unknown_calls": 201,
+    "internal_calls": 125,
+    "external_calls": 241,
     "key_chain_hop_hit_rate": 1.0,
     "matched_key_chains": 6,
     "total_key_chains": 6,
     "matched_key_hops": 24,
     "total_key_hops": 24,
     "unknown_breakdown": {
-      "jdk_unknown": 60,
-      "business_unknown": 3,
-      "total_unknown": 63
+      "jdk_unknown": 118,
+      "business_unknown": 83,
+      "total_unknown": 201
     }
   },
   "critical_chain_results": [
@@ -341,6 +341,48 @@
   ],
   "unknown_call_details": [
     {
+      "caller_class": "AuthorizationInterceptor",
+      "caller_name": "check",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "AuthorizationInterceptor",
+      "caller_name": "check",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "BaseDAO",
+      "caller_name": "audit",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "BaseDAO",
+      "caller_name": "audit",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "CacheUtil",
+      "caller_name": "get",
+      "callee_name": "get",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "CacheUtil",
+      "caller_name": "initCache",
+      "callee_name": "put",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "CacheUtil",
+      "caller_name": "put",
+      "callee_name": "put",
+      "category": "business_unknown"
+    },
+    {
       "caller_class": "DateUtil",
       "caller_name": "addDays",
       "callee_name": "getTime",
@@ -354,9 +396,27 @@
     },
     {
       "caller_class": "DateUtil",
-      "caller_name": "isExpired",
-      "callee_name": "before",
-      "category": "business_unknown"
+      "caller_name": "formatNow",
+      "callee_name": "format",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "DateUtil",
+      "caller_name": "nowMillis",
+      "callee_name": "currentTimeMillis",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "DeepChainCoordinator",
+      "caller_name": "start",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "DeepChainCoordinator",
+      "caller_name": "start",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
     },
     {
       "caller_class": "IdGenerator",
@@ -419,6 +479,294 @@
       "category": "jdk_unknown"
     },
     {
+      "caller_class": "LegacyBeanFactory",
+      "caller_name": "getByAlias",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyBeanFactory",
+      "caller_name": "newBean",
+      "callee_name": "forName",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyBeanFactory",
+      "caller_name": "newBean",
+      "callee_name": "newInstance",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyCodeUtil",
+      "caller_name": "debug",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyCodeUtil",
+      "caller_name": "debug",
+      "callee_name": "replace",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyCodeUtil",
+      "caller_name": "fallback",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyCodeUtil",
+      "caller_name": "fallback",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyDeepChainAction",
+      "caller_name": "execute",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyDirtyRouter",
+      "caller_name": "process",
+      "callee_name": "process",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyDirtyRouter",
+      "caller_name": "save",
+      "callee_name": "save",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyDirtyRouter",
+      "caller_name": "update",
+      "callee_name": "update",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyDispatchAction",
+      "caller_name": "execute",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyDispatchAction",
+      "caller_name": "execute",
+      "callee_name": "getUserId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyExecuteOrderDAO",
+      "caller_name": "execute",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyExecuteOrderDAO",
+      "caller_name": "process",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyExecuteOrderDAO",
+      "caller_name": "save",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "archiveStage",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "callDaoLayer",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "callUtilLayer",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "done",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "finalizeStage",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "prepare",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "prepare",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "routeStepA",
+      "callee_name": "contains",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyMegaWorkflowService",
+      "caller_name": "routeStepB",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderAuditBiz",
+      "caller_name": "auditDay",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderAuditBiz",
+      "caller_name": "auditDay",
+      "callee_name": "substring",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderAuditBiz",
+      "caller_name": "auditDay",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderGodService",
+      "caller_name": "defaultProcess",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderGodService",
+      "caller_name": "forceProcess",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderGodService",
+      "caller_name": "manualProcess",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderGodService",
+      "caller_name": "processAll",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderGodService",
+      "caller_name": "processAll",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderGodService",
+      "caller_name": "processAll",
+      "callee_name": "size",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderHistoryDAO",
+      "caller_name": "save",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyOrderHistoryDAO",
+      "caller_name": "update",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyPaymentServiceImpl",
+      "caller_name": "pay",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyPaymentServiceImpl",
+      "caller_name": "pay",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyPaymentServiceImpl",
+      "caller_name": "pay",
+      "callee_name": "getPaymentChannel",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyPaymentServiceImpl",
+      "caller_name": "reverse",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyReflectionInvoker",
+      "caller_name": "invoke",
+      "callee_name": "forName",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyReflectionInvoker",
+      "caller_name": "invoke",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "LegacyReflectionInvoker",
+      "caller_name": "invoke",
+      "callee_name": "getMethod",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyReflectionInvoker",
+      "caller_name": "invoke",
+      "callee_name": "newInstance",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LegacyStressAction",
+      "caller_name": "execute",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LocalCache",
+      "caller_name": "get",
+      "callee_name": "get",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LocalCache",
+      "caller_name": "put",
+      "callee_name": "put",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "LoggingInterceptor",
+      "caller_name": "after",
+      "callee_name": "currentTimeMillis",
+      "category": "jdk_unknown"
+    },
+    {
       "caller_class": "OrderBiz",
       "caller_name": "validateCancellation",
       "callee_name": "isEmpty",
@@ -429,6 +777,36 @@
       "caller_name": "validateOrderInput",
       "callee_name": "isEmpty",
       "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderCancelAction",
+      "caller_name": "execute",
+      "callee_name": "cancelOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCancelAction",
+      "caller_name": "execute",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderCancelAction",
+      "caller_name": "execute",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCancelHandler",
+      "caller_name": "handle",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderCancelHandler",
+      "caller_name": "handle",
+      "callee_name": "update",
+      "category": "business_unknown"
     },
     {
       "caller_class": "OrderController",
@@ -446,6 +824,66 @@
       "caller_class": "OrderController",
       "caller_name": "queryOrder",
       "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "execute",
+      "callee_name": "getPaymentChannel",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "execute",
+      "callee_name": "getProductCode",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "execute",
+      "callee_name": "getQuantity",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "execute",
+      "callee_name": "getUserId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "execute",
+      "callee_name": "submitOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "validateInput",
+      "callee_name": "getProductCode",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "validateInput",
+      "callee_name": "getQuantity",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "validateInput",
+      "callee_name": "getUserId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "validateInput",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderCreateAction",
+      "caller_name": "validateInput",
+      "callee_name": "trim",
       "category": "jdk_unknown"
     },
     {
@@ -467,6 +905,60 @@
       "category": "jdk_unknown"
     },
     {
+      "caller_class": "OrderManageAction",
+      "caller_name": "approve",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderManageAction",
+      "caller_name": "approve",
+      "callee_name": "queryOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderManageAction",
+      "caller_name": "reject",
+      "callee_name": "cancelOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderManageAction",
+      "caller_name": "reject",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderQueryAction",
+      "caller_name": "execute",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderQueryAction",
+      "caller_name": "execute",
+      "callee_name": "queryOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderQueryAction",
+      "caller_name": "execute",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderReconcileJob",
+      "caller_name": "run",
+      "callee_name": "reconcile",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderReconcileJob",
+      "caller_name": "runEmergency",
+      "callee_name": "reconcile",
+      "category": "business_unknown"
+    },
+    {
       "caller_class": "OrderService",
       "caller_name": "cancelOrder",
       "callee_name": "equals",
@@ -476,6 +968,270 @@
       "caller_class": "OrderService",
       "caller_name": "validateOrderRequest",
       "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceAsync",
+      "caller_name": "cancelOrder",
+      "callee_name": "cancelOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceAsync",
+      "caller_name": "queryOrder",
+      "callee_name": "queryOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceAsync",
+      "caller_name": "reconcile",
+      "callee_name": "reconcile",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceAsync",
+      "caller_name": "submitOrder",
+      "callee_name": "submitOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "abs",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "nextInt",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "setOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "setPaymentChannel",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "setProductCode",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "setQuantity",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "buildOrder",
+      "callee_name": "setUserId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "cancelOrder",
+      "callee_name": "contains",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "cancelOrder",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "cancelOrder",
+      "callee_name": "update",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "markFail",
+      "callee_name": "update",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "markSuccess",
+      "callee_name": "update",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "notifyRetry",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "notifyRetry",
+      "callee_name": "substring",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "reconcile",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "reconcile",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "reconcile",
+      "callee_name": "startsWith",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "reconcile",
+      "callee_name": "update",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "submitOrder",
+      "callee_name": "save",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "submitOrder",
+      "callee_name": "startsWith",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "validateProduct",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "validateProduct",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "validateUser",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceImpl",
+      "caller_name": "validateUser",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderServiceProxy",
+      "caller_name": "cancelOrder",
+      "callee_name": "cancelOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceProxy",
+      "caller_name": "queryOrder",
+      "callee_name": "queryOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceProxy",
+      "caller_name": "reconcile",
+      "callee_name": "reconcile",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderServiceProxy",
+      "caller_name": "submitOrder",
+      "callee_name": "submitOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderStatisticsDAO",
+      "caller_name": "countOrderByDate",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderSubmitHandler",
+      "caller_name": "afterSubmit",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderSubmitHandler",
+      "caller_name": "beforeSubmit",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "OrderSubmitHandler",
+      "caller_name": "recoverUserOrders",
+      "callee_name": "size",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "processPayment",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "processPayment",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "processPayment",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "processPayment",
+      "callee_name": "pay",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "processPayment",
+      "callee_name": "setPaymentChannel",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "processPayment",
+      "callee_name": "startsWith",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentGatewayBiz",
+      "caller_name": "reversePayment",
+      "callee_name": "reverse",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "PaymentReconcileBiz",
+      "caller_name": "reconcilePayment",
+      "callee_name": "equals",
       "category": "jdk_unknown"
     },
     {
@@ -614,12 +1370,54 @@
       "caller_class": "ProductFacade",
       "caller_name": "adjustStock",
       "callee_name": "abs",
-      "category": "business_unknown"
+      "category": "jdk_unknown"
     },
     {
       "caller_class": "ProductService",
       "caller_name": "validateCategory",
       "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "QueryBuilder",
+      "caller_name": "buildOrderWhere",
+      "callee_name": "append",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "QueryBuilder",
+      "caller_name": "buildOrderWhere",
+      "callee_name": "toString",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ServiceLocator",
+      "caller_name": "getPaymentService",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "StringMaskUtil",
+      "caller_name": "cut",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "StringMaskUtil",
+      "caller_name": "cut",
+      "callee_name": "substring",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "StringMaskUtil",
+      "caller_name": "maskPhone",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "StringMaskUtil",
+      "caller_name": "maskPhone",
+      "callee_name": "substring",
       "category": "jdk_unknown"
     },
     {
@@ -707,6 +1505,30 @@
       "category": "jdk_unknown"
     },
     {
+      "caller_class": "UserProfileAction",
+      "caller_name": "queryLastOrder",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserProfileAction",
+      "caller_name": "queryLastOrder",
+      "callee_name": "queryOrder",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "UserProfileAction",
+      "caller_name": "queryLastOrder",
+      "callee_name": "trim",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserRegisterAction",
+      "caller_name": "register",
+      "callee_name": "getUserId",
+      "category": "business_unknown"
+    },
+    {
       "caller_class": "UserService",
       "caller_name": "validateUserInfo",
       "callee_name": "contains",
@@ -717,6 +1539,12 @@
       "caller_name": "validateUserInfo",
       "callee_name": "isEmpty",
       "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "WechatPaymentServiceImpl",
+      "caller_name": "reverse",
+      "callee_name": "getOrderId",
+      "category": "business_unknown"
     }
   ]
 }

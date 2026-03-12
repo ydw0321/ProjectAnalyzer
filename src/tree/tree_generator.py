@@ -16,6 +16,7 @@ class ArchitectureTreeGenerator:
     def __init__(self, query_service: GraphQueryService = None):
         self.query_service = query_service or GraphQueryService()
         self.expand_subpackages = TreeConfig.SUB_PACKAGE_ENABLED
+        self._cache: Dict = {}  # 同一实例内缓存重复查询
     
     def close(self):
         if self.query_service:
@@ -27,6 +28,18 @@ class ArchitectureTreeGenerator:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
     
+    def _get_all_methods(self) -> List[Dict]:
+        """获取全部方法（带缓存，避免同一实例重复查询）"""
+        if 'all_methods' not in self._cache:
+            self._cache['all_methods'] = self.query_service.get_all_methods()
+        return self._cache['all_methods']
+
+    def _get_all_classes(self) -> List[Dict]:
+        """获取全部类（带缓存）"""
+        if 'all_classes' not in self._cache:
+            self._cache['all_classes'] = self.query_service.get_all_classes()
+        return self._cache['all_classes']
+
     # ==================== 树生成接口 ====================
     
     def generate_layer_tree(self, project_name: str = "Project") -> Dict:
@@ -36,8 +49,8 @@ class ArchitectureTreeGenerator:
         # 获取层级统计
         layer_stats = self.query_service.get_layer_statistics()
         
-        # 获取所有方法
-        all_methods = self.query_service.get_all_methods()
+        # 获取所有方法（带缓存）
+        all_methods = self._get_all_methods()
         
         # 构建树结构
         tree = {
@@ -60,13 +73,11 @@ class ArchitectureTreeGenerator:
                 'classes': []
             }
             
-            # 获取该层级下每个类的方法
+            # 获取该层级下每个类的方法（从缓存的全量方法中过滤，不再额外查询 DB）
             for class_name in layer_info['classes']:
-                methods = [m['method_name'] for m in all_methods 
+                methods = [m['method_name'] for m in all_methods
                           if m.get('class_name') == class_name]
-                
-                class_methods = self.query_service.get_class_methods(class_name)
-                
+
                 layer_node['classes'].append({
                     'name': class_name,
                     'type': 'class',
@@ -83,8 +94,8 @@ class ArchitectureTreeGenerator:
         """生成按包目录组织的树（支持子包展开）"""
         print("📊 生成包结构树...")
         
-        all_classes = self.query_service.get_all_classes()
-        all_methods = self.query_service.get_all_methods()
+        all_classes = self._get_all_classes()
+        all_methods = self._get_all_methods()
         
         # 构建路径到节点的映射
         tree = {
@@ -155,32 +166,61 @@ class ArchitectureTreeGenerator:
         
         return layers + sub_packages
     
-    def generate_call_chain_tree(self, entry_method: str = None, class_name: str = None, 
-                                  max_depth: int = None) -> Dict:
-        """从入口方法向下游生成完整调用链树"""
+    def generate_call_chain_tree(self, entry_method: str = None, class_name: str = None,
+                                  max_depth: int = None, max_entries: int = 1) -> Dict:
+        """从入口方法向下游生成完整调用链树
+        
+        Args:
+            entry_method: 指定入口方法名；为 None 时自动从 controller/action 层选取
+            class_name: 指定入口方法所在类
+            max_depth: 最大调用深度
+            max_entries: 无指定入口时，最多生成几个入口的调用链（默认 1）
+        """
         print(f"📊 生成调用链树 (入口: {entry_method})...")
         
         max_depth = max_depth or TreeConfig.MAX_CALL_DEPTH
         
-        # 如果没有指定入口方法，使用所有 Controller 方法
+        # 如果没有指定入口方法，使用所有 Controller/Action 方法
         if not entry_method:
             entry_methods = self.query_service.get_entry_methods()
             if not entry_methods:
-                print("⚠️ 未找到入口方法（Controller层方法）")
+                print("⚠️ 未找到入口方法（Controller/Action层方法）")
                 return {'error': 'No entry methods found'}
             
-            # 选择第一个或调用最多的
-            entry_method = entry_methods[0]['method_name']
-            class_name = entry_methods[0].get('class_name')
-            print(f"🔗 使用入口方法: {entry_method}")
-        
-        # 递归构建调用链树
-        chain_tree = {
-            'entry': f"{class_name}.{entry_method}" if class_name else entry_method,
-            'type': 'call_chain',
-            'max_depth': max_depth,
-            'tree': self._build_call_tree(entry_method, class_name, 0, max_depth)
-        }
+            # 支持多入口
+            selected = entry_methods[:max_entries]
+            if len(selected) == 1:
+                entry_method = selected[0]['method_name']
+                class_name = selected[0].get('class_name')
+                print(f"🔗 使用入口方法: {class_name}.{entry_method}")
+                chain_tree = {
+                    'entry': f"{class_name}.{entry_method}" if class_name else entry_method,
+                    'type': 'call_chain',
+                    'max_depth': max_depth,
+                    'tree': self._build_call_tree(entry_method, class_name, 0, max_depth)
+                }
+            else:
+                # 多入口返回列表
+                chains = []
+                for em in selected:
+                    em_name = em['method_name']
+                    em_class = em.get('class_name')
+                    print(f"🔗 使用入口方法: {em_class}.{em_name}")
+                    chains.append({
+                        'entry': f"{em_class}.{em_name}" if em_class else em_name,
+                        'type': 'call_chain',
+                        'max_depth': max_depth,
+                        'tree': self._build_call_tree(em_name, em_class, 0, max_depth)
+                    })
+                print("✅ 调用链树生成完成")
+                return {'type': 'multi_call_chain', 'chains': chains}
+        else:
+            chain_tree = {
+                'entry': f"{class_name}.{entry_method}" if class_name else entry_method,
+                'type': 'call_chain',
+                'max_depth': max_depth,
+                'tree': self._build_call_tree(entry_method, class_name, 0, max_depth)
+            }
         
         print("✅ 调用链树生成完成")
         return chain_tree
@@ -271,29 +311,35 @@ class ArchitectureTreeGenerator:
         return mermaid_code
     
     def _export_mermaid_layer_tree(self, tree: Dict) -> List[str]:
-        """导出层级树的 Mermaid 代码"""
+        """导出层级树的 Mermaid 代码（每层一个 subgraph，类节点包含在对应 subgraph 内）"""
         lines = []
-        
+
+        # 先按 layer 分组收集所有类节点定义
         for layer in tree.get('layers', []):
             layer_name = layer['name']
-            
-            for cls in layer.get('classes', []):
+            classes = layer.get('classes', [])
+            if not classes:
+                continue
+
+            lines.append(f'    subgraph {layer_name}')
+            for cls in classes:
                 class_name = cls['name']
-                
-                # 创建类节点
-                method_str = ', '.join(cls.get('methods', [])[:3])
-                if cls.get('method_count', 0) > 3:
-                    method_str += '...'
-                
-                lines.append(f'    {class_name}[{class_name}<br/>({cls.get("method_count", 0)} methods)]')
-                
-                # 创建层级容器
-                lines.append(f'    subgraph {layer_name}')
-                lines.append(f'    end')
-                
-                # 连接关系
-                lines.append(f'    {class_name} -->|BELONGS_TO| {layer_name}')
-        
+                method_count = cls.get('method_count', 0)
+                methods_preview = ', '.join(cls.get('methods', [])[:3])
+                if method_count > 3:
+                    methods_preview += '...'
+                lines.append(f'        {class_name}["{class_name}<br/>({method_count} methods)"]')
+            lines.append('    end')
+            lines.append('')
+
+        # 跨层调用关系：相邻层之间第一个类做示例连线
+        layers = tree.get('layers', [])
+        for i in range(len(layers) - 1):
+            curr_classes = layers[i].get('classes', [])
+            next_classes = layers[i + 1].get('classes', [])
+            if curr_classes and next_classes:
+                lines.append(f'    {curr_classes[0]["name"]} -->|calls| {next_classes[0]["name"]}')
+
         return lines
     
     def _export_mermaid_call_chain(self, tree: Dict) -> List[str]:
@@ -354,38 +400,39 @@ class ArchitectureTreeGenerator:
         return plantuml_code
     
     def _export_plantuml_layer_tree(self, tree: Dict) -> List[str]:
-        """导出层级树的 PlantUML 代码"""
+        """导出层级树的 PlantUML 代码（同层所有类包含在同一个 package 内）"""
         lines = []
-        
-        # 样式定义
         lines.append("skinparam packageStyle rectangle")
         lines.append("")
-        
+
+        # 每个 layer 输出一个 package 块，其中包含该层所有类
         for layer in tree.get('layers', []):
             layer_name = layer['name']
-            
-            for cls in layer.get('classes', []):
+            classes = layer.get('classes', [])
+            if not classes:
+                continue
+
+            lines.append(f'package "{layer_name}" {{')
+            for cls in classes:
                 class_name = cls['name']
                 method_count = cls.get('method_count', 0)
-                
-                # 创建类节点
-                lines.append(f'package "{layer_name}" {{')
                 lines.append(f'  class {class_name} {{')
                 lines.append(f'    + {method_count} methods')
                 lines.append(f'  }}')
-                lines.append('}')
-                lines.append('')
-        
-        # 添加层级间关系
+            lines.append('}')
+            lines.append('')
+
+        # 添加跨层调用关系（使用合法的 class 节点 ID）
         layers = tree.get('layers', [])
         for i in range(len(layers) - 1):
-            current_layer = layers[i]['name']
-            next_layer = layers[i + 1]['name']
-            
-            for cls in layers[i].get('classes', []):
-                class_name = cls['name']
-                lines.append(f'{class_name} --> {next_layer}')
-        
+            curr_classes = layers[i].get('classes', [])
+            next_classes = layers[i + 1].get('classes', [])
+            for src in curr_classes:
+                for dst in next_classes:
+                    lines.append(f'{src["name"]} --> {dst["name"]}')
+            if curr_classes and next_classes:
+                lines.append('')
+
         return lines
     
     def _export_plantuml_call_chain(self, tree: Dict) -> List[str]:
