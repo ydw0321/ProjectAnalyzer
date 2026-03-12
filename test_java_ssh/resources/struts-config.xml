@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts-config PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+    "http://struts.apache.org/dtds/struts-config_1_3.dtd">
+<struts-config>
+    <form-beans>
+        <form-bean name="orderForm" type="com.legacy.ssh.form.order.OrderForm"/>
+    </form-beans>
+
+    <action-mappings>
+        <action path="/order/create" name="orderForm" type="com.legacy.ssh.action.order.OrderCreateAction" scope="request" validate="false"/>
+        <action path="/order/cancel" name="orderForm" type="com.legacy.ssh.action.order.OrderCancelAction" scope="request" validate="false"/>
+        <action path="/order/manage" name="orderForm" type="com.legacy.ssh.action.order.OrderManageAction" scope="request" validate="false"/>
+        <action path="/order/legacyDispatch" name="orderForm" type="com.legacy.ssh.action.order.LegacyDispatchAction" scope="request" validate="false"/>
+        <action path="/order/deepChain" name="orderForm" type="com.legacy.ssh.action.order.LegacyDeepChainAction" scope="request" validate="false"/>
+        <action path="/order/stress" name="orderForm" type="com.legacy.ssh.action.order.LegacyStressAction" scope="request" validate="false"/>
+    </action-mappings>
+
+    <message-resources parameter="application"/>
+</struts-config>

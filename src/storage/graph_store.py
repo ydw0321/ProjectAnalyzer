@@ -20,17 +20,44 @@ class GraphStore:
                 file_path=file_path
             )
 
+    def batch_add_class_nodes(self, class_nodes):
+        """批量创建类节点"""
+        if not class_nodes:
+            return
+        with self.driver.session() as session:
+            session.run(
+                """
+                UNWIND $rows AS row
+                MERGE (c:Class {name: row.name, file_path: row.file_path})
+                """,
+                rows=class_nodes
+            )
+
     def add_method_node(self, name, class_name, file_path):
         """创建方法节点"""
         with self.driver.session() as session:
             session.run(
                 """
-                MERGE (m:Method {name: $name})
-                SET m.class_name = $class_name, m.file_path = $file_path
+                MERGE (m:Method {name: $name, class_name: $class_name})
+                SET m.file_path = $file_path
                 """,
                 name=name,
                 class_name=class_name,
                 file_path=file_path
+            )
+
+    def batch_add_method_nodes(self, method_nodes):
+        """批量创建方法节点"""
+        if not method_nodes:
+            return
+        with self.driver.session() as session:
+            session.run(
+                """
+                UNWIND $rows AS row
+                MERGE (m:Method {name: row.name, class_name: row.class_name})
+                SET m.file_path = row.file_path
+                """,
+                rows=method_nodes
             )
 
     def add_call_relationship(self, caller, callee, caller_class=None, callee_class=None, call_type='internal'):
@@ -42,11 +69,17 @@ class GraphStore:
                 if caller_class and callee_class and callee_class != 'Unknown':
                     session.run(
                         """
-                        MATCH (caller:Method {name: $caller})
-                        MATCH (callee:Method {name: $callee, class_name: $callee_class})
-                        MERGE (caller)-[:CALLS {via_field: $via_field, type: 'external'}]->(callee)
+                        MATCH (caller:Method {name: $caller, class_name: $caller_class})
+                        OPTIONAL MATCH (callee:Method {name: $callee, class_name: $callee_class})
+                        FOREACH (_ IN CASE WHEN callee IS NOT NULL THEN [1] ELSE [] END |
+                            MERGE (caller)-[:CALLS {via_field: $via_field, type: 'external'}]->(callee)
+                        )
+                        FOREACH (_ IN CASE WHEN callee IS NULL THEN [1] ELSE [] END |
+                            MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(:ExternalMethod {name: $callee})
+                        )
                         """,
                         caller=caller,
+                        caller_class=caller_class,
                         callee=callee,
                         callee_class=callee_class,
                         via_field=caller + '_to_' + callee
@@ -55,22 +88,99 @@ class GraphStore:
                     # 目标类未知，仅记录调用关系
                     session.run(
                         """
-                        MATCH (caller:Method {name: $caller})
+                        MATCH (caller:Method {name: $caller, class_name: $caller_class})
                         MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(callee:ExternalMethod {name: $callee})
                         """,
                         caller=caller,
+                        caller_class=caller_class,
                         callee=callee
                     )
             else:
                 # 内部调用
+                if not caller_class:
+                    return
+                target_class = callee_class or caller_class
                 session.run(
                     """
-                    MATCH (caller:Method {name: $caller})
-                    MATCH (callee:Method {name: $callee})
+                    MATCH (caller:Method {name: $caller, class_name: $caller_class})
+                    MATCH (callee:Method {name: $callee, class_name: $target_class})
                     MERGE (caller)-[:CALLS {type: 'internal'}]->(callee)
                     """,
                     caller=caller,
-                    callee=callee
+                    caller_class=caller_class,
+                    callee=callee,
+                    target_class=target_class
+                )
+
+    def batch_add_call_relationships(self, calls):
+        """批量创建方法调用关系"""
+        if not calls:
+            return
+
+        internal_rows = []
+        external_rows = []
+        unknown_rows = []
+
+        for call in calls:
+            call_type = call.get('type', 'internal')
+            row = {
+                'caller': call.get('caller'),
+                'callee': call.get('callee'),
+                'caller_class': call.get('caller_class'),
+                'callee_class': call.get('callee_class'),
+                'via_field': f"{call.get('caller', '')}_to_{call.get('callee', '')}"
+            }
+
+            if not row['caller'] or not row['callee']:
+                continue
+            if not row['caller_class']:
+                continue
+
+            if call_type == 'external':
+                if row['callee_class'] and row['callee_class'] != 'Unknown':
+                    external_rows.append(row)
+                else:
+                    unknown_rows.append(row)
+            else:
+                row['target_class'] = row['callee_class'] or row['caller_class']
+                internal_rows.append(row)
+
+        with self.driver.session() as session:
+            if internal_rows:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                    MATCH (callee:Method {name: row.callee, class_name: row.target_class})
+                    MERGE (caller)-[:CALLS {type: 'internal'}]->(callee)
+                    """,
+                    rows=internal_rows
+                )
+
+            if external_rows:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                    OPTIONAL MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
+                    FOREACH (_ IN CASE WHEN callee IS NOT NULL THEN [1] ELSE [] END |
+                        MERGE (caller)-[:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                    )
+                    FOREACH (_ IN CASE WHEN callee IS NULL THEN [1] ELSE [] END |
+                        MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(:ExternalMethod {name: row.callee})
+                    )
+                    """,
+                    rows=external_rows
+                )
+
+            if unknown_rows:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                    MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(callee:ExternalMethod {name: row.callee})
+                    """,
+                    rows=unknown_rows
                 )
 
     def add_belongs_to_relationship(self, method_name, class_name):
@@ -78,13 +188,56 @@ class GraphStore:
         with self.driver.session() as session:
             session.run(
                 """
-                MATCH (m:Method {name: $method_name})
+                MATCH (m:Method {name: $method_name, class_name: $class_name})
                 MATCH (c:Class {name: $class_name})
                 MERGE (m)-[:BELONGS_TO]->(c)
                 """,
                 method_name=method_name,
                 class_name=class_name
             )
+
+    def batch_add_belongs_to_relationships(self, method_class_pairs):
+        """批量创建 BELONGS_TO 关系"""
+        if not method_class_pairs:
+            return
+        with self.driver.session() as session:
+            session.run(
+                """
+                UNWIND $rows AS row
+                MATCH (m:Method {name: row.method_name, class_name: row.class_name})
+                MATCH (c:Class {name: row.class_name})
+                MERGE (m)-[:BELONGS_TO]->(c)
+                """,
+                rows=method_class_pairs
+            )
+
+    def resolve_external_unknown_calls(self):
+        """将可唯一匹配的 external_unknown 调用补链到 Method 节点"""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (caller:Method)-[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
+                WITH caller, r, ext
+                MATCH (candidate:Method {name: ext.name})
+                WITH caller, r, ext, collect(candidate) AS candidates
+                WHERE size(candidates) = 1
+                WITH caller, r, ext, candidates[0] AS target
+                MERGE (caller)-[:CALLS {type: 'external', inferred: true}]->(target)
+                DELETE r
+                RETURN count(*) AS resolved
+                """
+            )
+            resolved = result.single()["resolved"]
+
+            session.run(
+                """
+                MATCH (ext:ExternalMethod)
+                WHERE NOT (()-[:CALLS]->(ext))
+                DELETE ext
+                """
+            )
+
+            return resolved
 
     def get_hot_nodes(self, limit=50):
         """获取被调用最多的方法节点"""
@@ -215,7 +368,11 @@ class GraphStore:
 
     def _extract_layer_from_path(self, file_path: str) -> str:
         """从文件路径提取层级"""
-        base_layers = {'controller', 'service', 'facade', 'biz', 'bl', 'dal', 'dao', 'model', 'entity', 'vo', 'dto'}
+        base_layers = {
+            'controller', 'service', 'facade', 'biz', 'bl',
+            'dal', 'dao', 'model', 'entity', 'vo', 'dto',
+            'util', 'utils', 'helper', 'common'
+        }
         path_lower = file_path.lower()
         for layer in base_layers:
             if f'/{layer}/' in path_lower or path_lower.endswith(f'/{layer}') or path_lower.endswith(f'/{layer}.java'):

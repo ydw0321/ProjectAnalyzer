@@ -1,9 +1,9 @@
 import os
+import argparse
 from tqdm import tqdm
 from src.config import Config
 from src.scanner.scanner import scan_java_files
 from src.parser.java_parser import JavaParser
-from src.storage.vector_store import KnowledgeBase
 from src.storage.graph_store import GraphStore
 from src.tree import ArchitectureTreeGenerator
 
@@ -23,8 +23,9 @@ def phase1_parse_and_index(graph_store=None):
     print(f"📂 业务层文件: {len(business_files)} 个")
 
     method_index = []
-    all_classes = {}  # file_path -> list of class names
     all_calls = []    # 包含 internal_calls 和 external_calls
+    class_nodes = []
+    method_nodes = []
 
     for file_path in tqdm(business_files, desc="解析业务层"):
         result = parser.extract_with_calls(file_path)
@@ -34,16 +35,19 @@ def phase1_parse_and_index(graph_store=None):
         internal_calls = result.get('internal_calls', [])
         external_calls = result.get('external_calls', [])
 
-        # 存储类节点到 Neo4j
+        # 收集类节点到 Neo4j
         if graph_store and classes:
-            all_classes[file_path] = classes
             for class_name in classes:
-                graph_store.add_class_node(class_name, file_path)
+                class_nodes.append({'name': class_name, 'file_path': file_path})
 
-        # 存储方法节点到 Neo4j
+        # 收集方法节点到 Neo4j
         if graph_store:
             for method in methods:
-                graph_store.add_method_node(method['name'], method.get('class_name', ''), file_path)
+                method_nodes.append({
+                    'name': method['name'],
+                    'class_name': method.get('class_name', ''),
+                    'file_path': file_path
+                })
 
         # 收集调用关系（包括内部和外部）
         all_calls.extend(internal_calls)
@@ -56,6 +60,10 @@ def phase1_parse_and_index(graph_store=None):
                 'file_path': file_path,
                 'code': method['code'],
             })
+
+    if graph_store:
+        graph_store.batch_add_class_nodes(class_nodes)
+        graph_store.batch_add_method_nodes(method_nodes)
 
     print(f"✅ 共解析 {len(method_index)} 个业务层方法")
     return method_index, all_calls
@@ -90,6 +98,10 @@ def phase3_analyze_hot_nodes(method_index, hot_nodes):
         print("✅ 没有需要分析的节点")
         return
 
+    # 延迟导入，确保 graph-only 模式不触发向量和 LLM 依赖
+    from src.storage.vector_store import KnowledgeBase
+    from src.llm.processor import LLMProcessor
+
     method_map = {m['name']: m for m in method_index}
 
     print(f"\n🤖 阶段3：调用LLM分析 top5 方法...")
@@ -102,7 +114,6 @@ def phase3_analyze_hot_nodes(method_index, hot_nodes):
             code = method['code']
             git_info = {"author": "Unknown", "message": "调用关系分析"}
 
-            from src.llm.processor import LLMProcessor
             summary = LLMProcessor.generate_summary(method_name, code, git_info)
 
             chunk_id = f"{method['file_path']}_{method_name}".replace(os.sep, "_")
@@ -120,7 +131,7 @@ def phase3_analyze_hot_nodes(method_index, hot_nodes):
     print(f"✅ 分析完成！已存储 {min(5, len(hot_nodes))} 个方法")
 
 
-def main():
+def main(enable_llm=True):
     print("🚀 Code-GraphRAG 构建流水线\n")
 
     # 初始化图数据库（可选）
@@ -137,27 +148,13 @@ def main():
     # 阶段1.5：存储调用关系到 Neo4j
     if graph_store and all_calls:
         print(f"\n📊 存储 {len(all_calls)} 条调用关系到 Neo4j...")
-        internal_count = 0
-        external_count = 0
-        for call in tqdm(all_calls, desc="存储调用关系"):
-            try:
-                call_type = call.get('type', 'internal')
-                caller_class = call.get('caller_class')
-                callee_class = call.get('callee_class')
-                graph_store.add_call_relationship(
-                    call['caller'], 
-                    call['callee'],
-                    caller_class=caller_class,
-                    callee_class=callee_class,
-                    call_type=call_type
-                )
-                if call_type == 'external':
-                    external_count += 1
-                else:
-                    internal_count += 1
-            except Exception as e:
-                pass  # 忽略单个关系存储失败
+        graph_store.batch_add_call_relationships(all_calls)
+        internal_count = sum(1 for c in all_calls if c.get('type') == 'internal')
+        external_count = sum(1 for c in all_calls if c.get('type') == 'external')
         print(f"✅ 调用关系存储完成 (内部: {internal_count}, 跨类: {external_count})")
+
+        resolved_unknown = graph_store.resolve_external_unknown_calls()
+        print(f"✅ external_unknown 自动补链完成 (补链: {resolved_unknown})")
 
     # 阶段2：分析热点节点
     hot_nodes = phase2_find_caller_nodes(method_index)
@@ -165,16 +162,18 @@ def main():
     # 阶段2.5：存储 BELONGS_TO 关系到 Neo4j
     if graph_store:
         print(f"\n📊 存储 {len(method_index)} 个 BELONGS_TO 关系到 Neo4j...")
-        for method in tqdm(method_index, desc="存储 BELONGS_TO 关系"):
-            try:
-                if method['class_name']:
-                    graph_store.add_belongs_to_relationship(method['name'], method['class_name'])
-            except Exception as e:
-                pass
+        belongs_to_rows = [
+            {'method_name': method['name'], 'class_name': method['class_name']}
+            for method in method_index if method.get('class_name')
+        ]
+        graph_store.batch_add_belongs_to_relationships(belongs_to_rows)
         print("✅ BELONGS_TO 关系存储完成")
 
-    # 阶段3：LLM 分析
-    phase3_analyze_hot_nodes(method_index, hot_nodes)
+    # 阶段3：LLM 分析（可选）
+    if enable_llm:
+        phase3_analyze_hot_nodes(method_index, hot_nodes)
+    else:
+        print("\n⏭️ 阶段3已跳过（graph-only 模式）")
 
     # 阶段4：构建层级节点并生成架构树
     if graph_store:
@@ -215,4 +214,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Code-GraphRAG pipeline")
+    parser.add_argument(
+        "--graph-only",
+        action="store_true",
+        help="仅执行图存储与树生成流程，跳过向量和 LLM 分析"
+    )
+    args = parser.parse_args()
+
+    main(enable_llm=not args.graph_only)

@@ -1,0 +1,722 @@
+{
+  "timestamp": "2026-03-12 10:11:35",
+  "metrics": {
+    "broken_chain_rate": 0.3014354066985646,
+    "business_broken_chain_rate": 0.004784688995215311,
+    "reachability_rate": 0.8040540540540541,
+    "key_chain_hit_rate": 1.0
+  },
+  "details": {
+    "total_methods": 148,
+    "reachable_methods": 119,
+    "entry_method_count": 16,
+    "total_calls": 209,
+    "unknown_calls": 63,
+    "internal_calls": 67,
+    "external_calls": 79,
+    "key_chain_hop_hit_rate": 1.0,
+    "matched_key_chains": 6,
+    "total_key_chains": 6,
+    "matched_key_hops": 24,
+    "total_key_hops": 24,
+    "unknown_breakdown": {
+      "jdk_unknown": 62,
+      "business_unknown": 1,
+      "total_unknown": 63
+    }
+  },
+  "critical_chain_results": [
+    {
+      "name": "order_create_main_flow",
+      "full_hit": true,
+      "matched_hops": 4,
+      "total_hops": 4,
+      "hops": [
+        {
+          "from": {
+            "class": "OrderController",
+            "method": "createOrder"
+          },
+          "to": {
+            "class": "OrderBiz",
+            "method": "submitOrder"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "OrderBiz",
+            "method": "submitOrder"
+          },
+          "to": {
+            "class": "OrderFacade",
+            "method": "placeOrder"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "OrderFacade",
+            "method": "placeOrder"
+          },
+          "to": {
+            "class": "OrderService",
+            "method": "createOrder"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "OrderService",
+            "method": "createOrder"
+          },
+          "to": {
+            "class": "OrderDal",
+            "method": "insert"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "name": "order_cancel_main_flow",
+      "full_hit": true,
+      "matched_hops": 4,
+      "total_hops": 4,
+      "hops": [
+        {
+          "from": {
+            "class": "OrderController",
+            "method": "cancelOrder"
+          },
+          "to": {
+            "class": "OrderBiz",
+            "method": "handleOrderCancellation"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "OrderBiz",
+            "method": "handleOrderCancellation"
+          },
+          "to": {
+            "class": "OrderFacade",
+            "method": "cancelOrder"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "OrderFacade",
+            "method": "cancelOrder"
+          },
+          "to": {
+            "class": "OrderService",
+            "method": "cancelOrder"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "OrderService",
+            "method": "cancelOrder"
+          },
+          "to": {
+            "class": "OrderDal",
+            "method": "update"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "name": "product_query_main_flow",
+      "full_hit": true,
+      "matched_hops": 4,
+      "total_hops": 4,
+      "hops": [
+        {
+          "from": {
+            "class": "ProductController",
+            "method": "getProduct"
+          },
+          "to": {
+            "class": "ProductBiz",
+            "method": "queryProduct"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "ProductBiz",
+            "method": "queryProduct"
+          },
+          "to": {
+            "class": "ProductFacade",
+            "method": "getProductDetails"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "ProductFacade",
+            "method": "getProductDetails"
+          },
+          "to": {
+            "class": "ProductService",
+            "method": "getProduct"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "ProductService",
+            "method": "getProduct"
+          },
+          "to": {
+            "class": "ProductDal",
+            "method": "findById"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "name": "product_list_main_flow",
+      "full_hit": true,
+      "matched_hops": 4,
+      "total_hops": 4,
+      "hops": [
+        {
+          "from": {
+            "class": "ProductController",
+            "method": "listProducts"
+          },
+          "to": {
+            "class": "ProductBiz",
+            "method": "listProductsByCategory"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "ProductBiz",
+            "method": "listProductsByCategory"
+          },
+          "to": {
+            "class": "ProductFacade",
+            "method": "getProductsByCategory"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "ProductFacade",
+            "method": "getProductsByCategory"
+          },
+          "to": {
+            "class": "ProductService",
+            "method": "getProductsByCategory"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "ProductService",
+            "method": "getProductsByCategory"
+          },
+          "to": {
+            "class": "ProductDal",
+            "method": "findByCategory"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "name": "user_register_main_flow",
+      "full_hit": true,
+      "matched_hops": 4,
+      "total_hops": 4,
+      "hops": [
+        {
+          "from": {
+            "class": "UserController",
+            "method": "register"
+          },
+          "to": {
+            "class": "UserBiz",
+            "method": "registerUser"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "UserBiz",
+            "method": "registerUser"
+          },
+          "to": {
+            "class": "UserFacade",
+            "method": "register"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "UserFacade",
+            "method": "register"
+          },
+          "to": {
+            "class": "UserService",
+            "method": "registerUser"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "UserService",
+            "method": "registerUser"
+          },
+          "to": {
+            "class": "UserDal",
+            "method": "insert"
+          },
+          "matched": true
+        }
+      ]
+    },
+    {
+      "name": "user_list_main_flow",
+      "full_hit": true,
+      "matched_hops": 4,
+      "total_hops": 4,
+      "hops": [
+        {
+          "from": {
+            "class": "UserController",
+            "method": "listUsers"
+          },
+          "to": {
+            "class": "UserBiz",
+            "method": "fetchAllUsers"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "UserBiz",
+            "method": "fetchAllUsers"
+          },
+          "to": {
+            "class": "UserFacade",
+            "method": "getAllUsers"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "UserFacade",
+            "method": "getAllUsers"
+          },
+          "to": {
+            "class": "UserService",
+            "method": "getAllUsers"
+          },
+          "matched": true
+        },
+        {
+          "from": {
+            "class": "UserService",
+            "method": "getAllUsers"
+          },
+          "to": {
+            "class": "UserDal",
+            "method": "findAll"
+          },
+          "matched": true
+        }
+      ]
+    }
+  ],
+  "unknown_call_details": [
+    {
+      "caller_class": "DateUtil",
+      "caller_name": "addDays",
+      "callee_name": "getTime",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "DateUtil",
+      "caller_name": "formatDateTime",
+      "callee_name": "format",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "DateUtil",
+      "caller_name": "isExpired",
+      "callee_name": "before",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateOrderId",
+      "callee_name": "randomUUID",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateOrderId",
+      "callee_name": "toString",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateProductId",
+      "callee_name": "randomUUID",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateProductId",
+      "callee_name": "toString",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateTransactionId",
+      "callee_name": "currentTimeMillis",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateTransactionId",
+      "callee_name": "randomUUID",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateTransactionId",
+      "callee_name": "substring",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateTransactionId",
+      "callee_name": "toString",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateUserId",
+      "callee_name": "randomUUID",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "IdGenerator",
+      "caller_name": "generateUserId",
+      "callee_name": "toString",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderBiz",
+      "caller_name": "validateCancellation",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderBiz",
+      "caller_name": "validateOrderInput",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderController",
+      "caller_name": "cancelOrder",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderController",
+      "caller_name": "createOrder",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderController",
+      "caller_name": "queryOrder",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderFacade",
+      "caller_name": "placeOrder",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderFacade",
+      "caller_name": "placeOrder",
+      "callee_name": "multiply",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderFacade",
+      "caller_name": "placeOrder",
+      "callee_name": "valueOf",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderService",
+      "caller_name": "cancelOrder",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "OrderService",
+      "caller_name": "validateOrderRequest",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentService",
+      "caller_name": "processPayment",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentService",
+      "caller_name": "refundPayment",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentService",
+      "caller_name": "validatePayment",
+      "callee_name": "compareTo",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PaymentService",
+      "caller_name": "validatePayment",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateDiscount",
+      "callee_name": "compareTo",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateDiscount",
+      "callee_name": "divide",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateDiscount",
+      "callee_name": "multiply",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateDiscount",
+      "callee_name": "subtract",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateDiscount",
+      "callee_name": "valueOf",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateTax",
+      "callee_name": "divide",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateTax",
+      "callee_name": "multiply",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateTax",
+      "callee_name": "valueOf",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateTotal",
+      "callee_name": "add",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "PriceCalculator",
+      "caller_name": "calculateTotal",
+      "callee_name": "setScale",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductBiz",
+      "caller_name": "validateCategory",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductBiz",
+      "caller_name": "validatePrice",
+      "callee_name": "compareTo",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductBiz",
+      "caller_name": "validateProductId",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductController",
+      "caller_name": "adjustStock",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductController",
+      "caller_name": "getProduct",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductController",
+      "caller_name": "listProducts",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductController",
+      "caller_name": "listProducts",
+      "callee_name": "size",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductController",
+      "caller_name": "updatePrice",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductFacade",
+      "caller_name": "adjustStock",
+      "callee_name": "abs",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "ProductService",
+      "caller_name": "validateCategory",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserBiz",
+      "caller_name": "checkEmailFormat",
+      "callee_name": "contains",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserBiz",
+      "caller_name": "validateRegistration",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserBiz",
+      "caller_name": "validateUserId",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserController",
+      "caller_name": "listUsers",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserController",
+      "caller_name": "listUsers",
+      "callee_name": "size",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserController",
+      "caller_name": "register",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserController",
+      "caller_name": "updateProfile",
+      "callee_name": "getMessage",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "updateProfile",
+      "callee_name": "equals",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "updateProfile",
+      "callee_name": "filter",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "updateProfile",
+      "callee_name": "findFirst",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "updateProfile",
+      "callee_name": "getUserId",
+      "category": "business_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "updateProfile",
+      "callee_name": "orElse",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "updateProfile",
+      "callee_name": "stream",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserFacade",
+      "caller_name": "validateRegistrationInput",
+      "callee_name": "length",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserService",
+      "caller_name": "validateUserInfo",
+      "callee_name": "contains",
+      "category": "jdk_unknown"
+    },
+    {
+      "caller_class": "UserService",
+      "caller_name": "validateUserInfo",
+      "callee_name": "isEmpty",
+      "category": "jdk_unknown"
+    }
+  ]
+}

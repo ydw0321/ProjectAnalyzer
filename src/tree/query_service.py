@@ -100,7 +100,10 @@ class GraphQueryService:
             result = session.run("""
                 MATCH (m:Method)-[:BELONGS_TO]->(c:Class)
                 WHERE c.file_path CONTAINS '/controller/' OR c.file_path CONTAINS '/action/'
-                RETURN m.name as method_name, m.class_name as class_name, c.file_path as file_path
+                OPTIONAL MATCH (m)-[r:CALLS]->()
+                WITH m, c, count(r) as out_degree
+                RETURN m.name as method_name, m.class_name as class_name, c.file_path as file_path, out_degree
+                ORDER BY out_degree DESC, method_name ASC
             """)
             return [dict(record) for record in result]
     

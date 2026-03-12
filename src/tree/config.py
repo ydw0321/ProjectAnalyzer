@@ -4,7 +4,11 @@
 
 class TreeConfig:
     # 基础层级关键词
-    BASE_LAYERS = {'controller', 'service', 'facade', 'biz', 'bl', 'dal', 'dao', 'model', 'entity', 'vo', 'dto'}
+    BASE_LAYERS = {
+        'controller', 'service', 'facade', 'biz', 'bl',
+        'dal', 'dao', 'model', 'entity', 'vo', 'dto',
+        'util', 'utils', 'helper', 'common'
+    }
     
     # 子包配置
     SUB_PACKAGE_ENABLED = True      # 是否展开子包
@@ -41,5 +45,9 @@ class TreeConfig:
             'entity': 9,
             'vo': 10,
             'dto': 11,
+            'util': 12,
+            'utils': 13,
+            'helper': 14,
+            'common': 15,
         }
         return priority_map.get(layer.lower(), 99)

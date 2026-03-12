@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="orderService" class="com.legacy.ssh.service.impl.order.OrderServiceImpl"/>
+    <bean id="orderServiceProxy" class="com.legacy.ssh.service.impl.order.OrderServiceProxy"/>
+    <bean id="legacyMegaWorkflowService" class="com.legacy.ssh.service.impl.order.LegacyMegaWorkflowService"/>
+    <bean id="deepChainCoordinator" class="com.legacy.ssh.service.impl.order.DeepChainCoordinator"/>
+    <bean id="legacyTicketMonsterService" class="com.legacy.ssh.service.impl.order.LegacyTicketMonsterService"/>
+    <bean id="paymentService" class="com.legacy.ssh.service.impl.payment.LegacyPaymentServiceImpl"/>
+
+    <bean id="orderDAO" class="com.legacy.ssh.dao.order.OrderDAO"/>
+    <bean id="orderDetailDAO" class="com.legacy.ssh.dao.order.OrderDetailDAO"/>
+
+    <bean id="retryInterceptor" class="com.legacy.ssh.interceptor.RetryInterceptor"/>
+    <bean id="loggingInterceptor" class="com.legacy.ssh.interceptor.LoggingInterceptor"/>
+</beans>

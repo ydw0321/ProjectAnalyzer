@@ -57,6 +57,7 @@ class JavaParser:
         classes = []
         methods = []
         calls = []  # 同文件内调用
+        methods_by_class = {}
 
         class_info = {'name': '', 'start': 0, 'end': 0}
 
@@ -97,10 +98,15 @@ class JavaParser:
                     'start_byte': start_byte,
                     'end_byte': end_byte
                 })
+                methods_by_class.setdefault(class_info['name'], set()).add(method_name)
+
+                local_vars = self._extract_local_vars_regex(method_code)
+                method_field_map = dict(field_map)
+                method_field_map.update(local_vars)
                 
                 # 继续在方法内查找调用
                 for child in node.children:
-                    find_method_calls(child, class_info['name'], method_name, field_map)
+                    find_method_calls(child, class_info['name'], method_name, method_field_map)
             else:
                 for child in node.children:
                     find_class_and_methods(child)
@@ -121,11 +127,16 @@ class JavaParser:
                     if receiver:
                         # source_code 已经是字符串
                         receiver_text = source_code[receiver.start_byte:receiver.end_byte]
+                        receiver_root = receiver_text.split('.', 1)[0]
                         # 检查是否是成员变量调用（不是 this、super 或局部变量）
                         if not receiver_text.startswith('this') and not receiver_text.startswith('super'):
-                            target_field = receiver_text
+                            target_field = receiver_root
                             # 尝试通过字段类型推断目标类
-                            target_class = fmap.get(target_field)  # 直接使用 get
+                            target_class = fmap.get(target_field)
+
+                            # 静态调用场景: ClassName.method()
+                            if not target_class and receiver_root and receiver_root[0].isupper():
+                                target_class = receiver_root
                     
                     # 确定调用类型和目标类
                     if target_field:
@@ -136,7 +147,9 @@ class JavaParser:
                             'callee': method_name,
                             'callee_class': target_class or 'Unknown',
                             'target_field': target_field,
-                            'type': 'external'
+                            'type': 'external',
+                            'call_start_byte': node.start_byte,
+                            'call_end_byte': node.end_byte
                         })
                     else:
                         # 同类调用
@@ -146,7 +159,9 @@ class JavaParser:
                             'callee': method_name,
                             'callee_class': current_class,
                             'target_field': None,
-                            'type': 'internal'
+                            'type': 'internal',
+                            'call_start_byte': node.start_byte,
+                            'call_end_byte': node.end_byte
                         })
 
             for child in node.children:
@@ -155,24 +170,22 @@ class JavaParser:
         find_class_and_methods(root_node)
 
         # 分离内部调用和外部调用
-        all_method_names = {m['name'] for m in methods}
         internal_calls = []
         external_calls = []
         
         for call in calls:
-            # 如果是被调用方在本文件中声明的方法，则是内部调用
-            if call['callee'] in all_method_names and call['type'] == 'internal':
-                # 找到对应的方法获取其类
-                for m in methods:
-                    if m['name'] == call['callee'] and m['start_byte'] <= call.get('start_byte', 0) <= m['end_byte']:
-                        internal_calls.append({
-                            'caller': call['caller'],
-                            'caller_class': call['caller_class'],
-                            'callee': call['callee'],
-                            'callee_class': m['class_name'],
-                            'type': 'internal'
-                        })
-                        break
+            # 同类调用：仅当被调用方法在当前类中存在时才记为 internal
+            if call['type'] == 'internal':
+                caller_class = call.get('caller_class', '')
+                class_methods = methods_by_class.get(caller_class, set())
+                if call['callee'] in class_methods:
+                    internal_calls.append({
+                        'caller': call['caller'],
+                        'caller_class': caller_class,
+                        'callee': call['callee'],
+                        'callee_class': caller_class,
+                        'type': 'internal'
+                    })
             elif call['type'] == 'external':
                 external_calls.append(call)
 
@@ -249,3 +262,21 @@ class JavaParser:
         except:
             pass
         return None
+
+    def _extract_local_vars_regex(self, method_code):
+        """提取方法体内局部变量声明（用于调用目标类推断）"""
+        local_vars = {}
+        pattern = r'([A-Z][\w\.]*(?:<[^>]+>)?)\s+(\w+)\s*='
+
+        for match in re.finditer(pattern, method_code):
+            type_name = match.group(1)
+            var_name = match.group(2)
+
+            if '.' in type_name:
+                type_name = type_name.split('.')[-1]
+            if '<' in type_name:
+                type_name = type_name.split('<')[0]
+
+            local_vars[var_name] = type_name
+
+        return local_vars
