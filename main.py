@@ -49,7 +49,8 @@ def phase1_parse_and_index(graph_store=None):
                 method_nodes.append({
                     'name': method['name'],
                     'class_name': method.get('class_name', ''),
-                    'file_path': file_path
+                    'file_path': file_path,
+                    'param_count': method.get('param_count', 0),
                 })
 
         # 收集调用关系（包括内部和外部）
@@ -162,7 +163,7 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
         print(f"✅ 分析完成！已存储 {min(5, len(hot_nodes))} 个方法")
 
 
-def main(enable_llm=True, index_all=False):
+def main(enable_llm=True, index_all=False, reset_graph=False):
     setup_logging()
     print("🚀 Code-GraphRAG 构建流水线\n")
 
@@ -171,6 +172,10 @@ def main(enable_llm=True, index_all=False):
     try:
         graph_store = GraphStore()
         print("✅ Neo4j 连接成功")
+        if reset_graph:
+            print("🧹 已启用图重置：清空 Neo4j 旧数据...")
+            graph_store.clear_graph()
+            print("✅ Neo4j 图数据已清空")
     except Exception as e:
         print(f"⚠️ Neo4j 连接失败: {e}")
 
@@ -180,10 +185,24 @@ def main(enable_llm=True, index_all=False):
     # 阶段1.5：存储调用关系到 Neo4j
     if graph_store and all_calls:
         print(f"\n📊 存储 {len(all_calls)} 条调用关系到 Neo4j...")
-        graph_store.batch_add_call_relationships(all_calls)
+        call_stats = graph_store.batch_add_call_relationships(all_calls)
         internal_count = sum(1 for c in all_calls if c.get('type') == 'internal')
         external_count = sum(1 for c in all_calls if c.get('type') == 'external')
         print(f"✅ 调用关系存储完成 (内部: {internal_count}, 跨类: {external_count})")
+        print(
+            "📈 匹配统计: "
+            f"精确命中={call_stats.get('signature_exact_hits', 0)}, "
+            f"唯一回退={call_stats.get('unique_fallback_hits', 0)}, "
+            f"转unknown={call_stats.get('unmatched_to_unknown', 0)}, "
+            f"内部丢弃={call_stats.get('internal_unmatched_dropped', 0)}"
+        )
+        print(
+            "📈 样本统计: "
+            f"总行={call_stats.get('total_rows', 0)}, "
+            f"内部={call_stats.get('internal_rows', 0)}, "
+            f"外部已知={call_stats.get('external_rows', 0)}, "
+            f"外部未知={call_stats.get('direct_unknown_rows', 0)}"
+        )
 
         resolved_unknown = graph_store.resolve_external_unknown_calls()
         print(f"✅ external_unknown 自动补链完成 (补链: {resolved_unknown})")
@@ -260,6 +279,15 @@ if __name__ == "__main__":
         action="store_true",
         help="全量 LLM 摘要索引所有方法（增量更新，跳过已有），默认仅索引 top-5",
     )
+    parser.add_argument(
+        "--reset-graph",
+        action="store_true",
+        help="执行前清空 Neo4j 图数据，避免不同样本集运行结果累积",
+    )
     args = parser.parse_args()
 
-    main(enable_llm=not args.graph_only, index_all=args.index_all)
+    main(
+        enable_llm=not args.graph_only,
+        index_all=args.index_all,
+        reset_graph=args.reset_graph,
+    )

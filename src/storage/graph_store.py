@@ -26,7 +26,7 @@ class GraphStore:
             session.run(
                 "MERGE (c:Class {name: $name, file_path: $file_path})",
                 name=class_name,
-                file_path=file_path
+                file_path=file_path,
             )
 
     def batch_add_class_nodes(self, class_nodes):
@@ -39,26 +39,33 @@ class GraphStore:
                 UNWIND $rows AS row
                 MERGE (c:Class {name: row.name, file_path: row.file_path})
                 """,
-                rows=class_nodes
+                rows=class_nodes,
             )
 
-    def add_method_node(self, name, class_name, file_path):
+    def add_method_node(self, name, class_name, file_path, param_count=0):
         """创建方法节点"""
         with self.driver.session() as session:
             session.run(
                 """
                 MERGE (m:Method {name: $name, class_name: $class_name})
-                SET m.file_path = $file_path
+                SET m.file_path = $file_path,
+                    m.param_count = $param_count
                 """,
                 name=name,
                 class_name=class_name,
-                file_path=file_path
+                file_path=file_path,
+                param_count=param_count,
             )
+
+    def clear_graph(self):
+        """清空当前 Neo4j 图数据（仅删除节点和关系，不修改数据库配置）"""
+        with self.driver.session() as session:
+            session.run("MATCH (n) DETACH DELETE n")
 
     def _classify_unknown_method(self, method_name: str) -> str:
         if method_name in JDK_LIKELY_METHODS:
-            return 'jdk_unknown'
-        return 'business_unknown'
+            return "jdk_unknown"
+        return "business_unknown"
 
     def batch_add_method_nodes(self, method_nodes):
         """批量创建方法节点"""
@@ -72,16 +79,14 @@ class GraphStore:
                 SET m.file_path = row.file_path,
                     m.param_count = row.param_count
                 """,
-                rows=method_nodes
+                rows=method_nodes,
             )
 
-    def add_call_relationship(self, caller, callee, caller_class=None, callee_class=None, call_type='internal'):
+    def add_call_relationship(self, caller, callee, caller_class=None, callee_class=None, call_type="internal"):
         """创建方法调用关系（支持跨类调用）"""
         with self.driver.session() as session:
-            # 动态构建查询
-            if call_type == 'external':
-                # 跨类调用 - 通过类名匹配
-                if caller_class and callee_class and callee_class != 'Unknown':
+            if call_type == "external":
+                if caller_class and callee_class and callee_class != "Unknown":
                     session.run(
                         """
                         MATCH (caller:Method {name: $caller, class_name: $caller_class})
@@ -97,10 +102,9 @@ class GraphStore:
                         caller_class=caller_class,
                         callee=callee,
                         callee_class=callee_class,
-                        via_field=caller + '_to_' + callee
+                        via_field=caller + "_to_" + callee,
                     )
                 else:
-                    # 目标类未知，仅记录调用关系
                     session.run(
                         """
                         MATCH (caller:Method {name: $caller, class_name: $caller_class})
@@ -108,10 +112,9 @@ class GraphStore:
                         """,
                         caller=caller,
                         caller_class=caller_class,
-                        callee=callee
+                        callee=callee,
                     )
             else:
-                # 内部调用
                 if not caller_class:
                     return
                 target_class = callee_class or caller_class
@@ -124,47 +127,133 @@ class GraphStore:
                     caller=caller,
                     caller_class=caller_class,
                     callee=callee,
-                    target_class=target_class
+                    target_class=target_class,
                 )
 
+    def _build_signature_index(self):
+        index = {}
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (m:Method)
+                RETURN m.class_name AS class_name, m.name AS method_name, m.param_count AS param_count
+                """
+            )
+            for row in result:
+                key = (row["class_name"], row["method_name"])
+                index.setdefault(key, []).append(row.get("param_count", 0))
+        return index
+
     def batch_add_call_relationships(self, calls):
-        """批量创建方法调用关系"""
+        """批量创建方法调用关系，并返回匹配观测统计"""
+        stats = {
+            "total_rows": 0,
+            "internal_rows": 0,
+            "external_rows": 0,
+            "direct_unknown_rows": 0,
+            "signature_exact_hits": 0,
+            "unique_fallback_hits": 0,
+            "unmatched_to_unknown": 0,
+            "internal_unmatched_dropped": 0,
+        }
         if not calls:
-            return
+            return stats
 
         internal_rows = []
         external_rows = []
         unknown_rows = []
 
         for call in calls:
-            call_type = call.get('type', 'internal')
-            unknown_category = call.get('unknown_category') or self._classify_unknown_method(call.get('callee', ''))
+            call_type = call.get("type", "internal")
+            unknown_category = call.get("unknown_category") or self._classify_unknown_method(call.get("callee", ""))
             row = {
-                'caller': call.get('caller'),
-                'callee': call.get('callee'),
-                'caller_class': call.get('caller_class'),
-                'callee_class': call.get('callee_class'),
-                'arg_count': call.get('arg_count', 0),
-                'unknown_category': unknown_category,
-                'via_field': f"{call.get('caller', '')}_to_{call.get('callee', '')}"
+                "caller": call.get("caller"),
+                "callee": call.get("callee"),
+                "caller_class": call.get("caller_class"),
+                "callee_class": call.get("callee_class"),
+                "arg_count": call.get("arg_count", 0),
+                "unknown_category": unknown_category,
+                "via_field": f"{call.get('caller', '')}_to_{call.get('callee', '')}",
             }
 
-            if not row['caller'] or not row['callee']:
+            if not row["caller"] or not row["callee"]:
                 continue
-            if not row['caller_class']:
+            if not row["caller_class"]:
                 continue
 
-            if call_type == 'external':
-                if row['callee_class'] and row['callee_class'] != 'Unknown':
+            if call_type == "external":
+                if row["callee_class"] and row["callee_class"] != "Unknown":
                     external_rows.append(row)
                 else:
                     unknown_rows.append(row)
             else:
-                row['target_class'] = row['callee_class'] or row['caller_class']
+                row["target_class"] = row["callee_class"] or row["caller_class"]
                 internal_rows.append(row)
 
+        stats["total_rows"] = len(internal_rows) + len(external_rows) + len(unknown_rows)
+        stats["internal_rows"] = len(internal_rows)
+        stats["external_rows"] = len(external_rows)
+        stats["direct_unknown_rows"] = len(unknown_rows)
+
+        signature_index = self._build_signature_index()
+
+        def select_mode(class_name, method_name, arg_count):
+            candidates = signature_index.get((class_name, method_name), [])
+            if not candidates:
+                return "none"
+            if Config.USE_SIGNATURE_MATCH and arg_count in candidates:
+                return "exact"
+            if Config.USE_SIGNATURE_MATCH and len(candidates) == 1:
+                return "fallback"
+            if not Config.USE_SIGNATURE_MATCH:
+                return "fallback"
+            return "none"
+
+        internal_exact_rows = []
+        internal_fallback_rows = []
+        for row in internal_rows:
+            mode = select_mode(row["target_class"], row["callee"], row["arg_count"])
+            if mode == "exact":
+                internal_exact_rows.append(row)
+                stats["signature_exact_hits"] += 1
+            elif mode == "fallback":
+                internal_fallback_rows.append(row)
+                stats["unique_fallback_hits"] += 1
+            else:
+                stats["internal_unmatched_dropped"] += 1
+
+        external_exact_rows = []
+        external_fallback_rows = []
+        external_unmatched_rows = []
+        for row in external_rows:
+            mode = select_mode(row["callee_class"], row["callee"], row["arg_count"])
+            if mode == "exact":
+                external_exact_rows.append(row)
+                stats["signature_exact_hits"] += 1
+            elif mode == "fallback":
+                external_fallback_rows.append(row)
+                stats["unique_fallback_hits"] += 1
+            else:
+                external_unmatched_rows.append(row)
+
+        if external_unmatched_rows:
+            stats["unmatched_to_unknown"] = len(external_unmatched_rows)
+            unknown_rows.extend(external_unmatched_rows)
+
         with self.driver.session() as session:
-            if internal_rows:
+            if internal_exact_rows:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                    MATCH (callee:Method {name: row.callee, class_name: row.target_class, param_count: row.arg_count})
+                    MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
+                    SET r.arg_count = row.arg_count
+                    """,
+                    rows=internal_exact_rows,
+                )
+
+            if internal_fallback_rows:
                 session.run(
                     """
                     UNWIND $rows AS row
@@ -173,27 +262,31 @@ class GraphStore:
                     MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
                     SET r.arg_count = row.arg_count
                     """,
-                    rows=internal_rows
+                    rows=internal_fallback_rows,
                 )
 
-            if external_rows:
+            if external_exact_rows:
                 session.run(
                     """
                     UNWIND $rows AS row
                     MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    OPTIONAL MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
-                    FOREACH (_ IN CASE WHEN callee IS NOT NULL THEN [1] ELSE [] END |
-                        MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
-                        SET r.arg_count = row.arg_count
-                    )
-                    FOREACH (_ IN CASE WHEN callee IS NULL THEN [1] ELSE [] END |
-                        MERGE (ext:ExternalMethod {name: row.callee})
-                        SET ext.category = coalesce(ext.category, row.unknown_category)
-                        MERGE (caller)-[r:CALLS {type: 'external_unknown'}]->(ext)
-                        SET r.arg_count = row.arg_count, r.unknown_category = row.unknown_category
-                    )
+                    MATCH (callee:Method {name: row.callee, class_name: row.callee_class, param_count: row.arg_count})
+                    MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                    SET r.arg_count = row.arg_count
                     """,
-                    rows=external_rows
+                    rows=external_exact_rows,
+                )
+
+            if external_fallback_rows:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                    MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
+                    MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                    SET r.arg_count = row.arg_count
+                    """,
+                    rows=external_fallback_rows,
                 )
 
             if unknown_rows:
@@ -206,8 +299,10 @@ class GraphStore:
                     MERGE (caller)-[r:CALLS {type: 'external_unknown'}]->(callee)
                     SET r.arg_count = row.arg_count, r.unknown_category = row.unknown_category
                     """,
-                    rows=unknown_rows
+                    rows=unknown_rows,
                 )
+
+        return stats
 
     def add_belongs_to_relationship(self, method_name, class_name):
         """创建方法属于类的关系"""
@@ -219,7 +314,7 @@ class GraphStore:
                 MERGE (m)-[:BELONGS_TO]->(c)
                 """,
                 method_name=method_name,
-                class_name=class_name
+                class_name=class_name,
             )
 
     def batch_add_belongs_to_relationships(self, method_class_pairs):
@@ -234,7 +329,7 @@ class GraphStore:
                 MATCH (c:Class {name: row.class_name})
                 MERGE (m)-[:BELONGS_TO]->(c)
                 """,
-                rows=method_class_pairs
+                rows=method_class_pairs,
             )
 
     def resolve_external_unknown_calls(self):
@@ -276,7 +371,7 @@ class GraphStore:
                 LIMIT $limit
                 RETURN m.name as method_name, m.file_path as file_path, degree
                 """,
-                limit=limit
+                limit=limit,
             )
             return [dict(record) for record in result]
 
@@ -294,7 +389,7 @@ class GraphStore:
 
     # ==================== Layer 节点管理 ====================
 
-    def add_layer_node(self, layer_name: str, layer_type: str = 'base'):
+    def add_layer_node(self, layer_name: str, layer_type: str = "base"):
         """创建层级节点（controller/service/facade等）"""
         with self.driver.session() as session:
             session.run(
@@ -303,7 +398,7 @@ class GraphStore:
                 SET l.layer_type = $layer_type
                 """,
                 name=layer_name,
-                layer_type=layer_type
+                layer_type=layer_type,
             )
 
     def add_package_node(self, package_name: str, class_count: int = 0, method_count: int = 0):
@@ -316,7 +411,7 @@ class GraphStore:
                 """,
                 name=package_name,
                 class_count=class_count,
-                method_count=method_count
+                method_count=method_count,
             )
 
     def add_contains_relationship(self, layer_name: str, class_name: str):
@@ -329,7 +424,7 @@ class GraphStore:
                 MERGE (l)-[:CONTAINS]->(c)
                 """,
                 layer_name=layer_name,
-                class_name=class_name
+                class_name=class_name,
             )
 
     def add_package_contains_relationship(self, package_name: str, class_name: str):
@@ -342,7 +437,7 @@ class GraphStore:
                 MERGE (p)-[:CONTAINS]->(c)
                 """,
                 package_name=package_name,
-                class_name=class_name
+                class_name=class_name,
             )
 
     def add_call_path_relationship(self, start_method: str, end_method: str, depth: int):
@@ -356,7 +451,7 @@ class GraphStore:
                 """,
                 start_method=start_method,
                 end_method=end_method,
-                depth=depth
+                depth=depth,
             )
 
     def get_all_layers(self) -> list:
@@ -373,35 +468,33 @@ class GraphStore:
                 MATCH (l:Layer {name: $layer_name})-[:CONTAINS]->(c:Class)
                 RETURN c.name as class_name, c.file_path as file_path
                 """,
-                layer_name=layer_name
+                layer_name=layer_name,
             )
             return [dict(record) for record in result]
 
     def build_layer_nodes_from_classes(self):
         """从现有类节点构建层级关系"""
-        # 获取所有类并分析其层级
         with self.driver.session() as session:
             result = session.run("MATCH (c:Class) RETURN c.name as name, c.file_path as file_path")
             classes = [dict(record) for record in result]
 
-        # 提取层级并创建节点
         for cls in classes:
-            file_path = cls.get('file_path', '')
+            file_path = cls.get("file_path", "")
             layer_name = self._extract_layer_from_path(file_path)
             if layer_name:
                 self.add_layer_node(layer_name)
-                self.add_contains_relationship(layer_name, cls['name'])
+                self.add_contains_relationship(layer_name, cls["name"])
 
     def _extract_layer_from_path(self, file_path: str) -> str:
         """从文件路径提取层级"""
         base_layers = {
-            'controller', 'service', 'facade', 'biz', 'bl',
-            'dal', 'dao', 'model', 'entity', 'vo', 'dto',
-            'util', 'utils', 'helper', 'common'
+            "controller", "service", "facade", "biz", "bl",
+            "dal", "dao", "model", "entity", "vo", "dto",
+            "util", "utils", "helper", "common",
         }
         path_lower = file_path.lower()
         for layer in base_layers:
-            if f'/{layer}/' in path_lower or path_lower.endswith(f'/{layer}') or path_lower.endswith(f'/{layer}.java'):
+            if f"/{layer}/" in path_lower or path_lower.endswith(f"/{layer}") or path_lower.endswith(f"/{layer}.java"):
                 return layer
         return None
 

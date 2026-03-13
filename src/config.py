@@ -19,6 +19,13 @@ def _get_int_env(key: str, default: int) -> int:
         return default
 
 
+def _get_bool_env(key: str, default: bool) -> bool:
+    value = os.getenv(key)
+    if value is None or value == "":
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Config:
     # 使用环境变量覆盖默认值，便于多环境部署与密钥安全管理
     PROJECT_PATH = os.getenv("PROJECT_PATH", r"./test_java")
@@ -35,6 +42,9 @@ class Config:
     LLM_API_KEY = os.getenv("LLM_API_KEY", "")
     LLM_MODEL = os.getenv("LLM_MODEL", "ark-code-latest")
     LLM_TIMEOUT = _get_int_env("LLM_TIMEOUT", 60)
+
+    # 调用关系匹配：启用后优先按 类名+方法名+参数个数 匹配，减少同名/重载污染
+    USE_SIGNATURE_MATCH = _get_bool_env("USE_SIGNATURE_MATCH", True)
 
     EXCLUDE_DIRS = {'.git', 'target', 'build', 'node_modules', '__pycache__', '.idea', '.vscode'}
     JAVA_FILE_EXT = '.java'
