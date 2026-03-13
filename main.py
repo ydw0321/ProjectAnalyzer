@@ -3,6 +3,7 @@ import argparse
 import sys
 from collections import defaultdict
 from tqdm import tqdm
+from src.logging_utils import setup_logging
 from src.config import Config
 from src.scanner.scanner import scan_java_files
 from src.parser.java_parser import JavaParser
@@ -162,6 +163,7 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
 
 
 def main(enable_llm=True, index_all=False):
+    setup_logging()
     print("🚀 Code-GraphRAG 构建流水线\n")
 
     # 初始化图数据库（可选）

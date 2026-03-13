@@ -1,6 +1,17 @@
 """
 树生成器配置模块
 """
+import os
+
+
+def _get_int_env(key: str, default: int) -> int:
+    value = os.getenv(key)
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
 
 
 def extract_layer(file_path: str) -> str:
@@ -27,15 +38,18 @@ class TreeConfig:
     
     # 子包配置
     SUB_PACKAGE_ENABLED = True      # 是否展开子包
-    MAX_SUB_PACKAGE_DEPTH = 3       # 子包最大深度
+    MAX_SUB_PACKAGE_DEPTH = _get_int_env('MAX_SUB_PACKAGE_DEPTH', 3)
     
     # 树节点配置
-    MAX_TREE_DEPTH = 10             # 最大树深度
-    MAX_NODE_COUNT = 1000          # 最大节点数
+    MAX_TREE_DEPTH = _get_int_env('MAX_TREE_DEPTH', 10)
+    MAX_NODE_COUNT = _get_int_env('MAX_NODE_COUNT', 1000)
     
     # 查询配置
-    QUERY_TIMEOUT = 30              # 查询超时时间(秒)
-    MAX_CALL_DEPTH = 10             # 调用链最大深度
+    QUERY_TIMEOUT = _get_int_env('QUERY_TIMEOUT', 30)
+    MAX_CALL_DEPTH = _get_int_env('MAX_CALL_DEPTH', 10)
+    HARD_MAX_CALL_DEPTH = _get_int_env('HARD_MAX_CALL_DEPTH', 20)
+    MAX_QUERY_RESULTS = _get_int_env('MAX_QUERY_RESULTS', 1000)
+    MAX_METHOD_FANOUT = _get_int_env('MAX_METHOD_FANOUT', 100)
     
     # 导出配置
     DEFAULT_OUTPUT_FORMAT = 'json'  # 默认输出格式

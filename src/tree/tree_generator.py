@@ -3,11 +3,15 @@
 """
 import os
 import json
+import logging
 from typing import Dict, List, Optional
 from pathlib import Path
 
 from src.tree.config import TreeConfig
 from src.tree.query_service import GraphQueryService
+
+
+logger = logging.getLogger(__name__)
 
 
 class ArchitectureTreeGenerator:
@@ -17,6 +21,8 @@ class ArchitectureTreeGenerator:
         self.query_service = query_service or GraphQueryService()
         self.expand_subpackages = TreeConfig.SUB_PACKAGE_ENABLED
         self._cache: Dict = {}  # 同一实例内缓存重复查询
+        self._call_tree_node_budget = TreeConfig.MAX_NODE_COUNT
+        self._call_tree_nodes = 0
     
     def close(self):
         if self.query_service:
@@ -179,6 +185,7 @@ class ArchitectureTreeGenerator:
         print(f"📊 生成调用链树 (入口: {entry_method})...")
         
         max_depth = max_depth or TreeConfig.MAX_CALL_DEPTH
+        self._call_tree_nodes = 0
         
         # 如果没有指定入口方法，使用所有 Controller/Action 方法
         if not entry_method:
@@ -197,7 +204,7 @@ class ArchitectureTreeGenerator:
                     'entry': f"{class_name}.{entry_method}" if class_name else entry_method,
                     'type': 'call_chain',
                     'max_depth': max_depth,
-                    'tree': self._build_call_tree(entry_method, class_name, 0, max_depth)
+                    'tree': self._build_call_tree(entry_method, class_name, 0, max_depth, set())
                 }
             else:
                 # 多入口返回列表
@@ -210,7 +217,7 @@ class ArchitectureTreeGenerator:
                         'entry': f"{em_class}.{em_name}" if em_class else em_name,
                         'type': 'call_chain',
                         'max_depth': max_depth,
-                        'tree': self._build_call_tree(em_name, em_class, 0, max_depth)
+                        'tree': self._build_call_tree(em_name, em_class, 0, max_depth, set())
                     })
                 print("✅ 调用链树生成完成")
                 return {'type': 'multi_call_chain', 'chains': chains}
@@ -219,17 +226,45 @@ class ArchitectureTreeGenerator:
                 'entry': f"{class_name}.{entry_method}" if class_name else entry_method,
                 'type': 'call_chain',
                 'max_depth': max_depth,
-                'tree': self._build_call_tree(entry_method, class_name, 0, max_depth)
+                'tree': self._build_call_tree(entry_method, class_name, 0, max_depth, set())
             }
         
         print("✅ 调用链树生成完成")
         return chain_tree
     
-    def _build_call_tree(self, method_name: str, class_name: str, depth: int, 
-                        max_depth: int) -> Dict:
+    def _build_call_tree(self, method_name: str, class_name: str, depth: int,
+                        max_depth: int, path_nodes: set) -> Dict:
         """递归构建调用树"""
         if depth >= max_depth:
-            return {'name': method_name, 'type': 'method', 'truncated': True}
+            return {
+                'name': method_name,
+                'class': class_name,
+                'type': 'method',
+                'truncated': True,
+                'truncate_reason': 'max_depth',
+            }
+
+        node_key = (class_name or '', method_name)
+        if node_key in path_nodes:
+            return {
+                'name': method_name,
+                'class': class_name,
+                'type': 'method',
+                'truncated': True,
+                'truncate_reason': 'cycle',
+            }
+
+        if self._call_tree_nodes >= self._call_tree_node_budget:
+            logger.warning("调用链树达到节点上限，提前截断: limit=%s", self._call_tree_node_budget)
+            return {
+                'name': method_name,
+                'class': class_name,
+                'type': 'method',
+                'truncated': True,
+                'truncate_reason': 'max_nodes',
+            }
+
+        self._call_tree_nodes += 1
         
         node = {
             'name': method_name,
@@ -240,14 +275,19 @@ class ArchitectureTreeGenerator:
         }
         
         # 获取下游调用
-        downstream = self.query_service.get_method_calls(method_name, class_name)
+        downstream = self.query_service.get_method_calls(
+            method_name,
+            class_name,
+            limit=TreeConfig.MAX_METHOD_FANOUT,
+        )
         
         for call in downstream:
             child = self._build_call_tree(
                 call['callee_name'], 
                 call['callee_class'], 
                 depth + 1, 
-                max_depth
+                max_depth,
+                path_nodes | {node_key},
             )
             child['call_type'] = call['call_type']
             node['calls'].append(child)

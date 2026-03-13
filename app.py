@@ -3,6 +3,9 @@ Code-GraphRAG 可视化 Dashboard
 启动方式: streamlit run app.py
 """
 import streamlit as st
+from src.logging_utils import setup_logging
+
+setup_logging()
 
 st.set_page_config(
     page_title="Code-GraphRAG Explorer",
