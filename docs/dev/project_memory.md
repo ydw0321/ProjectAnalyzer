@@ -39,36 +39,48 @@ ProjectAnalyzer/
 │       ├── config.py             # 树生成配置（层次定义、深度限制等）
 │       ├── tree_generator.py     # 架构树生成引擎
 │       └── query_service.py      # Neo4j 查询服务
-├── test_java/                    # 测试用 Java 示例项目
-│   ├── controller/               # 控制层（OrderController 等）
-│   ├── facade/                   # Facade 层
-│   ├── service/                  # 服务层
-│   ├── biz/                      # 业务逻辑层
-│   ├── dal/                      # 数据访问层
-│   └── model/                    # 模型/实体
+├── fixtures/                     # 测试用 Java 示例项目
+│   ├── simple/                   # 标准三层架构（controller/service/biz/dal/model）
+│   └── ssh/                      # SSH 风格复杂老旧系统（含压测场景）
 ├── output/                       # 生成的输出文件
-│   ├── layer_tree.json           # 层次架构树（JSON）
-│   ├── layer_tree.md             # 层次树（Mermaid 图）
-│   ├── package_tree.json         # 包结构树（JSON）
-│   ├── call_chain_tree.json      # 方法调用链树（JSON）
-│   ├── call_chain_tree.puml      # 调用链（PlantUML）
-│   └── architecture_overview.md  # 架构概览文档
-├── docs/                         # 项目文档目录
-│   └── project_memory.md         # 本文档（项目理解记忆）
+│   ├── trees/                    # 架构树产物
+│   │   ├── layer_tree.json       # 层次架构树（JSON）
+│   │   ├── layer_tree.md         # 层次树（Mermaid 图）
+│   │   ├── package_tree.json     # 包结构树（JSON）
+│   │   ├── call_chain_tree.json  # 方法调用链树（JSON）
+│   │   └── call_chain_tree.puml  # 调用链（PlantUML）
+│   ├── quality/                  # 图质量报告
+│   │   ├── graph_quality_benchmark.json
+│   │   ├── graph_quality_breakdown.json
+│   │   └── graph_quality_thresholds.json
+│   └── docs/                     # 文档产物
+│       ├── architecture_overview.md
+│       └── {layer}_overview.md   # 各层摘要文档
+├── docs/                         # 项目文档
+│   ├── design/                   # 设计规格（稳定）
+│   │   ├── SPEC.md               # 详细功能规格说明
+│   │   ├── plan.md               # 开发计划文档
+│   │   └── structure.md          # 原始架构蓝图
+│   └── dev/                      # 开发记录（演进）
+│       ├── implementation_progress.md
+│       └── project_memory.md     # 本文档（项目理解记忆）
 ├── main.py                       # 主流程编排（4个阶段）
-├── search.py                     # 语义搜索示例
+├── scripts/                      # 辅助脚本目录
+│   ├── search.py                 # 语义搜索示例
+│   ├── check_packages.py         # 包检查脚本
+│   ├── inspect_data.py           # 数据检查脚本
+│   └── generate_docs.py          # 文档导出脚本
+├── tests/                        # 测试与诊断脚本目录
+│   ├── test_scanner.py           # 扫描器测试
+│   ├── test_search.py            # 语义搜索测试
+│   ├── test_neo4j.py             # Neo4j 测试
+│   ├── test_tree.py              # 架构树生成测试
+│   └── test_api.py               # LLM API 连通性测试
 ├── requirements.txt              # Python 依赖列表
 ├── README.md                     # 项目说明（编码格式）
 ├── SPEC.md                       # 详细功能规格说明
 ├── plan.md                       # 开发计划文档
 ├── structure.md                  # 原始架构蓝图
-├── check_packages.py             # 包检查脚本
-├── inspect_data.py               # 数据检查脚本
-├── test_scanner.py               # 扫描器测试
-├── test_search.py                # 语义搜索测试
-├── test_neo4j.py                 # Neo4j 测试
-├── test_tree.py                  # 架构树生成测试
-├── test_api.py                   # LLM API 连通性测试
 └── .trae/                        # 任务管理目录（项目规格）
 ```
 
@@ -200,7 +212,7 @@ ProjectAnalyzer/
 
 ```python
 class Config:
-    PROJECT_PATH = r"./test_java"          # 目标 Java 项目路径
+    PROJECT_PATH = r"./fixtures/simple"    # 目标 Java 项目路径
     CHROMA_DB_PATH = "./chroma_data"       # ChromaDB 存储路径
     NEO4J_URI = "bolt://localhost:7687"    # Neo4j 连接地址
     NEO4J_USER = "neo4j"                   # Neo4j 用户名
@@ -233,7 +245,7 @@ class TreeConfig:
 
 ## 六、输出格式样例
 
-### 层次树 JSON（`output/layer_tree.json`）
+### 层次树 JSON（`output/trees/layer_tree.json`）
 ```json
 {
   "project": "Project",
@@ -255,7 +267,7 @@ class TreeConfig:
 }
 ```
 
-### 调用链树 JSON（`output/call_chain_tree.json`）
+### 调用链树 JSON（`output/trees/call_chain_tree.json`）
 ```json
 {
   "entry": "OrderController.createOrder",
@@ -280,7 +292,7 @@ class TreeConfig:
 
 ## 七、测试数据说明
 
-`test_java/` 目录包含完整的示例 Java 项目，覆盖典型分层架构：
+`fixtures/simple/` 目录包含完整的示例 Java 项目，覆盖典型分层架构：
 
 | 层次 | 文件 |
 |------|------|
@@ -310,16 +322,16 @@ python main.py                    # 执行完整 4 阶段流水线
 
 ### 单项测试
 ```bash
-python test_scanner.py            # 测试文件扫描
-python test_search.py             # 测试语义搜索
-python test_neo4j.py              # 测试 Neo4j 图查询
-python test_tree.py               # 测试架构树生成
-python test_api.py                # 测试 LLM API 连通性
+python tests/test_scanner.py      # 测试文件扫描
+python tests/test_search.py       # 测试语义搜索
+python tests/test_neo4j.py        # 测试 Neo4j 图查询
+python tests/test_tree.py         # 测试架构树生成
+python tests/test_api.py          # 测试 LLM API 连通性
 ```
 
 ### 语义搜索示例
 ```bash
-python search.py                  # 示例：搜索"处理支付请求的逻辑"
+python scripts/search.py          # 示例：搜索"处理支付请求的逻辑"
 ```
 
 ---

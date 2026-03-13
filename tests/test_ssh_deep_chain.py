@@ -1,13 +1,17 @@
 """
 专项测试：验证第二批深链路与同名方法污染是否进入解析结果。
 """
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from src.scanner.scanner import scan_java_files
 from src.parser.java_parser import JavaParser
 
 
 def test_deep_chain_parser_coverage():
     parser = JavaParser()
-    files = scan_java_files("./test_java_ssh")
+    files = scan_java_files("./fixtures/ssh")
 
     target = None
     for path in files:

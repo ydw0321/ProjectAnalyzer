@@ -1,3 +1,7 @@
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 import argparse
 import sys
 
@@ -15,7 +19,7 @@ def main():
     parser.add_argument("--min-key-chain-hop-hit-rate", type=float, default=1.0, help="关键链路逐跳命中率下限")
     parser.add_argument(
         "--output",
-        default="output/graph_quality_thresholds.json",
+        default="output/quality/graph_quality_thresholds.json",
         help="阈值测试结果输出路径",
     )
     args = parser.parse_args()

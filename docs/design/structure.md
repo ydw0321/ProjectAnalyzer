@@ -291,7 +291,7 @@ if __name__ == "__main__":
 4. 你会看到炫酷的进度条，它正在逐个解析 Java 文件、请求大模型、并写入本地的 `./chroma_data` 目录。
 
 ### 第三步：验证与检索 (Search Test)
-构建完成后，你可以新建一个 `search.py` 脚本来验证成果：
+构建完成后，你可以新建一个 `scripts/search.py` 脚本来验证成果：
 
 ```python
 import chromadb

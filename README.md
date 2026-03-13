@@ -27,7 +27,6 @@ ProjectAnalyzer/
 ├── app.py                         # Streamlit 可视化入口
 ├── main.py                        # 主流水线入口
 ├── chat_cli.py                    # CLI 问答入口
-├── search.py                      # 向量检索验证脚本
 ├── requirements.txt               # Python 依赖
 ├── .env.example                   # 本地开发环境配置样板
 ├── .env.production.example        # 生产配置样板
@@ -35,11 +34,25 @@ ProjectAnalyzer/
 ├── run_pipeline_windows.bat       # Windows 启动主流水线
 ├── run_dashboard_windows.bat      # Windows 启动可视化界面
 ├── run_cli_windows.bat            # Windows 启动命令行问答
+├── scripts/                       # 辅助脚本（检索、导出、排查）
+├── tests/                         # 独立测试与诊断脚本
 ├── src/                           # 核心逻辑
 ├── ui/                            # Streamlit 面板
 ├── output/                        # 导出结果
-└── test_java/                     # 示例 Java 项目
+│   ├── trees/                     # 架构树 JSON/PlantUML
+│   ├── quality/                   # 图质量报告 JSON
+│   └── docs/                      # 各层文档 + 架构概览
+└── fixtures/                      # 测试用 Java 示例项目
+	├── simple/                    # 标准三层架构样本
+	└── ssh/                       # SSH 风格复杂架构样本
 ```
+
+目录优化原则：
+
+- 根目录只保留主入口、环境文件和启动脚本
+- `scripts/` 统一放辅助运行脚本，避免根目录堆满临时工具
+- `tests/` 统一放测试和诊断脚本，后续切 pytest 结构也更顺手
+- `src/` 与 `ui/` 分别承载核心逻辑和界面逻辑，职责边界更清晰
 
 ## 部署顺序
 
@@ -76,7 +89,7 @@ setup_windows.bat
 首次执行 `setup_windows.bat` 后，根目录会生成 `.env`。至少需要检查以下配置：
 
 ```env
-PROJECT_PATH=./test_java
+PROJECT_PATH=./fixtures/simple
 CHROMA_DB_PATH=./chroma_data
 
 NEO4J_URI=bolt://localhost:7687
@@ -119,13 +132,13 @@ USE_SIGNATURE_MATCH=true
 
 ```bat
 run_pipeline_windows.bat --index-all
-python search.py
+python scripts/search.py
 ```
 
 产出：
 
 - ChromaDB 向量库写入到 `chroma_data/`
-- 检索可通过 `search.py` 验证
+- 检索可通过 `scripts/search.py` 验证
 
 #### 模式 B：完整模式
 
@@ -229,7 +242,13 @@ python chat_cli.py
 ### 4. 向量检索验证
 
 ```bash
-python search.py
+python scripts/search.py
+```
+
+### 5. 文档导出
+
+```bash
+python scripts/generate_docs.py
 ```
 
 ## 运行结果
@@ -244,16 +263,18 @@ python search.py
 常见输出目录：
 
 - `chroma_data/`：向量库
-- `output/layer_tree.json`：层级树
-- `output/package_tree.json`：包结构树
-- `output/call_chain_tree.json`：调用链树
-- `output/call_chain_tree.puml`：PlantUML 调用链图
+- `output/trees/layer_tree.json`：层级树
+- `output/trees/package_tree.json`：包结构树
+- `output/trees/call_chain_tree.json`：调用链树
+- `output/trees/call_chain_tree.puml`：PlantUML 调用链图
+- `output/quality/`：图质量报告 JSON
+- `output/docs/`：各层文档与架构概览
 
 ## 配置项
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
-| PROJECT_PATH | 目标 Java 项目路径 | ./test_java |
+| PROJECT_PATH | 目标 Java 项目路径 | ./fixtures/simple |
 | CHROMA_DB_PATH | ChromaDB 存储路径 | ./chroma_data |
 | NEO4J_URI | Neo4j 地址 | bolt://localhost:7687 |
 | NEO4J_USER | Neo4j 用户名 | neo4j |

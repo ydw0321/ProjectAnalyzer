@@ -9,6 +9,10 @@
 5) unknown 可补链潜力（是否存在可唯一匹配但未回填）
 """
 
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 import argparse
 import json
 import os
@@ -25,7 +29,7 @@ def _run_graph_pipeline_for_ssh(bootstrap: bool):
 
     old_path = Config.PROJECT_PATH
     try:
-        Config.PROJECT_PATH = "./test_java_ssh"
+        Config.PROJECT_PATH = "./fixtures/ssh"
         main(enable_llm=False)
     finally:
         Config.PROJECT_PATH = old_path
@@ -242,7 +246,7 @@ def main_cli():
     parser.add_argument("--bootstrap", action="store_true", help="是否先执行 test_java_ssh graph-only 构图")
     parser.add_argument(
         "--output",
-        default="output/ssh_graph_generation_diagnostics.json",
+        default="output/quality/ssh_graph_generation_diagnostics.json",
         help="诊断输出 JSON 路径",
     )
     args = parser.parse_args()

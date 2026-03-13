@@ -1,3 +1,7 @@
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from src.scanner.scanner import scan_java_files
 from src.config import Config
 

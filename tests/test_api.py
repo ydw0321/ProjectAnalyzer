@@ -1,3 +1,7 @@
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 import requests
 from src.config import Config
 

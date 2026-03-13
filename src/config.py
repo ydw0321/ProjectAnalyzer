@@ -28,7 +28,7 @@ def _get_bool_env(key: str, default: bool) -> bool:
 
 class Config:
     # 使用环境变量覆盖默认值，便于多环境部署与密钥安全管理
-    PROJECT_PATH = os.getenv("PROJECT_PATH", r"./test_java")
+    PROJECT_PATH = os.getenv("PROJECT_PATH", r"./fixtures/simple")
     CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_data")
 
     NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")

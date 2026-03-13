@@ -21,17 +21,17 @@
 - 反射入口: legacy/integration/LegacyReflectionInvoker.java
 - 同名方法污染: biz/order/LegacyDirtyRouter.java 与 dao/order/LegacyOrderHistoryDAO.java
 - 调度扩散入口: action/order/LegacyDispatchAction.java
-- external_unknown 测试脚本: ../test_ssh_external_unknown.py
+- external_unknown 测试脚本: ../tests/test_ssh_external_unknown.py
 
 ## 第三批极限加压点
 - 10+ 深链入口: action/order/LegacyStressAction.java
 - 深链协调器: service/impl/order/DeepChainCoordinator.java
 - 深链节点: DeepNode1Biz -> DeepNode11FinalService
 - 超大类: service/impl/order/LegacyTicketMonsterService.java
-- 深链阈值脚本: ../test_ssh_chain_depth.py
+- 深链阈值脚本: ../tests/test_ssh_chain_depth.py
 
 ## 快速验证
-- 仅扫和解析：`python test_ssh_scanner.py`
-- 图谱流程（跳过 LLM）：`python test_ssh_graph.py`
-- external_unknown 盲点断言：`python test_ssh_external_unknown.py`
-- 深链与超大类阈值断言：`python test_ssh_chain_depth.py`
+- 仅扫和解析：`python tests/test_ssh_scanner.py`
+- 图谱流程（跳过 LLM）：`python tests/test_ssh_graph.py`
+- external_unknown 盲点断言：`python tests/test_ssh_external_unknown.py`
+- 深链与超大类阈值断言：`python tests/test_ssh_chain_depth.py`

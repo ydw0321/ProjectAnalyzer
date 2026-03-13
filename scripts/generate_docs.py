@@ -1,6 +1,10 @@
 """
 离线文档生成：按层导出 overview，并生成全局 architecture_overview。
 """
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from pathlib import Path
 
 from src.logging_utils import setup_logging
@@ -27,7 +31,7 @@ def main():
             overview_blocks.append(text)
             overview_blocks.append("")
 
-        arch_file = Path("output/architecture_overview.md")
+        arch_file = Path("output/docs/architecture_overview.md")
         arch_file.write_text("\n".join(overview_blocks), encoding="utf-8")
         print(f"✅ 生成: {arch_file}")
 

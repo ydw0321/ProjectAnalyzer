@@ -2,6 +2,10 @@
 专项测试：验证 test_java_ssh 在图谱中能稳定产生 external_unknown 调用，
 用于暴露老系统动态/反射/运行时绑定盲点。
 """
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from src.config import Config
 from src.storage.graph_store import GraphStore
 from main import main
@@ -10,7 +14,7 @@ from main import main
 def test_external_unknown_for_ssh():
     old_path = Config.PROJECT_PATH
     try:
-        Config.PROJECT_PATH = "./test_java_ssh"
+        Config.PROJECT_PATH = "./fixtures/ssh"
         main(enable_llm=False)
 
         with GraphStore() as gs:

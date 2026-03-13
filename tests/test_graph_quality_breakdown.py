@@ -1,3 +1,7 @@
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 import argparse
 
 from src.tree import build_report, ensure_graph_data, save_report
@@ -9,7 +13,7 @@ def main():
     parser.add_argument("--max-depth", type=int, default=10, help="可达率计算深度")
     parser.add_argument(
         "--output",
-        default="output/graph_quality_breakdown.json",
+        default="output/quality/graph_quality_breakdown.json",
         help="分类测试结果输出路径",
     )
     parser.add_argument(

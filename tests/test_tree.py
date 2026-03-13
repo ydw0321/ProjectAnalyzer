@@ -1,6 +1,10 @@
 """
 测试架构树生成器
 """
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 import json
 from src.tree import ArchitectureTreeGenerator, GraphQueryService
 

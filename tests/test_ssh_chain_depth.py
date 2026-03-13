@@ -1,6 +1,10 @@
 """
 专项测试：验证 test_java_ssh 的深链路阈值与超大类规模。
 """
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from main import main
 from src.config import Config
 from src.parser.java_parser import JavaParser
@@ -10,7 +14,7 @@ from src.tree import GraphQueryService
 def test_chain_depth_threshold():
     old_path = Config.PROJECT_PATH
     try:
-        Config.PROJECT_PATH = "./test_java_ssh"
+        Config.PROJECT_PATH = "./fixtures/ssh"
         main(enable_llm=False)
 
         with GraphQueryService() as query:
@@ -18,7 +22,7 @@ def test_chain_depth_threshold():
             max_depth = max((d.get("depth", 0) for d in downstream), default=0)
 
         parser = JavaParser()
-        result = parser.extract_with_calls("./test_java_ssh/service/impl/order/LegacyTicketMonsterService.java")
+        result = parser.extract_with_calls("./fixtures/ssh/service/impl/order/LegacyTicketMonsterService.java")
         monster_methods = len(result.get("methods", []))
 
         print("=" * 60)

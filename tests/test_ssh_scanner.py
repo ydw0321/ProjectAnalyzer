@@ -1,12 +1,16 @@
 """
 专项测试：验证 test_java_ssh 样例集的扫描与解析覆盖。
 """
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from src.scanner.scanner import scan_java_files
 from src.parser.java_parser import JavaParser
 
 
 def test_ssh_scanner_and_parser():
-    project_path = "./test_java_ssh"
+    project_path = "./fixtures/ssh"
     java_files = scan_java_files(project_path)
 
     print("=" * 60)

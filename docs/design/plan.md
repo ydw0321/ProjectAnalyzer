@@ -30,7 +30,7 @@
 ```
 
 **已确认技术选型：**
-- 测试项目：`test_java/`（标准三层架构）+ `test_java_ssh/`（复杂多层 SSH 风格架构）
+- 测试项目：`fixtures/simple/`（标准三层架构）+ `fixtures/ssh/`（复杂多层 SSH 风格架构）
 - 大模型：本地兼容 OpenAI 接口（Ollama）
 - Neo4j：Community 5.26.0，本地安装
 - 当前数据规模：88+ 类，148~355 方法，567 条调用关系
@@ -64,9 +64,13 @@ ProjectAnalyzer/
 │       ├── query_service.py
 │       ├── tree_generator.py
 │       └── graph_quality.py
-├── test_java/            # 标准测试项目 ✅
-├── test_java_ssh/        # 复杂测试项目 ✅
+├── fixtures/             # 测试用 Java 示例项目
+│   ├── simple/           # 标准三层架构样本 ✅
+│   └── ssh/              # SSH 风格复杂架构样本 ✅
 ├── output/               # 生成产物目录 ✅
+│   ├── trees/            # 架构树 JSON/PlantUML
+│   ├── quality/          # 图质量报告 JSON
+│   └── docs/             # 各层文档 + 架构概览
 ├── ui/                   # 可视化仪表板模块 ✅ (新增)
 │   ├── layer_tree_panel.py   # 层级树面板（点击联动）
 │   ├── call_graph_panel.py   # agraph 交互网络图
@@ -102,7 +106,7 @@ ProjectAnalyzer/
 | 4.1 | 单元/集成测试编写 | ✅ (15+ 测试文件) |
 | 4.2 | 使用测试Java项目验证（test_java + test_java_ssh） | ✅ |
 | 4.3 | 性能优化（BFS→Cypher变长路径，消除 O(n) DB轮次） | ✅ |
-| 4.4 | 检索验证脚本（search.py） | ✅ |
+| 4.4 | 检索验证脚本（scripts/search.py） | ✅ |
 
 ### 阶段五：架构树生成 ✅ 已完成（计划外新增）
 
@@ -220,12 +224,12 @@ class GraphQueryService:
 
 | 文件 | 内容 | 状态 |
 |------|------|------|
-| `output/layer_tree.json` | 9个层级（action/controller/facade/service/biz/dal/dao/model/util） | ✅ 正常 |
-| `output/layer_tree.md` | Mermaid 格式，每层 subgraph 包含所有类 | ✅ 正常 |
-| `output/package_tree.json` | 按文件路径展开的完整包树 | ✅ 正常 |
-| `output/call_chain_tree.json` | 从 `OrderCreateAction.execute` 出发的调用链（深度10） | ✅ 正常 |
-| `output/call_chain_tree.puml` | PlantUML 格式调用链 | ✅ 正常 |
-| `output/graph_quality_benchmark.json` | 质量基准报告：断链率35%，业务断链14%，可达率56%，关键链100% | ✅ 正常 |
+| `output/trees/layer_tree.json` | 9个层级（action/controller/facade/service/biz/dal/dao/model/util） | ✅ 正常 |
+| `output/trees/layer_tree.md` | Mermaid 格式，每层 subgraph 包含所有类 | ✅ 正常 |
+| `output/trees/package_tree.json` | 按文件路径展开的完整包树 | ✅ 正常 |
+| `output/trees/call_chain_tree.json` | 从 `OrderCreateAction.execute` 出发的调用链（深度10） | ✅ 正常 |
+| `output/trees/call_chain_tree.puml` | PlantUML 格式调用链 | ✅ 正常 |
+| `output/quality/graph_quality_benchmark.json` | 质量基准报告：断链率35%，业务断链14%，可达率56%，关键链100% | ✅ 正常 |
 
 ---
 
@@ -235,7 +239,7 @@ class GraphQueryService:
 2. **图质量提升**：业务断链率 14.64%（83条），可通过扩展跨类调用识别规则继续优化
 3. **可达率提升**：当前 56.34%（200/355），SSH 项目中部分孤立方法未被入口覆盖
 4. **真实项目接入**：可接入实际 Java 业务仓库替换测试项目
-5. **搜索接口增强**：`search.py` 现有语义搜索基础，可结合图关系做 GraphRAG 联合召回
+5. **搜索接口增强**：`scripts/search.py` 现有语义搜索基础，可结合图关系做 GraphRAG 联合召回
 
 ---
 
@@ -265,7 +269,7 @@ class GraphQueryService:
 | GraphRAG 引擎 | 新增 `GraphRAGEngine`（query/trace/describe） | ✅ 已实现 |
 | UI 聊天 | 新增 `ui/chat_panel.py`，并在 `app.py` 集成 Chat Tab | ✅ 已实现 |
 | CLI 问答 | 新增 `chat_cli.py`，支持 `/trace` `/describe` | ✅ 已实现 |
-| 文档导出 | 新增 `generate_docs.py`，输出分层文档与总览 | ✅ 已实现 |
+| 文档导出 | 新增 `scripts/generate_docs.py`，输出分层文档与总览 | ✅ 已实现 |
 
 ### 当前验证状态
 
@@ -279,4 +283,4 @@ class GraphQueryService:
 1. 先运行 `python main.py --graph-only` 校验图侧数据完整性。
 2. 再运行 `python main.py --index-all` 完成全量摘要索引。
 3. 启动 `streamlit run app.py` 验证图问答联动。
-4. 运行 `python chat_cli.py` 与 `python generate_docs.py` 完成问答与文档验收。
+4. 运行 `python chat_cli.py` 与 `python scripts/generate_docs.py` 完成问答与文档验收。

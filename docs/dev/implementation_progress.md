@@ -111,13 +111,13 @@ Streamlit Chat 面板 + CLI 命令行问答，多种方式理解项目。
 
 ### 任务清单
 
-- [x] **4.1** 新建 `generate_docs.py`：为每层生成 Markdown，生成全局架构概览
+- [x] **4.1** 新建 `scripts/generate_docs.py`：为每层生成 Markdown，生成全局架构概览
 
 ### 实施记录
 
 #### 2026-03-13
 
-**4.1 generate_docs.py**
+**4.1 scripts/generate_docs.py**
 - 遍历各层，聚合摘要，调用 LLM 生成层级说明
 - 输出 `output/docs/{layer}_overview.md` + `output/architecture_overview.md`
 
@@ -127,13 +127,13 @@ Streamlit Chat 面板 + CLI 命令行问答，多种方式理解项目。
 
 | 验证项 | 命令 | 预期结果 | 实际结果 |
 |--------|------|---------|---------|
-| 语法编译检查 | `python -m py_compile main.py chat_cli.py generate_docs.py src/llm/batch_indexer.py src/llm/graphrag.py ui/chat_panel.py src/storage/vector_store.py src/llm/processor.py src/tree/config.py app.py` | 全部通过 | ✅ 通过 |
+| 语法编译检查 | `python -m py_compile main.py chat_cli.py scripts/generate_docs.py src/llm/batch_indexer.py src/llm/graphrag.py ui/chat_panel.py src/storage/vector_store.py src/llm/processor.py src/tree/config.py app.py` | 全部通过 | ✅ 通过 |
 | 图链路（graph-only） | `python main.py --graph-only` | 图写入+树导出完成 | ⚠️ Neo4j 未启动，解析与热点分析完成，图写入与树导出跳过 |
 | 全量索引 | `python main.py --index-all` | vector_store.count() > 100 | ✅ 成功，148/148 新增，向量库文档数 148 |
 | CLI 冒烟（help） | `printf '/help\n/exit\n' \| python chat_cli.py` | CLI 正常启动并处理命令 | ✅ 通过 |
 | CLI 实际问答 | `printf '订单创建流程是怎样的？\n/exit\n' \| python chat_cli.py` | 返回含调用链答案 | ⚠️ Neo4j 连接失败导致中断 |
 | Streamlit 启动 | `python -m streamlit run app.py --server.headless true --server.port 8503` | Chat Tab 正常问答 | ⚠️ 应用启动后访问图查询时报 Neo4j 连接失败 |
-| 文档导出 | `python generate_docs.py` | output/docs/ 下生成各层 md | ✅ 通过，16 个分层文档 + architecture_overview.md |
+| 文档导出 | `python scripts/generate_docs.py` | output/docs/ 下生成各层 md | ✅ 通过，16 个分层文档 + architecture_overview.md |
 
 ---
 

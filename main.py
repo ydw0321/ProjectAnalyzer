@@ -238,17 +238,17 @@ def main(enable_llm=True, index_all=False, reset_graph=False):
             with ArchitectureTreeGenerator() as tree_gen:
                 # 层级树
                 layer_tree = tree_gen.generate_layer_tree("Project")
-                tree_gen.export_tree_json(layer_tree, "output/layer_tree.json")
-                tree_gen.export_mermaid(layer_tree, "output/layer_tree.md")
+                tree_gen.export_tree_json(layer_tree, "output/trees/layer_tree.json")
+                tree_gen.export_mermaid(layer_tree, "output/trees/layer_tree.md")
 
                 # 包结构树
                 package_tree = tree_gen.generate_package_tree("Project")
-                tree_gen.export_tree_json(package_tree, "output/package_tree.json")
+                tree_gen.export_tree_json(package_tree, "output/trees/package_tree.json")
 
                 # 调用链树
                 chain_tree = tree_gen.generate_call_chain_tree()
-                tree_gen.export_tree_json(chain_tree, "output/call_chain_tree.json")
-                tree_gen.export_plantuml(chain_tree, "output/call_chain_tree.puml")
+                tree_gen.export_tree_json(chain_tree, "output/trees/call_chain_tree.json")
+                tree_gen.export_plantuml(chain_tree, "output/trees/call_chain_tree.puml")
 
                 # 打印汇总
                 print(tree_gen.get_tree_summary())

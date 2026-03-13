@@ -1,3 +1,7 @@
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 from src.storage.graph_store import GraphStore
 
 

@@ -1,3 +1,7 @@
+from _bootstrap import bootstrap_project_root
+
+bootstrap_project_root()
+
 import argparse
 
 from src.tree import build_report, ensure_graph_data, print_report, save_report
@@ -18,7 +22,7 @@ def main():
     )
     parser.add_argument(
         "--output",
-        default="output/graph_quality_benchmark.json",
+        default="output/quality/graph_quality_benchmark.json",
         help="基准结果 JSON 输出路径",
     )
     args = parser.parse_args()
