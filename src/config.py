@@ -1,19 +1,40 @@
 import os
 
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv:
+    load_dotenv()
+
+
+def _get_int_env(key: str, default: int) -> int:
+    value = os.getenv(key)
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
 
 class Config:
-    # 使用原始字符串 r"" 避免 Windows 路径警告
-    PROJECT_PATH = r"./test_java"
-    CHROMA_DB_PATH = "./chroma_data"
+    # 使用环境变量覆盖默认值，便于多环境部署与密钥安全管理
+    PROJECT_PATH = os.getenv("PROJECT_PATH", r"./test_java")
+    CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_data")
 
-    NEO4J_URI = "bolt://localhost:7687"
-    NEO4J_USER = "neo4j"
-    NEO4J_PASSWORD = "password"
+    NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+    NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
+    NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "")
 
-    LLM_API_URL = "https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions"
-    LLM_API_KEY = "f56bc3bc-5b71-4876-930c-87d8189a8909"
-    LLM_MODEL = "ark-code-latest"
-    LLM_TIMEOUT = 60
+    LLM_API_URL = os.getenv(
+        "LLM_API_URL",
+        "https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions",
+    )
+    LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+    LLM_MODEL = os.getenv("LLM_MODEL", "ark-code-latest")
+    LLM_TIMEOUT = _get_int_env("LLM_TIMEOUT", 60)
 
     EXCLUDE_DIRS = {'.git', 'target', 'build', 'node_modules', '__pycache__', '.idea', '.vscode'}
     JAVA_FILE_EXT = '.java'

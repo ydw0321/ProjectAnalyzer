@@ -89,9 +89,141 @@
             "methods": [
               "formatDateTime",
               "addDays",
-              "isExpired"
+              "isExpired",
+              "formatNow",
+              "nowMillis",
+              "expired"
             ],
-            "method_count": 3
+            "method_count": 6
+          },
+          "cache": {
+            "name": "cache",
+            "type": "package",
+            "children": {
+              "DeepNode10CacheUtil": {
+                "name": "DeepNode10CacheUtil",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/cache/DeepNode10CacheUtil.java",
+                "methods": [
+                  "step10"
+                ],
+                "method_count": 1
+              },
+              "LocalCache": {
+                "name": "LocalCache",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/cache/LocalCache.java",
+                "methods": [
+                  "put",
+                  "get",
+                  "clear"
+                ],
+                "method_count": 3
+              },
+              "CacheUtil": {
+                "name": "CacheUtil",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/cache/CacheUtil.java",
+                "methods": [
+                  "initCache",
+                  "get",
+                  "put"
+                ],
+                "method_count": 3
+              }
+            },
+            "file_path": null
+          },
+          "common": {
+            "name": "common",
+            "type": "package",
+            "children": {
+              "DeepNode4Util": {
+                "name": "DeepNode4Util",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/DeepNode4Util.java",
+                "methods": [
+                  "step4"
+                ],
+                "method_count": 1
+              },
+              "LegacyCodeUtil": {
+                "name": "LegacyCodeUtil",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/LegacyCodeUtil.java",
+                "methods": [
+                  "debug",
+                  "fallback"
+                ],
+                "method_count": 2
+              },
+              "LegacyBeanFactory": {
+                "name": "LegacyBeanFactory",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/LegacyBeanFactory.java",
+                "methods": [
+                  "newBean",
+                  "getByAlias"
+                ],
+                "method_count": 2
+              },
+              "SqlBuilderUtil": {
+                "name": "SqlBuilderUtil",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/SqlBuilderUtil.java",
+                "methods": [
+                  "buildSelectOrder",
+                  "buildUpdateStatus"
+                ],
+                "method_count": 2
+              },
+              "DateUtil": {
+                "name": "DateUtil",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/DateUtil.java",
+                "methods": [
+                  "formatDateTime",
+                  "addDays",
+                  "isExpired",
+                  "formatNow",
+                  "nowMillis",
+                  "expired"
+                ],
+                "method_count": 6
+              },
+              "StringMaskUtil": {
+                "name": "StringMaskUtil",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/StringMaskUtil.java",
+                "methods": [
+                  "maskPhone",
+                  "cut"
+                ],
+                "method_count": 2
+              },
+              "LegacyExecuteHelper": {
+                "name": "LegacyExecuteHelper",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/util/common/LegacyExecuteHelper.java",
+                "methods": [
+                  "execute",
+                  "process",
+                  "save"
+                ],
+                "method_count": 3
+              }
+            },
+            "file_path": null
           }
         },
         "file_path": null
@@ -209,6 +341,120 @@
               "notifyInventoryChanged"
             ],
             "method_count": 13
+          },
+          "payment": {
+            "name": "payment",
+            "type": "package",
+            "children": {
+              "DeepNode8PaymentBiz": {
+                "name": "DeepNode8PaymentBiz",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/payment/DeepNode8PaymentBiz.java",
+                "methods": [
+                  "step8"
+                ],
+                "method_count": 1
+              },
+              "PaymentReconcileBiz": {
+                "name": "PaymentReconcileBiz",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/payment/PaymentReconcileBiz.java",
+                "methods": [
+                  "reconcilePayment"
+                ],
+                "method_count": 1
+              },
+              "PaymentGatewayBiz": {
+                "name": "PaymentGatewayBiz",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/payment/PaymentGatewayBiz.java",
+                "methods": [
+                  "processPayment",
+                  "reversePayment"
+                ],
+                "method_count": 2
+              },
+              "LegacyExecutePaymentBiz": {
+                "name": "LegacyExecutePaymentBiz",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/payment/LegacyExecutePaymentBiz.java",
+                "methods": [
+                  "execute",
+                  "process",
+                  "save"
+                ],
+                "method_count": 3
+              }
+            },
+            "file_path": null
+          },
+          "order": {
+            "name": "order",
+            "type": "package",
+            "children": {
+              "LegacyOrderAuditBiz": {
+                "name": "LegacyOrderAuditBiz",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/order/LegacyOrderAuditBiz.java",
+                "methods": [
+                  "auditDay",
+                  "auditUser"
+                ],
+                "method_count": 2
+              },
+              "OrderCancelHandler": {
+                "name": "OrderCancelHandler",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/order/OrderCancelHandler.java",
+                "methods": [
+                  "handle"
+                ],
+                "method_count": 1
+              },
+              "OrderSubmitHandler": {
+                "name": "OrderSubmitHandler",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/order/OrderSubmitHandler.java",
+                "methods": [
+                  "beforeSubmit",
+                  "afterSubmit",
+                  "forceCloseByDao",
+                  "recoverUserOrders"
+                ],
+                "method_count": 4
+              },
+              "DeepNode1Biz": {
+                "name": "DeepNode1Biz",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/order/DeepNode1Biz.java",
+                "methods": [
+                  "step1"
+                ],
+                "method_count": 1
+              },
+              "LegacyDirtyRouter": {
+                "name": "LegacyDirtyRouter",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/biz/order/LegacyDirtyRouter.java",
+                "methods": [
+                  "save",
+                  "update",
+                  "process",
+                  "execute"
+                ],
+                "method_count": 4
+              }
+            },
+            "file_path": null
           }
         },
         "file_path": null
@@ -291,6 +537,211 @@
               "notifyRefundCompleted"
             ],
             "method_count": 8
+          },
+          "impl": {
+            "name": "impl",
+            "type": "package",
+            "children": {
+              "payment": {
+                "name": "payment",
+                "type": "package",
+                "children": {
+                  "DeepNode2PaymentService": {
+                    "name": "DeepNode2PaymentService",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/payment/DeepNode2PaymentService.java",
+                    "methods": [
+                      "step2"
+                    ],
+                    "method_count": 1
+                  },
+                  "WechatPaymentServiceImpl": {
+                    "name": "WechatPaymentServiceImpl",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/payment/WechatPaymentServiceImpl.java",
+                    "methods": [
+                      "pay",
+                      "reverse",
+                      "getChannelCode"
+                    ],
+                    "method_count": 3
+                  },
+                  "LegacyPaymentServiceImpl": {
+                    "name": "LegacyPaymentServiceImpl",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/payment/LegacyPaymentServiceImpl.java",
+                    "methods": [
+                      "pay",
+                      "reverse",
+                      "getChannelCode"
+                    ],
+                    "method_count": 3
+                  },
+                  "AlipayPaymentServiceImpl": {
+                    "name": "AlipayPaymentServiceImpl",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/payment/AlipayPaymentServiceImpl.java",
+                    "methods": [
+                      "pay",
+                      "reverse",
+                      "getChannelCode"
+                    ],
+                    "method_count": 3
+                  }
+                },
+                "file_path": null
+              },
+              "order": {
+                "name": "order",
+                "type": "package",
+                "children": {
+                  "LegacyTicketMonsterService": {
+                    "name": "LegacyTicketMonsterService",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/LegacyTicketMonsterService.java",
+                    "methods": [
+                      "execute",
+                      "process",
+                      "save",
+                      "update",
+                      "remove",
+                      "reopen",
+                      "sync",
+                      "async",
+                      "review",
+                      "approve",
+                      "reject",
+                      "patch",
+                      "fix",
+                      "migrate",
+                      "fallback",
+                      "route",
+                      "transform",
+                      "aggregate",
+                      "emit",
+                      "archive",
+                      "purge",
+                      "retry",
+                      "rollback",
+                      "commit",
+                      "finalizeTicket",
+                      "close",
+                      "done"
+                    ],
+                    "method_count": 27
+                  },
+                  "OrderServiceImpl": {
+                    "name": "OrderServiceImpl",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/OrderServiceImpl.java",
+                    "methods": [
+                      "submitOrder",
+                      "cancelOrder",
+                      "queryOrder",
+                      "reconcile",
+                      "notifyRetry",
+                      "buildOrder",
+                      "markFail",
+                      "markSuccess",
+                      "validateUser",
+                      "validateProduct",
+                      "validateQuantity"
+                    ],
+                    "method_count": 11
+                  },
+                  "OrderServiceProxy": {
+                    "name": "OrderServiceProxy",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/OrderServiceProxy.java",
+                    "methods": [
+                      "submitOrder",
+                      "cancelOrder",
+                      "queryOrder",
+                      "reconcile"
+                    ],
+                    "method_count": 4
+                  },
+                  "LegacyOrderGodService": {
+                    "name": "LegacyOrderGodService",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/LegacyOrderGodService.java",
+                    "methods": [
+                      "processAll",
+                      "execute",
+                      "forceProcess",
+                      "manualProcess",
+                      "defaultProcess"
+                    ],
+                    "method_count": 5
+                  },
+                  "DeepChainCoordinator": {
+                    "name": "DeepChainCoordinator",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/DeepChainCoordinator.java",
+                    "methods": [
+                      "start"
+                    ],
+                    "method_count": 1
+                  },
+                  "LegacyMegaWorkflowService": {
+                    "name": "LegacyMegaWorkflowService",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/LegacyMegaWorkflowService.java",
+                    "methods": [
+                      "execute",
+                      "process",
+                      "save",
+                      "prepare",
+                      "loadLegacyContext",
+                      "routeStepA",
+                      "routeStepB",
+                      "callBizLayer",
+                      "callDaoLayer",
+                      "callUtilLayer",
+                      "finalizeStage",
+                      "archiveStage",
+                      "done"
+                    ],
+                    "method_count": 13
+                  },
+                  "OrderServiceAsync": {
+                    "name": "OrderServiceAsync",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/OrderServiceAsync.java",
+                    "methods": [
+                      "submitOrder",
+                      "cancelOrder",
+                      "queryOrder",
+                      "reconcile"
+                    ],
+                    "method_count": 4
+                  },
+                  "DeepNode11FinalService": {
+                    "name": "DeepNode11FinalService",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/service/impl/order/DeepNode11FinalService.java",
+                    "methods": [
+                      "step11"
+                    ],
+                    "method_count": 1
+                  }
+                },
+                "file_path": null
+              }
+            },
+            "file_path": null
           }
         },
         "file_path": null
@@ -335,9 +786,17 @@
               "getCreatedAt",
               "setCreatedAt",
               "getUpdatedAt",
-              "setUpdatedAt"
+              "setUpdatedAt",
+              "getProductCode",
+              "setProductCode",
+              "getQuantity",
+              "setQuantity",
+              "getPaymentChannel",
+              "setPaymentChannel",
+              "getItems",
+              "setItems"
             ],
-            "method_count": 12
+            "method_count": 20
           },
           "User": {
             "name": "User",
@@ -354,9 +813,94 @@
               "getPhone",
               "setPhone",
               "getStatus",
-              "setStatus"
+              "setStatus",
+              "getDisplayName",
+              "setDisplayName",
+              "getRiskLevel",
+              "setRiskLevel"
             ],
-            "method_count": 10
+            "method_count": 14
+          },
+          "user": {
+            "name": "user",
+            "type": "package",
+            "children": {
+              "User": {
+                "name": "User",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/model/user/User.java",
+                "methods": [
+                  "getUserId",
+                  "setUserId",
+                  "getUsername",
+                  "setUsername",
+                  "getEmail",
+                  "setEmail",
+                  "getPhone",
+                  "setPhone",
+                  "getStatus",
+                  "setStatus",
+                  "getDisplayName",
+                  "setDisplayName",
+                  "getRiskLevel",
+                  "setRiskLevel"
+                ],
+                "method_count": 14
+              }
+            },
+            "file_path": null
+          },
+          "order": {
+            "name": "order",
+            "type": "package",
+            "children": {
+              "OrderItem": {
+                "name": "OrderItem",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/model/order/OrderItem.java",
+                "methods": [
+                  "getSkuCode",
+                  "setSkuCode",
+                  "getCount",
+                  "setCount",
+                  "getAmount",
+                  "setAmount"
+                ],
+                "method_count": 6
+              },
+              "Order": {
+                "name": "Order",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/model/order/Order.java",
+                "methods": [
+                  "getOrderId",
+                  "setOrderId",
+                  "getUserId",
+                  "setUserId",
+                  "getTotalAmount",
+                  "setTotalAmount",
+                  "getStatus",
+                  "setStatus",
+                  "getCreatedAt",
+                  "setCreatedAt",
+                  "getUpdatedAt",
+                  "setUpdatedAt",
+                  "getProductCode",
+                  "setProductCode",
+                  "getQuantity",
+                  "setQuantity",
+                  "getPaymentChannel",
+                  "setPaymentChannel",
+                  "getItems",
+                  "setItems"
+                ],
+                "method_count": 20
+              }
+            },
+            "file_path": null
           }
         },
         "file_path": null
@@ -405,6 +949,448 @@
               "findAll"
             ],
             "method_count": 4
+          }
+        },
+        "file_path": null
+      },
+      ".": {
+        "name": ".",
+        "type": "package",
+        "children": {
+          "test_java_ssh": {
+            "name": "test_java_ssh",
+            "type": "package",
+            "children": {
+              "legacy": {
+                "name": "legacy",
+                "type": "package",
+                "children": {
+                  "integration": {
+                    "name": "integration",
+                    "type": "package",
+                    "children": {
+                      "LegacyRpcClient": {
+                        "name": "LegacyRpcClient",
+                        "type": "class",
+                        "children": null,
+                        "file_path": "./test_java_ssh/legacy/integration/LegacyRpcClient.java",
+                        "methods": [
+                          "post"
+                        ],
+                        "method_count": 1
+                      },
+                      "LegacyReflectionInvoker": {
+                        "name": "LegacyReflectionInvoker",
+                        "type": "class",
+                        "children": null,
+                        "file_path": "./test_java_ssh/legacy/integration/LegacyReflectionInvoker.java",
+                        "methods": [
+                          "invoke",
+                          "invokeNoArg"
+                        ],
+                        "method_count": 2
+                      },
+                      "ServiceLocator": {
+                        "name": "ServiceLocator",
+                        "type": "class",
+                        "children": null,
+                        "file_path": "./test_java_ssh/legacy/integration/ServiceLocator.java",
+                        "methods": [
+                          "getPaymentService"
+                        ],
+                        "method_count": 1
+                      },
+                      "DeepNode6Integration": {
+                        "name": "DeepNode6Integration",
+                        "type": "class",
+                        "children": null,
+                        "file_path": "./test_java_ssh/legacy/integration/DeepNode6Integration.java",
+                        "methods": [
+                          "step6"
+                        ],
+                        "method_count": 1
+                      }
+                    },
+                    "file_path": null
+                  }
+                },
+                "file_path": null
+              },
+              "job": {
+                "name": "job",
+                "type": "package",
+                "children": {
+                  "LegacyFullRepairJob": {
+                    "name": "LegacyFullRepairJob",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/job/LegacyFullRepairJob.java",
+                    "methods": [
+                      "run"
+                    ],
+                    "method_count": 1
+                  },
+                  "OrderReconcileJob": {
+                    "name": "OrderReconcileJob",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/job/OrderReconcileJob.java",
+                    "methods": [
+                      "run",
+                      "runEmergency"
+                    ],
+                    "method_count": 2
+                  },
+                  "DeepNode7Job": {
+                    "name": "DeepNode7Job",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/job/DeepNode7Job.java",
+                    "methods": [
+                      "step7"
+                    ],
+                    "method_count": 1
+                  },
+                  "LegacyCleanupJob": {
+                    "name": "LegacyCleanupJob",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/job/LegacyCleanupJob.java",
+                    "methods": [
+                      "run"
+                    ],
+                    "method_count": 1
+                  }
+                },
+                "file_path": null
+              },
+              "interceptor": {
+                "name": "interceptor",
+                "type": "package",
+                "children": {
+                  "DeepNode5Interceptor": {
+                    "name": "DeepNode5Interceptor",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/interceptor/DeepNode5Interceptor.java",
+                    "methods": [
+                      "step5"
+                    ],
+                    "method_count": 1
+                  },
+                  "LoggingInterceptor": {
+                    "name": "LoggingInterceptor",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/interceptor/LoggingInterceptor.java",
+                    "methods": [
+                      "before",
+                      "after"
+                    ],
+                    "method_count": 2
+                  },
+                  "AuthorizationInterceptor": {
+                    "name": "AuthorizationInterceptor",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/interceptor/AuthorizationInterceptor.java",
+                    "methods": [
+                      "check"
+                    ],
+                    "method_count": 1
+                  },
+                  "RetryInterceptor": {
+                    "name": "RetryInterceptor",
+                    "type": "class",
+                    "children": null,
+                    "file_path": "./test_java_ssh/interceptor/RetryInterceptor.java",
+                    "methods": [
+                      "doRetry"
+                    ],
+                    "method_count": 1
+                  }
+                },
+                "file_path": null
+              },
+              "form": {
+                "name": "form",
+                "type": "package",
+                "children": {
+                  "order": {
+                    "name": "order",
+                    "type": "package",
+                    "children": {
+                      "OrderForm": {
+                        "name": "OrderForm",
+                        "type": "class",
+                        "children": null,
+                        "file_path": "./test_java_ssh/form/order/OrderForm.java",
+                        "methods": [
+                          "getOrderId",
+                          "setOrderId",
+                          "getUserId",
+                          "setUserId",
+                          "getProductCode",
+                          "setProductCode",
+                          "getPaymentChannel",
+                          "setPaymentChannel",
+                          "getQuantity",
+                          "setQuantity",
+                          "getOperator",
+                          "setOperator"
+                        ],
+                        "method_count": 12
+                      }
+                    },
+                    "file_path": null
+                  }
+                },
+                "file_path": null
+              }
+            },
+            "file_path": null
+          }
+        },
+        "file_path": null
+      },
+      "dao": {
+        "name": "dao",
+        "type": "package",
+        "children": {
+          "order": {
+            "name": "order",
+            "type": "package",
+            "children": {
+              "OrderDetailDAO": {
+                "name": "OrderDetailDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/order/OrderDetailDAO.java",
+                "methods": [
+                  "loadDirtyOrders",
+                  "findItemJson"
+                ],
+                "method_count": 2
+              },
+              "LegacyExecuteOrderDAO": {
+                "name": "LegacyExecuteOrderDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/order/LegacyExecuteOrderDAO.java",
+                "methods": [
+                  "execute",
+                  "process",
+                  "save"
+                ],
+                "method_count": 3
+              },
+              "DeepNode3OrderDAO": {
+                "name": "DeepNode3OrderDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/order/DeepNode3OrderDAO.java",
+                "methods": [
+                  "step3"
+                ],
+                "method_count": 1
+              },
+              "OrderDAO": {
+                "name": "OrderDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/order/OrderDAO.java",
+                "methods": [
+                  "findByOrderId",
+                  "softDelete",
+                  "listByUser",
+                  "markStatus"
+                ],
+                "method_count": 4
+              },
+              "LegacyOrderHistoryDAO": {
+                "name": "LegacyOrderHistoryDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/order/LegacyOrderHistoryDAO.java",
+                "methods": [
+                  "save",
+                  "update",
+                  "process",
+                  "execute"
+                ],
+                "method_count": 4
+              },
+              "OrderStatisticsDAO": {
+                "name": "OrderStatisticsDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/order/OrderStatisticsDAO.java",
+                "methods": [
+                  "countOrderByDate",
+                  "summarizeUser"
+                ],
+                "method_count": 2
+              }
+            },
+            "file_path": null
+          },
+          "base": {
+            "name": "base",
+            "type": "package",
+            "children": {
+              "DeepNode9BaseDAO": {
+                "name": "DeepNode9BaseDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/base/DeepNode9BaseDAO.java",
+                "methods": [
+                  "step9"
+                ],
+                "method_count": 1
+              },
+              "QueryBuilder": {
+                "name": "QueryBuilder",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/base/QueryBuilder.java",
+                "methods": [
+                  "buildOrderWhere",
+                  "unsafeInClause"
+                ],
+                "method_count": 2
+              },
+              "BaseDAO": {
+                "name": "BaseDAO",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/dao/base/BaseDAO.java",
+                "methods": [
+                  "save",
+                  "update",
+                  "findById",
+                  "query",
+                  "audit"
+                ],
+                "method_count": 5
+              }
+            },
+            "file_path": null
+          }
+        },
+        "file_path": null
+      },
+      "action": {
+        "name": "action",
+        "type": "package",
+        "children": {
+          "user": {
+            "name": "user",
+            "type": "package",
+            "children": {
+              "UserRegisterAction": {
+                "name": "UserRegisterAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/user/UserRegisterAction.java",
+                "methods": [
+                  "register"
+                ],
+                "method_count": 1
+              },
+              "UserProfileAction": {
+                "name": "UserProfileAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/user/UserProfileAction.java",
+                "methods": [
+                  "queryLastOrder",
+                  "patchProfile"
+                ],
+                "method_count": 2
+              }
+            },
+            "file_path": null
+          },
+          "order": {
+            "name": "order",
+            "type": "package",
+            "children": {
+              "LegacyDispatchAction": {
+                "name": "LegacyDispatchAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/LegacyDispatchAction.java",
+                "methods": [
+                  "execute",
+                  "process"
+                ],
+                "method_count": 2
+              },
+              "LegacyStressAction": {
+                "name": "LegacyStressAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/LegacyStressAction.java",
+                "methods": [
+                  "execute"
+                ],
+                "method_count": 1
+              },
+              "OrderCancelAction": {
+                "name": "OrderCancelAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/OrderCancelAction.java",
+                "methods": [
+                  "execute"
+                ],
+                "method_count": 1
+              },
+              "OrderManageAction": {
+                "name": "OrderManageAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/OrderManageAction.java",
+                "methods": [
+                  "approve",
+                  "reject"
+                ],
+                "method_count": 2
+              },
+              "LegacyDeepChainAction": {
+                "name": "LegacyDeepChainAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/LegacyDeepChainAction.java",
+                "methods": [
+                  "execute",
+                  "process"
+                ],
+                "method_count": 2
+              },
+              "OrderQueryAction": {
+                "name": "OrderQueryAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/OrderQueryAction.java",
+                "methods": [
+                  "execute"
+                ],
+                "method_count": 1
+              },
+              "OrderCreateAction": {
+                "name": "OrderCreateAction",
+                "type": "class",
+                "children": null,
+                "file_path": "./test_java_ssh/action/order/OrderCreateAction.java",
+                "methods": [
+                  "execute",
+                  "validateInput"
+                ],
+                "method_count": 2
+              }
+            },
+            "file_path": null
           }
         },
         "file_path": null

@@ -1,5 +1,7 @@
 import os
 import argparse
+import sys
+from collections import defaultdict
 from tqdm import tqdm
 from src.config import Config
 from src.scanner.scanner import scan_java_files
@@ -69,20 +71,22 @@ def phase1_parse_and_index(graph_store=None):
     return method_index, all_calls
 
 
-def phase2_find_caller_nodes(method_index):
-    print("\n🔍 阶段2：分析调用关系（找出调用其他方法最多的方法）...")
+def phase2_find_caller_nodes(method_index, all_calls):
+    print("\n🔍 阶段2：分析调用关系（基于解析结果统计热点方法）...")
 
-    method_names = {m['name'] for m in method_index}
-    
-    caller_count = {}
+    # 以 Class.method 作为唯一键，避免同名方法互相覆盖
+    caller_count = defaultdict(int)
+    for call in all_calls:
+        caller_class = call.get('caller_class', '')
+        caller_name = call.get('caller', '')
+        if caller_name:
+            key = f"{caller_class}.{caller_name}" if caller_class else caller_name
+            caller_count[key] += 1
+
+    # 补齐未出现在调用边中的方法，保证排序输出完整
     for method in method_index:
-        name = method['name']
-        code = method['code']
-        count = 0
-        for mname in method_names:
-            if mname != name and mname in code:
-                count += 1
-        caller_count[name] = count
+        key = f"{method.get('class_name', '')}.{method['name']}".strip('.')
+        caller_count.setdefault(key, 0)
 
     hot_nodes = sorted(caller_count.items(), key=lambda x: x[1], reverse=True)[:20]
 
@@ -125,11 +129,14 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
         if not hot_nodes:
             print("✅ 没有需要分析的节点")
             return
-        method_map = {m['name']: m for m in method_index}
+        method_map = {
+            f"{m.get('class_name', '')}.{m['name']}".strip('.'): m for m in method_index
+        }
         print(f"\n🤖 阶段3：调用LLM分析 top5 热点方法...")
-        for method_name, degree in hot_nodes[:5]:
-            if method_name in method_map:
-                method = method_map[method_name]
+        for method_key, degree in hot_nodes[:5]:
+            if method_key in method_map:
+                method = method_map[method_key]
+                method_name = method['name']
                 git_info = {"author": "Unknown", "message": "调用关系分析"}
                 summary = LLMProcessor.generate_summary(
                     method_name=method_name,
@@ -150,7 +157,7 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
                     "callers_count": 0,
                 }
                 kb.add_code_chunk(chunk_id, summary, method['code'], metadata)
-                print(f"  ✅ {method_name}")
+                print(f"  ✅ {method_key}")
         print(f"✅ 分析完成！已存储 {min(5, len(hot_nodes))} 个方法")
 
 
@@ -180,7 +187,7 @@ def main(enable_llm=True, index_all=False):
         print(f"✅ external_unknown 自动补链完成 (补链: {resolved_unknown})")
 
     # 阶段2：分析热点节点
-    hot_nodes = phase2_find_caller_nodes(method_index)
+    hot_nodes = phase2_find_caller_nodes(method_index, all_calls)
 
     # 阶段2.5：存储 BELONGS_TO 关系到 Neo4j
     if graph_store:
@@ -228,6 +235,9 @@ def main(enable_llm=True, index_all=False):
             print("✅ 架构树导出完成 (output/ 目录)")
         except Exception as e:
             print(f"⚠️ 架构树生成失败: {e}")
+            if graph_store:
+                graph_store.close()
+            sys.exit(1)
 
     # 关闭图数据库连接
     if graph_store:

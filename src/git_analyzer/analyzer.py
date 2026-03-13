@@ -1,5 +1,9 @@
 from git import Repo
 import os
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class GitAnalyzer:
@@ -8,9 +12,9 @@ class GitAnalyzer:
         self.has_git = True
         try:
             self.repo = Repo(repo_path)
-        except Exception:
+        except Exception as e:
             self.has_git = False
-            print(f"路径 '{repo_path}' 不是有效的 Git 仓库")
+            logger.warning("路径 '%s' 不是有效的 Git 仓库: %s", repo_path, e)
 
     def get_file_last_commit(self, file_path: str) -> dict:
         if not self.has_git:
@@ -29,5 +33,6 @@ class GitAnalyzer:
                 "message": commit.message.strip(),
                 "date": commit.committed_datetime.strftime("%Y-%m-%d %H:%M:%S")
             }
-        except Exception:
+        except Exception as e:
+            logger.warning("获取文件最后提交信息失败: file=%s, error=%s", file_path, e)
             return {"author": "Unknown", "message": "Unknown", "date": "Unknown"}

@@ -1,6 +1,10 @@
 from tree_sitter import Language, Parser
 from tree_sitter_java import language as java_language
 import re
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class JavaParser:
@@ -259,8 +263,8 @@ class JavaParser:
                     'start_byte': node.start_byte,
                     'end_byte': node.end_byte
                 }
-        except:
-            pass
+        except Exception as e:
+            logger.debug("字段提取失败: start=%s, end=%s, error=%s", node.start_byte, node.end_byte, e)
         return None
 
     def _extract_local_vars_regex(self, method_code):
