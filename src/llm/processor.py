@@ -1,12 +1,38 @@
 import requests
 from src.config import Config
 from typing import List, Optional
+import threading
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+
+_THREAD_LOCAL = threading.local()
+
+
+def _get_session() -> requests.Session:
+    session = getattr(_THREAD_LOCAL, "session", None)
+    if session is not None:
+        return session
+
+    session = requests.Session()
+    retry = Retry(
+        total=2,
+        backoff_factor=0.3,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["POST"],
+    )
+    adapter = HTTPAdapter(pool_connections=64, pool_maxsize=64, max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    _THREAD_LOCAL.session = session
+    return session
 
 
 class LLMProcessor:
     @staticmethod
     def _call_llm(prompt: str) -> str:
         try:
+            session = _get_session()
             headers = {
                 "Authorization": f"Bearer {Config.LLM_API_KEY}",
                 "Content-Type": "application/json"
@@ -18,7 +44,7 @@ class LLMProcessor:
                 ],
                 "stream": False
             }
-            response = requests.post(
+            response = session.post(
                 Config.LLM_API_URL,
                 headers=headers,
                 json=payload,

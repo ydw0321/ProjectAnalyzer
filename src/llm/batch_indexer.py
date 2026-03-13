@@ -44,6 +44,7 @@ class BatchIndexer:
             Exception  如果 LLM 调用或写库失败
         """
         chunk_id = self._make_chunk_id(method)
+        # 批量模式下由 index_all 统一预过滤，避免每条都访问一次 Chroma。
         if skip_existing and self.kb.exists(chunk_id):
             return "skipped"
 
@@ -83,6 +84,7 @@ class BatchIndexer:
         method_index: List[dict],
         call_counts: Optional[Dict[str, int]] = None,
         caller_counts: Optional[Dict[str, int]] = None,
+        top_n: Optional[int] = None,
         max_workers: int = 4,
         skip_existing: bool = True,
     ) -> dict:
@@ -93,6 +95,7 @@ class BatchIndexer:
             method_index:   方法列表，每项含 name/class_name/file_path/code
             call_counts:    {方法名: 下游调用数}（用于热度排序）
             caller_counts:  {方法名: 上游调用数}
+            top_n:          仅索引前 N 个方法（按调用热度降序）
             max_workers:    并发线程数（受 LLM QPS 限制，建议 2-8）
             skip_existing:  True 则跳过已索引方法（增量更新）
 
@@ -102,12 +105,32 @@ class BatchIndexer:
         call_counts = call_counts or {}
         caller_counts = caller_counts or {}
 
+        prioritized_methods = method_index
+        if top_n is not None and top_n > 0:
+            prioritized_methods = sorted(
+                method_index,
+                key=lambda m: call_counts.get(self._method_key(m), call_counts.get(m.get("name", ""), 0)),
+                reverse=True,
+            )[:top_n]
+
         stats = {
-            "total": len(method_index),
+            "total": len(prioritized_methods),
             "indexed": 0,
             "skipped": 0,
             "failed": 0,
         }
+
+        pending_methods = prioritized_methods
+        if skip_existing and prioritized_methods:
+            existing_ids = self.kb.get_all_ids()
+            pending_methods = [
+                method for method in prioritized_methods
+                if self._make_chunk_id(method) not in existing_ids
+            ]
+            stats["skipped"] = len(prioritized_methods) - len(pending_methods)
+
+        if not pending_methods:
+            return stats
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
@@ -116,9 +139,9 @@ class BatchIndexer:
                     method,
                     call_counts.get(self._method_key(method), call_counts.get(method["name"], 0)),
                     caller_counts.get(self._method_key(method), caller_counts.get(method["name"], 0)),
-                    skip_existing,
+                    False,
                 ): method
-                for method in method_index
+                for method in pending_methods
             }
 
             with tqdm(total=len(futures), desc="📚 全量索引方法摘要") as pbar:

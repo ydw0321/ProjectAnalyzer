@@ -1,5 +1,6 @@
 from neo4j import GraphDatabase
 from src.config import Config
+from tqdm import tqdm
 
 
 JDK_LIKELY_METHODS = {
@@ -19,6 +20,44 @@ class GraphStore:
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         with self.driver.session() as session:
             session.run("RETURN 1")
+        self._ensure_indexes()
+
+    def _ensure_indexes(self):
+        """确保核心查询路径有索引，避免大规模 MATCH/MERGE 退化为全表扫描。"""
+        index_statements = [
+            "CREATE INDEX method_class_name_idx IF NOT EXISTS FOR (m:Method) ON (m.class_name, m.name)",
+            "CREATE INDEX method_class_name_param_idx IF NOT EXISTS FOR (m:Method) ON (m.class_name, m.name, m.param_count)",
+            "CREATE INDEX class_name_file_idx IF NOT EXISTS FOR (c:Class) ON (c.name, c.file_path)",
+            "CREATE INDEX external_method_name_idx IF NOT EXISTS FOR (e:ExternalMethod) ON (e.name)",
+        ]
+        with self.driver.session() as session:
+            for stmt in index_statements:
+                session.run(stmt)
+
+    @staticmethod
+    def _chunk_rows(rows, batch_size):
+        for i in range(0, len(rows), batch_size):
+            yield rows[i:i + batch_size]
+
+    @staticmethod
+    def _dedupe_rows(rows, key_fields):
+        seen = set()
+        unique_rows = []
+        for row in rows:
+            key = tuple(row.get(field) for field in key_fields)
+            if key in seen:
+                continue
+            seen.add(key)
+            unique_rows.append(row)
+        return unique_rows
+
+    def _run_chunked_query(self, session, query, rows, batch_size, progress=None, stage_label=None):
+        for chunk in self._chunk_rows(rows, batch_size):
+            session.run(query, rows=chunk)
+            if progress is not None:
+                progress.update(len(chunk))
+                if stage_label:
+                    progress.set_postfix_str(stage_label)
 
     def add_class_node(self, class_name, file_path):
         """创建类节点"""
@@ -33,14 +72,21 @@ class GraphStore:
         """批量创建类节点"""
         if not class_nodes:
             return
+        class_nodes = self._dedupe_rows(class_nodes, ["name", "file_path"])
+        batch_size = max(1, Config.NEO4J_WRITE_BATCH_SIZE)
         with self.driver.session() as session:
-            session.run(
-                """
-                UNWIND $rows AS row
-                MERGE (c:Class {name: row.name, file_path: row.file_path})
-                """,
-                rows=class_nodes,
-            )
+            with tqdm(total=len(class_nodes), desc="写入 Neo4j Class 节点", unit="row", leave=True) as progress:
+                self._run_chunked_query(
+                    session,
+                    """
+                    UNWIND $rows AS row
+                    MERGE (c:Class {name: row.name, file_path: row.file_path})
+                    """,
+                    class_nodes,
+                    batch_size,
+                    progress=progress,
+                    stage_label="class-nodes",
+                )
 
     def add_method_node(self, name, class_name, file_path, param_count=0):
         """创建方法节点"""
@@ -71,16 +117,23 @@ class GraphStore:
         """批量创建方法节点"""
         if not method_nodes:
             return
+        method_nodes = self._dedupe_rows(method_nodes, ["name", "class_name", "file_path", "param_count"])
+        batch_size = max(1, Config.NEO4J_WRITE_BATCH_SIZE)
         with self.driver.session() as session:
-            session.run(
-                """
-                UNWIND $rows AS row
-                MERGE (m:Method {name: row.name, class_name: row.class_name})
-                SET m.file_path = row.file_path,
-                    m.param_count = row.param_count
-                """,
-                rows=method_nodes,
-            )
+            with tqdm(total=len(method_nodes), desc="写入 Neo4j Method 节点", unit="row", leave=True) as progress:
+                self._run_chunked_query(
+                    session,
+                    """
+                    UNWIND $rows AS row
+                    MERGE (m:Method {name: row.name, class_name: row.class_name})
+                    SET m.file_path = row.file_path,
+                        m.param_count = row.param_count
+                    """,
+                    method_nodes,
+                    batch_size,
+                    progress=progress,
+                    stage_label="method-nodes",
+                )
 
     def add_call_relationship(self, caller, callee, caller_class=None, callee_class=None, call_type="internal"):
         """创建方法调用关系（支持跨类调用）"""
@@ -130,7 +183,25 @@ class GraphStore:
                     target_class=target_class,
                 )
 
-    def _build_signature_index(self):
+    def _build_signature_index(self, signature_index=None):
+        """构建 (class_name, method_name) -> {param_count...} 索引。"""
+        if signature_index is not None:
+            normalized = {}
+            for key, values in signature_index.items():
+                if not isinstance(key, tuple) or len(key) != 2:
+                    continue
+                class_name, method_name = key
+                if not class_name or not method_name:
+                    continue
+                if isinstance(values, (set, list, tuple)):
+                    candidate_values = values
+                else:
+                    candidate_values = [values]
+                normalized[(class_name, method_name)] = {
+                    int(v) if v is not None else 0 for v in candidate_values
+                }
+            return normalized
+
         index = {}
         with self.driver.session() as session:
             result = session.run(
@@ -141,13 +212,14 @@ class GraphStore:
             )
             for row in result:
                 key = (row["class_name"], row["method_name"])
-                index.setdefault(key, []).append(row.get("param_count", 0))
+                index.setdefault(key, set()).add(row.get("param_count", 0))
         return index
 
-    def batch_add_call_relationships(self, calls):
+    def batch_add_call_relationships(self, calls, signature_index=None):
         """批量创建方法调用关系，并返回匹配观测统计"""
         stats = {
             "total_rows": 0,
+            "deduplicated_rows": 0,
             "internal_rows": 0,
             "external_rows": 0,
             "direct_unknown_rows": 0,
@@ -172,6 +244,7 @@ class GraphStore:
                 "caller_class": call.get("caller_class"),
                 "callee_class": call.get("callee_class"),
                 "arg_count": call.get("arg_count", 0),
+                "type": call_type,
                 "unknown_category": unknown_category,
                 "via_field": f"{call.get('caller', '')}_to_{call.get('callee', '')}",
             }
@@ -195,7 +268,21 @@ class GraphStore:
         stats["external_rows"] = len(external_rows)
         stats["direct_unknown_rows"] = len(unknown_rows)
 
-        signature_index = self._build_signature_index()
+        internal_rows = self._dedupe_rows(
+            internal_rows,
+            ["caller", "caller_class", "callee", "target_class", "arg_count", "type"],
+        )
+        external_rows = self._dedupe_rows(
+            external_rows,
+            ["caller", "caller_class", "callee", "callee_class", "arg_count", "type", "via_field"],
+        )
+        unknown_rows = self._dedupe_rows(
+            unknown_rows,
+            ["caller", "caller_class", "callee", "arg_count", "unknown_category", "type"],
+        )
+        stats["deduplicated_rows"] = len(internal_rows) + len(external_rows) + len(unknown_rows)
+
+        signature_index = self._build_signature_index(signature_index=signature_index)
 
         def select_mode(class_name, method_name, arg_count):
             candidates = signature_index.get((class_name, method_name), [])
@@ -239,98 +326,149 @@ class GraphStore:
         if external_unmatched_rows:
             stats["unmatched_to_unknown"] = len(external_unmatched_rows)
             unknown_rows.extend(external_unmatched_rows)
+            unknown_rows = self._dedupe_rows(
+                unknown_rows,
+                ["caller", "caller_class", "callee", "arg_count", "unknown_category", "type"],
+            )
+
+        batch_size = max(1, Config.NEO4J_WRITE_BATCH_SIZE)
+        total_write_rows = (
+            len(internal_exact_rows)
+            + len(internal_fallback_rows)
+            + len(external_exact_rows)
+            + len(external_fallback_rows)
+            + len(unknown_rows)
+        )
 
         with self.driver.session() as session:
-            if internal_exact_rows:
-                session.run(
-                    """
-                    UNWIND $rows AS row
-                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    MATCH (callee:Method {name: row.callee, class_name: row.target_class, param_count: row.arg_count})
-                    MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
-                    SET r.arg_count = row.arg_count
-                    """,
-                    rows=internal_exact_rows,
-                )
+            with tqdm(
+                total=total_write_rows,
+                desc="写入 Neo4j 调用关系",
+                unit="row",
+                leave=True,
+            ) as progress:
+                if internal_exact_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MATCH (callee:Method {name: row.callee, class_name: row.target_class, param_count: row.arg_count})
+                        MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
+                        SET r.arg_count = row.arg_count
+                        """,
+                        internal_exact_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="internal-exact",
+                    )
 
-            if internal_fallback_rows:
-                session.run(
-                    """
-                    UNWIND $rows AS row
-                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    MATCH (callee:Method {name: row.callee, class_name: row.target_class})
-                    MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
-                    SET r.arg_count = row.arg_count
-                    """,
-                    rows=internal_fallback_rows,
-                )
+                if internal_fallback_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MATCH (callee:Method {name: row.callee, class_name: row.target_class})
+                        MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
+                        SET r.arg_count = row.arg_count
+                        """,
+                        internal_fallback_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="internal-fallback",
+                    )
 
-            if external_exact_rows:
-                session.run(
-                    """
-                    UNWIND $rows AS row
-                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    MATCH (callee:Method {name: row.callee, class_name: row.callee_class, param_count: row.arg_count})
-                    MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
-                    SET r.arg_count = row.arg_count
-                    """,
-                    rows=external_exact_rows,
-                )
+                if external_exact_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MATCH (callee:Method {name: row.callee, class_name: row.callee_class, param_count: row.arg_count})
+                        MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                        SET r.arg_count = row.arg_count
+                        """,
+                        external_exact_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="external-exact",
+                    )
 
-            if external_fallback_rows:
-                session.run(
-                    """
-                    UNWIND $rows AS row
-                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
-                    MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
-                    SET r.arg_count = row.arg_count
-                    """,
-                    rows=external_fallback_rows,
-                )
+                if external_fallback_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
+                        MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                        SET r.arg_count = row.arg_count
+                        """,
+                        external_fallback_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="external-fallback",
+                    )
 
-            if unknown_rows:
-                session.run(
-                    """
-                    UNWIND $rows AS row
-                    MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    MERGE (callee:ExternalMethod {name: row.callee})
-                    SET callee.category = coalesce(callee.category, row.unknown_category)
-                    MERGE (caller)-[r:CALLS {type: 'external_unknown'}]->(callee)
-                    SET r.arg_count = row.arg_count, r.unknown_category = row.unknown_category
-                    """,
-                    rows=unknown_rows,
-                )
+                if unknown_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MERGE (callee:ExternalMethod {name: row.callee})
+                        SET callee.category = coalesce(callee.category, row.unknown_category)
+                        MERGE (caller)-[r:CALLS {type: 'external_unknown'}]->(callee)
+                        SET r.arg_count = row.arg_count, r.unknown_category = row.unknown_category
+                        """,
+                        unknown_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="external-unknown",
+                    )
 
         return stats
 
-    def add_belongs_to_relationship(self, method_name, class_name):
+    def add_belongs_to_relationship(self, method_name, class_name, file_path=None, param_count=0):
         """创建方法属于类的关系"""
         with self.driver.session() as session:
             session.run(
                 """
-                MATCH (m:Method {name: $method_name, class_name: $class_name})
-                MATCH (c:Class {name: $class_name})
+                MATCH (m:Method {name: $method_name, class_name: $class_name, param_count: $param_count})
+                MATCH (c:Class {name: $class_name, file_path: $file_path})
                 MERGE (m)-[:BELONGS_TO]->(c)
                 """,
                 method_name=method_name,
                 class_name=class_name,
+                file_path=file_path,
+                param_count=param_count,
             )
 
     def batch_add_belongs_to_relationships(self, method_class_pairs):
         """批量创建 BELONGS_TO 关系"""
         if not method_class_pairs:
             return
+        method_class_pairs = self._dedupe_rows(
+            method_class_pairs,
+            ["method_name", "class_name", "file_path", "param_count"],
+        )
+        batch_size = max(1, Config.NEO4J_WRITE_BATCH_SIZE)
         with self.driver.session() as session:
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (m:Method {name: row.method_name, class_name: row.class_name})
-                MATCH (c:Class {name: row.class_name})
-                MERGE (m)-[:BELONGS_TO]->(c)
-                """,
-                rows=method_class_pairs,
-            )
+            with tqdm(total=len(method_class_pairs), desc="写入 Neo4j BELONGS_TO", unit="row", leave=True) as progress:
+                self._run_chunked_query(
+                    session,
+                    """
+                    UNWIND $rows AS row
+                    MATCH (m:Method {name: row.method_name, class_name: row.class_name, param_count: row.param_count})
+                    MATCH (c:Class {name: row.class_name, file_path: row.file_path})
+                    MERGE (m)-[:BELONGS_TO]->(c)
+                    """,
+                    method_class_pairs,
+                    batch_size,
+                    progress=progress,
+                    stage_label="belongs-to",
+                )
 
     def resolve_external_unknown_calls(self):
         """将可唯一匹配的 external_unknown 调用补链到 Method 节点"""

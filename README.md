@@ -224,8 +224,34 @@ python main.py
 常用参数：
 
 - `--index-all`：全量为所有方法生成摘要并写入向量库
-- `--graph-only`：跳过 LLM 与向量库，保留图谱流程
+- `--index-top N`：仅处理前 N 个热点方法（可与 `--index-all` 或默认模式配合）
+- `--neo4j-only`：仅执行 Neo4j 图存储与树导出
+- `--vector-only`：仅执行向量摘要索引（增量补齐未索引方法）
+- `--graph-only`：兼容旧参数，等价于 `--neo4j-only`
 - `--reset-graph`：执行前清空 Neo4j 图数据
+
+推荐分步执行（可随时补跑向量）：
+
+```bash
+# 第一步：仅构图（Neo4j）
+python main.py --neo4j-only --reset-graph
+
+# 第二步：仅向量索引（全量增量）
+python main.py --vector-only --index-all
+
+# 仅索引前 3000 个热点方法（用于提速）
+python main.py --vector-only --index-all --index-top 3000
+
+# 需要时补齐未索引方法（例如新增代码后）
+python main.py --vector-only --index-all
+```
+
+Windows 批处理脚本等价用法：
+
+```bat
+run_pipeline_windows.bat --neo4j-only --reset-graph
+run_pipeline_windows.bat --vector-only --index-all --index-top 3000
+```
 
 ### 2. 可视化界面
 
@@ -283,7 +309,9 @@ python scripts/generate_docs.py
 | LLM_API_KEY | LLM API Key | 空 |
 | LLM_MODEL | 模型名称 | ark-code-latest |
 | LLM_TIMEOUT | LLM 超时秒数 | 60 |
+| LLM_INDEX_MAX_WORKERS | 向量索引并发线程数 | 8 |
 | USE_SIGNATURE_MATCH | 是否启用签名匹配 | true |
+| NEO4J_WRITE_BATCH_SIZE | Neo4j 批量写入大小 | 10000 |
 
 ## 常见问题
 

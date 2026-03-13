@@ -27,6 +27,7 @@ def phase1_parse_and_index(graph_store=None):
 
     method_index = []
     all_calls = []    # 包含 internal_calls 和 external_calls
+    method_signature_index = {}
     class_nodes = []
     method_nodes = []
 
@@ -58,9 +59,17 @@ def phase1_parse_and_index(graph_store=None):
         all_calls.extend(external_calls)
 
         for method in methods:
+            class_name = method.get('class_name', '')
+            method_name = method.get('name', '')
+            param_count = method.get('param_count', 0)
+            if class_name and method_name:
+                key = (class_name, method_name)
+                method_signature_index.setdefault(key, set()).add(param_count)
+
             method_index.append({
-                'name': method['name'],
-                'class_name': method.get('class_name', ''),
+                'name': method_name,
+                'class_name': class_name,
+                'param_count': param_count,
                 'file_path': file_path,
                 'code': method['code'],
             })
@@ -70,10 +79,10 @@ def phase1_parse_and_index(graph_store=None):
         graph_store.batch_add_method_nodes(method_nodes)
 
     print(f"✅ 共解析 {len(method_index)} 个业务层方法")
-    return method_index, all_calls
+    return method_index, all_calls, method_signature_index
 
 
-def phase2_find_caller_nodes(method_index, all_calls):
+def phase2_collect_call_stats(method_index, all_calls):
     print("\n🔍 阶段2：分析调用关系（基于解析结果统计热点方法）...")
 
     # 以 Class.method 作为唯一键，避免同名方法互相覆盖
@@ -96,10 +105,10 @@ def phase2_find_caller_nodes(method_index, all_calls):
     for i, (name, count) in enumerate(hot_nodes):
         print(f"  {i+1}. {name} (调用了 {count} 个其他方法)")
 
-    return hot_nodes
+    return hot_nodes, dict(caller_count)
 
 
-def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
+def phase3_index_all(method_index, hot_nodes, call_counts, index_all: bool = False, index_top: int = 0):
     """阶段3：LLM 摘要索引。
     index_all=True  → 全量索引所有方法（增量跳过已有）
     index_all=False → 仅索引 top-5 热点方法（快速模式，保持向后兼容）
@@ -110,16 +119,20 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
     from src.llm.processor import LLMProcessor
 
     kb = KnowledgeBase()
+    index_top = max(0, index_top or 0)
 
     if index_all:
-        print(f"\n🤖 阶段3：全量 LLM 摘要索引（{len(method_index)} 个方法，增量更新）...")
-        # 构建调用计数 map（用于写元数据）
-        call_counts = {name: count for name, count in hot_nodes}
+        workers = max(1, Config.LLM_INDEX_MAX_WORKERS)
+        target = f"前 {index_top} 个方法" if index_top > 0 else f"{len(method_index)} 个方法"
+        print(
+            f"\n🤖 阶段3：全量 LLM 摘要索引（目标={target}，增量更新，并发={workers}）..."
+        )
         indexer = BatchIndexer(knowledge_base=kb)
         stats = indexer.index_all(
             method_index,
             call_counts=call_counts,
-            max_workers=4,
+            top_n=index_top if index_top > 0 else None,
+            max_workers=workers,
             skip_existing=True,
         )
         print(
@@ -128,14 +141,16 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
         )
         print(f"   向量库当前文档数：{kb.count()}")
     else:
-        if not hot_nodes:
+        ranked_methods = sorted(call_counts.items(), key=lambda x: x[1], reverse=True)
+        if not ranked_methods:
             print("✅ 没有需要分析的节点")
             return
         method_map = {
             f"{m.get('class_name', '')}.{m['name']}".strip('.'): m for m in method_index
         }
-        print(f"\n🤖 阶段3：调用LLM分析 top5 热点方法...")
-        for method_key, degree in hot_nodes[:5]:
+        top_k = index_top if index_top > 0 else 5
+        print(f"\n🤖 阶段3：调用LLM分析 top{top_k} 热点方法...")
+        for method_key, degree in ranked_methods[:top_k]:
             if method_key in method_map:
                 method = method_map[method_key]
                 method_name = method['name']
@@ -160,32 +175,42 @@ def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
                 }
                 kb.add_code_chunk(chunk_id, summary, method['code'], metadata)
                 print(f"  ✅ {method_key}")
-        print(f"✅ 分析完成！已存储 {min(5, len(hot_nodes))} 个方法")
+        print(f"✅ 分析完成！已存储 {min(top_k, len(ranked_methods))} 个方法")
 
 
-def main(enable_llm=True, index_all=False, reset_graph=False):
+def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_graph=False):
     setup_logging()
     print("🚀 Code-GraphRAG 构建流水线\n")
 
+    if not run_neo4j and not run_vector:
+        print("⚠️ 未选择任何执行阶段，请设置 --neo4j-only 或 --vector-only，或不设置以执行全流程。")
+        return
+
     # 初始化图数据库（可选）
     graph_store = None
-    try:
-        graph_store = GraphStore()
-        print("✅ Neo4j 连接成功")
-        if reset_graph:
-            print("🧹 已启用图重置：清空 Neo4j 旧数据...")
-            graph_store.clear_graph()
-            print("✅ Neo4j 图数据已清空")
-    except Exception as e:
-        print(f"⚠️ Neo4j 连接失败: {e}")
+    if run_neo4j:
+        try:
+            graph_store = GraphStore()
+            print("✅ Neo4j 连接成功")
+            if reset_graph:
+                print("🧹 已启用图重置：清空 Neo4j 旧数据...")
+                graph_store.clear_graph()
+                print("✅ Neo4j 图数据已清空")
+        except Exception as e:
+            print(f"⚠️ Neo4j 连接失败: {e}")
+    elif reset_graph:
+        print("⚠️ 已忽略 --reset-graph（当前未执行 Neo4j 阶段）")
 
-    # 阶段1：解析并存储到图数据库
-    method_index, all_calls = phase1_parse_and_index(graph_store)
+    # 阶段1：解析源码（按模式可选写入 Neo4j）
+    method_index, all_calls, method_signature_index = phase1_parse_and_index(graph_store)
 
     # 阶段1.5：存储调用关系到 Neo4j
-    if graph_store and all_calls:
+    if run_neo4j and graph_store and all_calls:
         print(f"\n📊 存储 {len(all_calls)} 条调用关系到 Neo4j...")
-        call_stats = graph_store.batch_add_call_relationships(all_calls)
+        call_stats = graph_store.batch_add_call_relationships(
+            all_calls,
+            signature_index=method_signature_index,
+        )
         internal_count = sum(1 for c in all_calls if c.get('type') == 'internal')
         external_count = sum(1 for c in all_calls if c.get('type') == 'external')
         print(f"✅ 调用关系存储完成 (内部: {internal_count}, 跨类: {external_count})")
@@ -199,6 +224,7 @@ def main(enable_llm=True, index_all=False, reset_graph=False):
         print(
             "📈 样本统计: "
             f"总行={call_stats.get('total_rows', 0)}, "
+            f"去重后={call_stats.get('deduplicated_rows', 0)}, "
             f"内部={call_stats.get('internal_rows', 0)}, "
             f"外部已知={call_stats.get('external_rows', 0)}, "
             f"外部未知={call_stats.get('direct_unknown_rows', 0)}"
@@ -208,26 +234,37 @@ def main(enable_llm=True, index_all=False, reset_graph=False):
         print(f"✅ external_unknown 自动补链完成 (补链: {resolved_unknown})")
 
     # 阶段2：分析热点节点
-    hot_nodes = phase2_find_caller_nodes(method_index, all_calls)
+    hot_nodes, call_counts = phase2_collect_call_stats(method_index, all_calls)
 
     # 阶段2.5：存储 BELONGS_TO 关系到 Neo4j
-    if graph_store:
+    if run_neo4j and graph_store:
         print(f"\n📊 存储 {len(method_index)} 个 BELONGS_TO 关系到 Neo4j...")
         belongs_to_rows = [
-            {'method_name': method['name'], 'class_name': method['class_name']}
+            {
+                'method_name': method['name'],
+                'class_name': method['class_name'],
+                'file_path': method['file_path'],
+                'param_count': method.get('param_count', 0),
+            }
             for method in method_index if method.get('class_name')
         ]
         graph_store.batch_add_belongs_to_relationships(belongs_to_rows)
         print("✅ BELONGS_TO 关系存储完成")
 
     # 阶段3：LLM 摘要索引（可选）
-    if enable_llm:
-        phase3_index_all(method_index, hot_nodes, index_all=index_all)
+    if run_vector:
+        phase3_index_all(
+            method_index,
+            hot_nodes,
+            call_counts,
+            index_all=index_all,
+            index_top=index_top,
+        )
     else:
-        print("\n⏭️ 阶段3已跳过（graph-only 模式）")
+        print("\n⏭️ 阶段3已跳过（当前仅执行 Neo4j 阶段）")
 
     # 阶段4：构建层级节点并生成架构树
-    if graph_store:
+    if run_neo4j and graph_store:
         print("\n📊 阶段4：构建层级节点...")
         try:
             # 构建 Layer 节点
@@ -272,12 +309,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--graph-only",
         action="store_true",
-        help="仅执行图存储与树生成流程，跳过向量和 LLM 分析",
+        help="仅执行 Neo4j 图存储与树生成（兼容旧参数，等价于 --neo4j-only）",
+    )
+    parser.add_argument(
+        "--neo4j-only",
+        action="store_true",
+        help="仅执行 Neo4j 图存储与树生成，跳过向量和 LLM 摘要",
+    )
+    parser.add_argument(
+        "--vector-only",
+        action="store_true",
+        help="仅执行向量摘要索引，不写入 Neo4j；可反复执行增量补齐未索引方法",
     )
     parser.add_argument(
         "--index-all",
         action="store_true",
         help="全量 LLM 摘要索引所有方法（增量更新，跳过已有），默认仅索引 top-5",
+    )
+    parser.add_argument(
+        "--index-top",
+        type=int,
+        default=0,
+        help="限制向量索引规模：仅处理前 N 个热点方法（0 表示不限制）",
     )
     parser.add_argument(
         "--reset-graph",
@@ -286,8 +339,19 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    if args.neo4j_only and args.vector_only:
+        parser.error("--neo4j-only 与 --vector-only 不能同时使用")
+
+    run_neo4j = args.neo4j_only or args.graph_only
+    run_vector = args.vector_only
+    if not run_neo4j and not run_vector:
+        run_neo4j = True
+        run_vector = True
+
     main(
-        enable_llm=not args.graph_only,
+        run_neo4j=run_neo4j,
+        run_vector=run_vector,
         index_all=args.index_all,
+        index_top=args.index_top,
         reset_graph=args.reset_graph,
     )

@@ -34,6 +34,7 @@ class Config:
     NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
     NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
     NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "")
+    NEO4J_WRITE_BATCH_SIZE = _get_int_env("NEO4J_WRITE_BATCH_SIZE", 10000)
 
     LLM_API_URL = os.getenv(
         "LLM_API_URL",
@@ -42,6 +43,7 @@ class Config:
     LLM_API_KEY = os.getenv("LLM_API_KEY", "")
     LLM_MODEL = os.getenv("LLM_MODEL", "ark-code-latest")
     LLM_TIMEOUT = _get_int_env("LLM_TIMEOUT", 60)
+    LLM_INDEX_MAX_WORKERS = _get_int_env("LLM_INDEX_MAX_WORKERS", 8)
 
     # 调用关系匹配：启用后优先按 类名+方法名+参数个数 匹配，减少同名/重载污染
     USE_SIGNATURE_MATCH = _get_bool_env("USE_SIGNATURE_MATCH", True)

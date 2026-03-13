@@ -5,7 +5,10 @@ import json
 import streamlit as st
 from pathlib import Path
 
-LAYER_TREE_PATH = Path("output/layer_tree.json")
+LAYER_TREE_PATHS = [
+    Path("output/trees/layer_tree.json"),
+    Path("output/layer_tree.json"),
+]
 
 LAYER_COLORS = {
     "action":     "#E74C3C",
@@ -25,10 +28,11 @@ LAYER_COLORS = {
 
 @st.cache_data(ttl=60)
 def load_layer_tree() -> dict:
-    if not LAYER_TREE_PATH.exists():
-        return {}
-    with open(LAYER_TREE_PATH, encoding="utf-8") as f:
-        return json.load(f)
+    for path in LAYER_TREE_PATHS:
+        if path.exists():
+            with open(path, encoding="utf-8") as f:
+                return json.load(f)
+    return {}
 
 
 def render_layer_tree_panel(search_query: str = ""):
@@ -40,7 +44,7 @@ def render_layer_tree_panel(search_query: str = ""):
     layers = tree.get("layers", [])
 
     if not layers:
-        st.warning("⚠️ layer_tree.json 为空，请先运行 `python main.py` 生成数据")
+        st.warning("⚠️ 未找到 layer_tree.json，请先运行 `python main.py` 生成 output/trees/layer_tree.json")
         return
 
     q = search_query.strip().lower()

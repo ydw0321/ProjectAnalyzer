@@ -23,6 +23,21 @@ class KnowledgeBase:
         result = self.collection.get(ids=[chunk_id], include=[])
         return len(result["ids"]) > 0
 
+    def get_all_ids(self, page_size: int = 5000) -> set[str]:
+        """分页读取所有已索引 ID，便于增量任务做批量跳过。"""
+        all_ids: set[str] = set()
+        offset = 0
+        while True:
+            result = self.collection.get(limit=page_size, offset=offset, include=[])
+            ids = result.get("ids", [])
+            if not ids:
+                break
+            all_ids.update(ids)
+            if len(ids) < page_size:
+                break
+            offset += page_size
+        return all_ids
+
     def count(self) -> int:
         """返回当前索引的文档总数"""
         return self.collection.count()
