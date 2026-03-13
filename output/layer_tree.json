@@ -3,100 +3,17 @@
   "type": "layer_tree",
   "layers": [
     {
-      "name": "action",
-      "type": "layer",
-      "classes": [
-        {
-          "name": "LegacyDeepChainAction",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "execute",
-            "process"
-          ]
-        },
-        {
-          "name": "LegacyDispatchAction",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "execute",
-            "process"
-          ]
-        },
-        {
-          "name": "LegacyStressAction",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "execute"
-          ]
-        },
-        {
-          "name": "OrderCancelAction",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "execute"
-          ]
-        },
-        {
-          "name": "OrderCreateAction",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "execute",
-            "validateInput"
-          ]
-        },
-        {
-          "name": "OrderManageAction",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "approve",
-            "reject"
-          ]
-        },
-        {
-          "name": "OrderQueryAction",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "execute"
-          ]
-        },
-        {
-          "name": "UserProfileAction",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "queryLastOrder",
-            "patchProfile"
-          ]
-        },
-        {
-          "name": "UserRegisterAction",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "register"
-          ]
-        }
-      ]
-    },
-    {
       "name": "controller",
       "type": "layer",
       "classes": [
         {
-          "name": "OrderController",
+          "name": "UserController",
           "type": "class",
           "method_count": 5,
           "methods": [
-            "createOrder",
-            "cancelOrder",
-            "queryOrder",
+            "register",
+            "updateProfile",
+            "listUsers",
             "buildSuccessResponse",
             "buildErrorResponse"
           ]
@@ -115,13 +32,13 @@
           ]
         },
         {
-          "name": "UserController",
+          "name": "OrderController",
           "type": "class",
           "method_count": 5,
           "methods": [
-            "register",
-            "updateProfile",
-            "listUsers",
+            "createOrder",
+            "cancelOrder",
+            "queryOrder",
             "buildSuccessResponse",
             "buildErrorResponse"
           ]
@@ -132,16 +49,6 @@
       "name": "facade",
       "type": "layer",
       "classes": [
-        {
-          "name": "OrderFacade",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "placeOrder",
-            "cancelOrder",
-            "confirmOrder"
-          ]
-        },
         {
           "name": "ProductFacade",
           "type": "class",
@@ -165,6 +72,16 @@
             "validateRegistrationInput",
             "sendConfirmation"
           ]
+        },
+        {
+          "name": "OrderFacade",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "placeOrder",
+            "cancelOrder",
+            "confirmOrder"
+          ]
         }
       ]
     },
@@ -173,163 +90,29 @@
       "type": "layer",
       "classes": [
         {
-          "name": "DeepChainCoordinator",
+          "name": "UserService",
           "type": "class",
-          "method_count": 1,
+          "method_count": 6,
           "methods": [
-            "start"
+            "registerUser",
+            "updateUserProfile",
+            "getAllUsers",
+            "validateUserInfo",
+            "sendWelcomeEmail",
+            "notifyProfileUpdated"
           ]
         },
         {
-          "name": "DeepNode11FinalService",
+          "name": "ProductService",
           "type": "class",
-          "method_count": 1,
+          "method_count": 6,
           "methods": [
-            "step11"
-          ]
-        },
-        {
-          "name": "LegacyMegaWorkflowService",
-          "type": "class",
-          "method_count": 13,
-          "methods": [
-            "execute",
-            "process",
-            "save",
-            "prepare",
-            "loadLegacyContext",
-            "routeStepA",
-            "routeStepB",
-            "callBizLayer",
-            "callDaoLayer",
-            "callUtilLayer",
-            "finalizeStage",
-            "archiveStage",
-            "done"
-          ]
-        },
-        {
-          "name": "LegacyOrderGodService",
-          "type": "class",
-          "method_count": 5,
-          "methods": [
-            "processAll",
-            "execute",
-            "forceProcess",
-            "manualProcess",
-            "defaultProcess"
-          ]
-        },
-        {
-          "name": "LegacyTicketMonsterService",
-          "type": "class",
-          "method_count": 27,
-          "methods": [
-            "execute",
-            "process",
-            "save",
-            "update",
-            "remove",
-            "reopen",
-            "sync",
-            "async",
-            "review",
-            "approve",
-            "reject",
-            "patch",
-            "fix",
-            "migrate",
-            "fallback",
-            "route",
-            "transform",
-            "aggregate",
-            "emit",
-            "archive",
-            "purge",
-            "retry",
-            "rollback",
-            "commit",
-            "finalizeTicket",
-            "close",
-            "done"
-          ]
-        },
-        {
-          "name": "OrderServiceAsync",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "submitOrder",
-            "cancelOrder",
-            "queryOrder",
-            "reconcile"
-          ]
-        },
-        {
-          "name": "OrderServiceImpl",
-          "type": "class",
-          "method_count": 11,
-          "methods": [
-            "submitOrder",
-            "cancelOrder",
-            "queryOrder",
-            "reconcile",
-            "notifyRetry",
-            "buildOrder",
-            "markFail",
-            "markSuccess",
-            "validateUser",
-            "validateProduct",
-            "validateQuantity"
-          ]
-        },
-        {
-          "name": "OrderServiceProxy",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "submitOrder",
-            "cancelOrder",
-            "queryOrder",
-            "reconcile"
-          ]
-        },
-        {
-          "name": "AlipayPaymentServiceImpl",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "pay",
-            "reverse",
-            "getChannelCode"
-          ]
-        },
-        {
-          "name": "DeepNode2PaymentService",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step2"
-          ]
-        },
-        {
-          "name": "LegacyPaymentServiceImpl",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "pay",
-            "reverse",
-            "getChannelCode"
-          ]
-        },
-        {
-          "name": "WechatPaymentServiceImpl",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "pay",
-            "reverse",
-            "getChannelCode"
+            "getProduct",
+            "getProductsByCategory",
+            "updateStock",
+            "calculateProductPrice",
+            "validateCategory",
+            "notifyStockChanged"
           ]
         },
         {
@@ -370,32 +153,6 @@
             "validatePayment",
             "notifyRefundCompleted"
           ]
-        },
-        {
-          "name": "ProductService",
-          "type": "class",
-          "method_count": 6,
-          "methods": [
-            "getProduct",
-            "getProductsByCategory",
-            "updateStock",
-            "calculateProductPrice",
-            "validateCategory",
-            "notifyStockChanged"
-          ]
-        },
-        {
-          "name": "UserService",
-          "type": "class",
-          "method_count": 6,
-          "methods": [
-            "registerUser",
-            "updateUserProfile",
-            "getAllUsers",
-            "validateUserInfo",
-            "sendWelcomeEmail",
-            "notifyProfileUpdated"
-          ]
         }
       ]
     },
@@ -403,88 +160,6 @@
       "name": "biz",
       "type": "layer",
       "classes": [
-        {
-          "name": "DeepNode1Biz",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step1"
-          ]
-        },
-        {
-          "name": "LegacyDirtyRouter",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "save",
-            "update",
-            "process",
-            "execute"
-          ]
-        },
-        {
-          "name": "LegacyOrderAuditBiz",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "auditDay",
-            "auditUser"
-          ]
-        },
-        {
-          "name": "OrderCancelHandler",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "handle"
-          ]
-        },
-        {
-          "name": "OrderSubmitHandler",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "beforeSubmit",
-            "afterSubmit",
-            "forceCloseByDao",
-            "recoverUserOrders"
-          ]
-        },
-        {
-          "name": "DeepNode8PaymentBiz",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step8"
-          ]
-        },
-        {
-          "name": "LegacyExecutePaymentBiz",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "execute",
-            "process",
-            "save"
-          ]
-        },
-        {
-          "name": "PaymentGatewayBiz",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "processPayment",
-            "reversePayment"
-          ]
-        },
-        {
-          "name": "PaymentReconcileBiz",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "reconcilePayment"
-          ]
-        },
         {
           "name": "OrderBiz",
           "type": "class",
@@ -499,6 +174,24 @@
             "validateCancellation",
             "checkCancellationTime",
             "notifyOrderCancelled"
+          ]
+        },
+        {
+          "name": "UserBiz",
+          "type": "class",
+          "method_count": 11,
+          "methods": [
+            "registerUser",
+            "modifyUserProfile",
+            "fetchAllUsers",
+            "validateRegistration",
+            "checkUsernameAvailability",
+            "checkEmailFormat",
+            "logUserRegistration",
+            "validateUserId",
+            "checkUserExists",
+            "logProfileModification",
+            "checkAdminPermission"
           ]
         },
         {
@@ -520,24 +213,6 @@
             "checkInventoryPermission",
             "notifyInventoryChanged"
           ]
-        },
-        {
-          "name": "UserBiz",
-          "type": "class",
-          "method_count": 11,
-          "methods": [
-            "registerUser",
-            "modifyUserProfile",
-            "fetchAllUsers",
-            "validateRegistration",
-            "checkUsernameAvailability",
-            "checkEmailFormat",
-            "logUserRegistration",
-            "validateUserId",
-            "checkUserExists",
-            "logProfileModification",
-            "checkAdminPermission"
-          ]
         }
       ]
     },
@@ -558,17 +233,6 @@
           ]
         },
         {
-          "name": "ProductDal",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "findById",
-            "findByCategory",
-            "updateStock",
-            "findAll"
-          ]
-        },
-        {
           "name": "UserDal",
           "type": "class",
           "method_count": 5,
@@ -579,98 +243,16 @@
             "update",
             "findAll"
           ]
-        }
-      ]
-    },
-    {
-      "name": "dao",
-      "type": "layer",
-      "classes": [
+        },
         {
-          "name": "BaseDAO",
+          "name": "ProductDal",
           "type": "class",
-          "method_count": 5,
+          "method_count": 4,
           "methods": [
-            "save",
-            "update",
             "findById",
-            "query",
-            "audit"
-          ]
-        },
-        {
-          "name": "DeepNode9BaseDAO",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step9"
-          ]
-        },
-        {
-          "name": "QueryBuilder",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "buildOrderWhere",
-            "unsafeInClause"
-          ]
-        },
-        {
-          "name": "DeepNode3OrderDAO",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step3"
-          ]
-        },
-        {
-          "name": "LegacyExecuteOrderDAO",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "execute",
-            "process",
-            "save"
-          ]
-        },
-        {
-          "name": "LegacyOrderHistoryDAO",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "save",
-            "update",
-            "process",
-            "execute"
-          ]
-        },
-        {
-          "name": "OrderDAO",
-          "type": "class",
-          "method_count": 4,
-          "methods": [
-            "findByOrderId",
-            "softDelete",
-            "listByUser",
-            "markStatus"
-          ]
-        },
-        {
-          "name": "OrderDetailDAO",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "loadDirtyOrders",
-            "findItemJson"
-          ]
-        },
-        {
-          "name": "OrderStatisticsDAO",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "countOrderByDate",
-            "summarizeUser"
+            "findByCategory",
+            "updateStock",
+            "findAll"
           ]
         }
       ]
@@ -679,94 +261,6 @@
       "name": "model",
       "type": "layer",
       "classes": [
-        {
-          "name": "Order",
-          "type": "class",
-          "method_count": 20,
-          "methods": [
-            "getOrderId",
-            "setOrderId",
-            "getUserId",
-            "setUserId",
-            "getProductCode",
-            "setProductCode",
-            "getQuantity",
-            "setQuantity",
-            "getPaymentChannel",
-            "setPaymentChannel",
-            "getStatus",
-            "setStatus",
-            "getCreatedAt",
-            "setCreatedAt",
-            "getUpdatedAt",
-            "setUpdatedAt",
-            "getItems",
-            "setItems",
-            "getTotalAmount",
-            "setTotalAmount"
-          ]
-        },
-        {
-          "name": "OrderItem",
-          "type": "class",
-          "method_count": 6,
-          "methods": [
-            "getSkuCode",
-            "setSkuCode",
-            "getCount",
-            "setCount",
-            "getAmount",
-            "setAmount"
-          ]
-        },
-        {
-          "name": "User",
-          "type": "class",
-          "method_count": 14,
-          "methods": [
-            "getUserId",
-            "setUserId",
-            "getDisplayName",
-            "setDisplayName",
-            "getRiskLevel",
-            "setRiskLevel",
-            "getUsername",
-            "setUsername",
-            "getEmail",
-            "setEmail",
-            "getPhone",
-            "setPhone",
-            "getStatus",
-            "setStatus"
-          ]
-        },
-        {
-          "name": "Order",
-          "type": "class",
-          "method_count": 20,
-          "methods": [
-            "getOrderId",
-            "setOrderId",
-            "getUserId",
-            "setUserId",
-            "getProductCode",
-            "setProductCode",
-            "getQuantity",
-            "setQuantity",
-            "getPaymentChannel",
-            "setPaymentChannel",
-            "getStatus",
-            "setStatus",
-            "getCreatedAt",
-            "setCreatedAt",
-            "getUpdatedAt",
-            "setUpdatedAt",
-            "getItems",
-            "setItems",
-            "getTotalAmount",
-            "setTotalAmount"
-          ]
-        },
         {
           "name": "Product",
           "type": "class",
@@ -785,16 +279,31 @@
           ]
         },
         {
+          "name": "Order",
+          "type": "class",
+          "method_count": 12,
+          "methods": [
+            "getOrderId",
+            "setOrderId",
+            "getUserId",
+            "setUserId",
+            "getTotalAmount",
+            "setTotalAmount",
+            "getStatus",
+            "setStatus",
+            "getCreatedAt",
+            "setCreatedAt",
+            "getUpdatedAt",
+            "setUpdatedAt"
+          ]
+        },
+        {
           "name": "User",
           "type": "class",
-          "method_count": 14,
+          "method_count": 10,
           "methods": [
             "getUserId",
             "setUserId",
-            "getDisplayName",
-            "setDisplayName",
-            "getRiskLevel",
-            "setRiskLevel",
             "getUsername",
             "setUsername",
             "getEmail",
@@ -811,114 +320,6 @@
       "name": "util",
       "type": "layer",
       "classes": [
-        {
-          "name": "CacheUtil",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "initCache",
-            "get",
-            "put"
-          ]
-        },
-        {
-          "name": "DeepNode10CacheUtil",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step10"
-          ]
-        },
-        {
-          "name": "LocalCache",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "put",
-            "get",
-            "clear"
-          ]
-        },
-        {
-          "name": "DateUtil",
-          "type": "class",
-          "method_count": 6,
-          "methods": [
-            "formatNow",
-            "nowMillis",
-            "expired",
-            "formatDateTime",
-            "addDays",
-            "isExpired"
-          ]
-        },
-        {
-          "name": "DeepNode4Util",
-          "type": "class",
-          "method_count": 1,
-          "methods": [
-            "step4"
-          ]
-        },
-        {
-          "name": "LegacyBeanFactory",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "newBean",
-            "getByAlias"
-          ]
-        },
-        {
-          "name": "LegacyCodeUtil",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "debug",
-            "fallback"
-          ]
-        },
-        {
-          "name": "LegacyExecuteHelper",
-          "type": "class",
-          "method_count": 3,
-          "methods": [
-            "execute",
-            "process",
-            "save"
-          ]
-        },
-        {
-          "name": "SqlBuilderUtil",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "buildSelectOrder",
-            "buildUpdateStatus"
-          ]
-        },
-        {
-          "name": "StringMaskUtil",
-          "type": "class",
-          "method_count": 2,
-          "methods": [
-            "maskPhone",
-            "cut"
-          ]
-        },
-        {
-          "name": "DateUtil",
-          "type": "class",
-          "method_count": 6,
-          "methods": [
-            "formatNow",
-            "nowMillis",
-            "expired",
-            "formatDateTime",
-            "addDays",
-            "isExpired"
-          ]
-        },
         {
           "name": "IdGenerator",
           "type": "class",
@@ -938,6 +339,16 @@
             "calculateDiscount",
             "calculateTax",
             "calculateTotal"
+          ]
+        },
+        {
+          "name": "DateUtil",
+          "type": "class",
+          "method_count": 3,
+          "methods": [
+            "formatDateTime",
+            "addDays",
+            "isExpired"
           ]
         }
       ]

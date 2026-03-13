@@ -81,11 +81,32 @@ def render_layer_tree_panel(search_query: str = ""):
             f'{layer_name.upper()}</span>'
         )
 
-        expanded = bool(q)
-        with st.expander(
-            f"{badge}&nbsp;&nbsp;{len(classes)} 个类",
-            expanded=expanded,
-        ):
+        # ── 层级标题行：badge + 类数量 + 展开/收起按钮 ──────────────────
+        toggle_key = f"layer_open_{layer_name}"
+        if toggle_key not in st.session_state:
+            st.session_state[toggle_key] = bool(q)
+        is_open = st.session_state[toggle_key]
+
+        hdr_col, tog_col = st.columns([11, 1])
+        with hdr_col:
+            st.markdown(
+                f'<div style="padding:6px 0 2px 0;line-height:2;">'
+                f'{badge}&nbsp;&nbsp;'
+                f'<span style="font-size:13px;color:#444">'
+                f'{len(classes)} 个类</span></div>',
+                unsafe_allow_html=True,
+            )
+        with tog_col:
+            if st.button(
+                "▾" if is_open else "▸",
+                key=f"lt_{layer_name}",
+                help="展开/收起",
+            ):
+                st.session_state[toggle_key] = not is_open
+                st.rerun()
+
+        # ── 类列表（展开时显示）───────────────────────────────────────
+        if is_open:
             for cls in classes:
                 class_name = cls["name"]
                 method_count = cls.get("method_count", 0)
@@ -129,3 +150,8 @@ def render_layer_tree_panel(search_query: str = ""):
                             st.session_state["selected_method"] = method
                             st.session_state["selected_layer"] = layer_name
                             st.rerun()
+
+        st.markdown(
+            '<hr style="margin:6px 0 10px 0;border:none;border-top:1px solid #eee">',
+            unsafe_allow_html=True,
+        )
