@@ -1,255 +1,467 @@
 @startuml
 
-class "execute" as OrderCreateAction_execute
-OrderCreateAction_execute --> getQuantity
-class "getQuantity" as getQuantity #red
-OrderCreateAction_execute --> getProductCode
-class "getProductCode" as getProductCode #red
-OrderCreateAction_execute --> getUserId
-class "getUserId" as getUserId #red
-OrderCreateAction_execute --> getPaymentChannel
-class "getPaymentChannel" as getPaymentChannel #red
-OrderCreateAction_execute --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-OrderCreateAction_execute --> submitOrder
-class "submitOrder" as submitOrder #red
-submitOrder --> OrderFacade_placeOrder
-class "placeOrder" as OrderFacade_placeOrder #pink
-OrderFacade_placeOrder --> getMessage
-class "getMessage" as getMessage #red
-OrderFacade_placeOrder --> PaymentService_processPayment
-class "processPayment" as PaymentService_processPayment #pink
-PaymentService_processPayment --> equals
+class "execute" as OrderCancelAction_execute
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
 class "equals" as equals #red
-PaymentService_processPayment --> IdGenerator_generateTransactionId
-class "generateTransactionId" as IdGenerator_generateTransactionId #pink
-IdGenerator_generateTransactionId --> randomUUID
-class "randomUUID" as randomUUID #red
-IdGenerator_generateTransactionId --> toString
-class "toString" as toString #red
-IdGenerator_generateTransactionId --> substring
-class "substring" as substring #red
-IdGenerator_generateTransactionId --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-PaymentService_processPayment --> PaymentService_processCreditCardPayment
-class "processCreditCardPayment" as PaymentService_processCreditCardPayment
-PaymentService_processPayment --> PaymentService_validatePayment
-class "validatePayment" as PaymentService_validatePayment
-PaymentService_validatePayment --> isEmpty
-class "isEmpty" as isEmpty #red
-PaymentService_validatePayment --> compareTo
-class "compareTo" as compareTo #red
-PaymentService_processPayment --> PaymentService_processAlipayPayment
-class "processAlipayPayment" as PaymentService_processAlipayPayment
-PaymentService_processPayment --> PaymentService_processWechatPayment
-class "processWechatPayment" as PaymentService_processWechatPayment
-OrderFacade_placeOrder --> PriceCalculator_calculateTotal
-class "calculateTotal" as PriceCalculator_calculateTotal #pink
-PriceCalculator_calculateTotal --> setScale
-class "setScale" as setScale #red
-PriceCalculator_calculateTotal --> add
-class "add" as add #red
-OrderFacade_placeOrder --> InventoryService_checkStock
-class "checkStock" as InventoryService_checkStock #pink
-InventoryService_checkStock --> Product_getStock
-class "getStock" as Product_getStock #pink
-InventoryService_checkStock --> ProductDal_findById
-class "findById" as ProductDal_findById #pink
-OrderFacade_placeOrder --> InventoryService_reserveStock
-class "reserveStock" as InventoryService_reserveStock #pink
-InventoryService_reserveStock --> ProductDal_findById
-class "findById" as ProductDal_findById #pink
-InventoryService_reserveStock --> ProductDal_updateStock
-class "updateStock" as ProductDal_updateStock #pink
-InventoryService_reserveStock --> InventoryService_checkStock
-class "checkStock" as InventoryService_checkStock
-InventoryService_checkStock --> Product_getStock
-class "getStock" as Product_getStock #pink
-InventoryService_checkStock --> ProductDal_findById
-class "findById" as ProductDal_findById #pink
-InventoryService_reserveStock --> InventoryService_notifyStockReserved
-class "notifyStockReserved" as InventoryService_notifyStockReserved
-OrderFacade_placeOrder --> valueOf
-class "valueOf" as valueOf #red
-OrderFacade_placeOrder --> multiply
-class "multiply" as multiply #red
-OrderFacade_placeOrder --> InventoryService_releaseStock
-class "releaseStock" as InventoryService_releaseStock #pink
-InventoryService_releaseStock --> ProductDal_findById
-class "findById" as ProductDal_findById #pink
-InventoryService_releaseStock --> ProductDal_updateStock
-class "updateStock" as ProductDal_updateStock #pink
-InventoryService_releaseStock --> InventoryService_notifyStockReleased
-class "notifyStockReleased" as InventoryService_notifyStockReleased
-OrderFacade_placeOrder --> ProductService_calculateProductPrice
-class "calculateProductPrice" as ProductService_calculateProductPrice #pink
-ProductService_calculateProductPrice --> Product_getPrice
-class "getPrice" as Product_getPrice #pink
-ProductService_calculateProductPrice --> PriceCalculator_calculateDiscount
-class "calculateDiscount" as PriceCalculator_calculateDiscount #pink
-PriceCalculator_calculateDiscount --> compareTo
-class "compareTo" as compareTo #red
-PriceCalculator_calculateDiscount --> divide
-class "divide" as divide #red
-PriceCalculator_calculateDiscount --> subtract
-class "subtract" as subtract #red
-PriceCalculator_calculateDiscount --> multiply
-class "multiply" as multiply #red
-PriceCalculator_calculateDiscount --> valueOf
-class "valueOf" as valueOf #red
-ProductService_calculateProductPrice --> ProductService_getProduct
-class "getProduct" as ProductService_getProduct
-ProductService_getProduct --> ProductDal_findById
-class "findById" as ProductDal_findById #pink
-OrderFacade_placeOrder --> ProductService_getProduct
-class "getProduct" as ProductService_getProduct #pink
-ProductService_getProduct --> ProductDal_findById
-class "findById" as ProductDal_findById #pink
-OrderFacade_placeOrder --> OrderService_createOrder
-class "createOrder" as OrderService_createOrder #pink
-OrderService_createOrder --> Order_setOrderId
-class "setOrderId" as Order_setOrderId #pink
-OrderService_createOrder --> Order_setCreatedAt
-class "setCreatedAt" as Order_setCreatedAt #pink
-OrderService_createOrder --> OrderDal_insert
-class "insert" as OrderDal_insert #pink
-OrderService_createOrder --> Order_setUpdatedAt
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> getOrderId
+class "getOrderId" as getOrderId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
+OrderCancelAction_execute --> OrderForm_getOrderId
+class "getOrderId" as OrderForm_getOrderId #pink
+OrderCancelAction_execute --> OrderSubmitHandler_forceCloseByDao
+class "forceCloseByDao" as OrderSubmitHandler_forceCloseByDao #pink
+OrderSubmitHandler_forceCloseByDao --> OrderDAO_softDelete
+class "softDelete" as OrderDAO_softDelete #pink
+OrderDAO_softDelete --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+OrderSubmitHandler_forceCloseByDao --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+OrderCancelAction_execute --> OrderForm_getOperator
+class "getOperator" as OrderForm_getOperator #pink
+OrderCancelAction_execute --> cancelOrder
+class "cancelOrder" as cancelOrder #red
+cancelOrder --> OrderService_cancelOrder
+class "cancelOrder" as OrderService_cancelOrder #pink
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> OrderDal_findById
+class "findById" as OrderDal_findById #pink
+OrderService_cancelOrder --> OrderDal_update
+class "update" as OrderDal_update #pink
+OrderService_cancelOrder --> Order_getStatus
+class "getStatus" as Order_getStatus #pink
+OrderService_cancelOrder --> Order_setStatus
+class "setStatus" as Order_setStatus #pink
+OrderService_cancelOrder --> Order_setUpdatedAt
 class "setUpdatedAt" as Order_setUpdatedAt #pink
-OrderService_createOrder --> IdGenerator_generateOrderId
-class "generateOrderId" as IdGenerator_generateOrderId #pink
-IdGenerator_generateOrderId --> randomUUID
-class "randomUUID" as randomUUID #red
-IdGenerator_generateOrderId --> toString
-class "toString" as toString #red
-OrderService_createOrder --> Order_setUserId
-class "setUserId" as Order_setUserId #pink
-OrderService_createOrder --> OrderService_validateOrderRequest
-class "validateOrderRequest" as OrderService_validateOrderRequest
-OrderService_validateOrderRequest --> isEmpty
+OrderService_cancelOrder --> OrderService_processRefund
+class "processRefund" as OrderService_processRefund
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> getMessage
+class "getMessage" as getMessage #red
+cancelOrder --> OrderBiz_handleOrderCancellation
+class "handleOrderCancellation" as OrderBiz_handleOrderCancellation #pink
+OrderBiz_handleOrderCancellation --> OrderFacade_cancelOrder
+class "cancelOrder" as OrderFacade_cancelOrder #pink
+OrderFacade_cancelOrder --> OrderService_cancelOrder
+class "cancelOrder" as OrderService_cancelOrder #pink
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> OrderDal_findById
+class "findById" as OrderDal_findById #pink
+OrderService_cancelOrder --> OrderDal_update
+class "update" as OrderDal_update #pink
+OrderService_cancelOrder --> Order_getStatus
+class "getStatus" as Order_getStatus #pink
+OrderService_cancelOrder --> Order_setStatus
+class "setStatus" as Order_setStatus #pink
+OrderService_cancelOrder --> Order_setUpdatedAt
+class "setUpdatedAt" as Order_setUpdatedAt #pink
+OrderService_cancelOrder --> OrderService_processRefund
+class "processRefund" as OrderService_processRefund
+OrderBiz_handleOrderCancellation --> OrderBiz_notifyOrderCancelled
+class "notifyOrderCancelled" as OrderBiz_notifyOrderCancelled
+OrderBiz_handleOrderCancellation --> OrderBiz_checkCancellationTime
+class "checkCancellationTime" as OrderBiz_checkCancellationTime
+OrderBiz_handleOrderCancellation --> OrderBiz_validateCancellation
+class "validateCancellation" as OrderBiz_validateCancellation
+OrderBiz_validateCancellation --> isEmpty
 class "isEmpty" as isEmpty #red
-OrderService_createOrder --> OrderService_notifyOrderCreated
-class "notifyOrderCreated" as OrderService_notifyOrderCreated
-OrderFacade_placeOrder --> OrderFacade_confirmOrder
-class "confirmOrder" as OrderFacade_confirmOrder
-submitOrder --> OrderBiz_logOrderSubmission
-class "logOrderSubmission" as OrderBiz_logOrderSubmission
-submitOrder --> OrderBiz_checkUserOrderLimit
-class "checkUserOrderLimit" as OrderBiz_checkUserOrderLimit
-submitOrder --> OrderBiz_checkProductAvailability
-class "checkProductAvailability" as OrderBiz_checkProductAvailability
-submitOrder --> OrderBiz_validateOrderInput
-class "validateOrderInput" as OrderBiz_validateOrderInput
-OrderBiz_validateOrderInput --> isEmpty
+OrderBiz_validateCancellation --> isEmpty
 class "isEmpty" as isEmpty #red
-submitOrder --> startsWith
-class "startsWith" as startsWith #red
-submitOrder --> PaymentGatewayBiz_processPayment
-class "processPayment" as PaymentGatewayBiz_processPayment #pink
-PaymentGatewayBiz_processPayment --> equals
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+OrderBiz_validateCancellation --> isEmpty
+class "isEmpty" as isEmpty #red
+cancelOrder --> OrderController_buildErrorResponse
+class "buildErrorResponse" as OrderController_buildErrorResponse
+cancelOrder --> OrderController_buildSuccessResponse
+class "buildSuccessResponse" as OrderController_buildSuccessResponse
+cancelOrder --> equals
 class "equals" as equals #red
-PaymentGatewayBiz_processPayment --> getOrderId
-class "getOrderId" as getOrderId #red
-PaymentGatewayBiz_processPayment --> setPaymentChannel
-class "setPaymentChannel" as setPaymentChannel #red
-PaymentGatewayBiz_processPayment --> ServiceLocator_getPaymentService
-class "getPaymentService" as ServiceLocator_getPaymentService #pink
-ServiceLocator_getPaymentService --> equals
+cancelOrder --> equals
 class "equals" as equals #red
-PaymentGatewayBiz_processPayment --> length
-class "length" as length #red
-PaymentGatewayBiz_processPayment --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-PaymentGatewayBiz_processPayment --> startsWith
-class "startsWith" as startsWith #red
-PaymentGatewayBiz_processPayment --> CacheUtil_get
-class "get" as CacheUtil_get #pink
-CacheUtil_get --> get
-class "get" as get #red
-get --> get
-class "get" as get #red
-get --> get
-class "get" as get #red
-PaymentGatewayBiz_processPayment --> LegacyRpcClient_post
-class "post" as LegacyRpcClient_post #pink
-LegacyRpcClient_post --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-PaymentGatewayBiz_processPayment --> pay
-class "pay" as pay #red
-pay --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-pay --> getPaymentChannel
-class "getPaymentChannel" as getPaymentChannel #red
-pay --> equals
+cancelOrder --> equals
 class "equals" as equals #red
-pay --> getOrderId
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> OrderDal_findById
+class "findById" as OrderDal_findById #pink
+cancelOrder --> OrderDal_update
+class "update" as OrderDal_update #pink
+cancelOrder --> Order_getStatus
+class "getStatus" as Order_getStatus #pink
+cancelOrder --> Order_setStatus
+class "setStatus" as Order_setStatus #pink
+cancelOrder --> Order_setUpdatedAt
+class "setUpdatedAt" as Order_setUpdatedAt #pink
+cancelOrder --> OrderService_processRefund
+class "processRefund" as OrderService_processRefund
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> update
+class "update" as update #red
+update --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
+update --> getOrderId
 class "getOrderId" as getOrderId #red
-pay --> LegacyCodeUtil_debug
+update --> LegacyCodeUtil_debug
 class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
 LegacyCodeUtil_debug --> length
 class "length" as length #red
 LegacyCodeUtil_debug --> replace
 class "replace" as replace #red
-pay --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-pay --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-PaymentGatewayBiz_processPayment --> RetryInterceptor_doRetry
-class "doRetry" as RetryInterceptor_doRetry #pink
-submitOrder --> OrderSubmitHandler_afterSubmit
-class "afterSubmit" as OrderSubmitHandler_afterSubmit #pink
-OrderSubmitHandler_afterSubmit --> getOrderId
-class "getOrderId" as getOrderId #red
-OrderSubmitHandler_afterSubmit --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
 LegacyCodeUtil_debug --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> save
-class "save" as save #red
-save --> getOrderId
-class "getOrderId" as getOrderId #red
-save --> LegacyExecuteHelper_save
-class "save" as LegacyExecuteHelper_save #pink
-save --> getOrderId
-class "getOrderId" as getOrderId #red
-save --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
 LegacyCodeUtil_debug --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-save --> BaseDAO_audit
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+update --> BaseDAO_audit
 class "audit" as BaseDAO_audit
+BaseDAO_audit --> trim
+class "trim" as trim #red
 BaseDAO_audit --> length
 class "length" as length #red
 BaseDAO_audit --> trim
 class "trim" as trim #red
-save --> LegacyExecuteOrderDAO_save
-class "save" as LegacyExecuteOrderDAO_save #pink
-LegacyExecuteOrderDAO_save --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyExecuteOrderDAO_save --> LegacyExecuteHelper_save
-class "save" as LegacyExecuteHelper_save #pink
-save --> save
-class "save" as save #red
-save --> LegacyTicketMonsterService_update
-class "update" as LegacyTicketMonsterService_update
-LegacyTicketMonsterService_update --> LegacyTicketMonsterService_remove
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyTicketMonsterService_remove
 class "remove" as LegacyTicketMonsterService_remove
 LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
 class "reopen" as LegacyTicketMonsterService_reopen
@@ -263,454 +475,744 @@ LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
 class "approve" as LegacyTicketMonsterService_approve
 LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
 class "reject" as LegacyTicketMonsterService_reject
-save --> LegacyMegaWorkflowService_execute
-class "execute" as LegacyMegaWorkflowService_execute
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_prepare
-class "prepare" as LegacyMegaWorkflowService_prepare
-LegacyMegaWorkflowService_prepare --> isEmpty
-class "isEmpty" as isEmpty #red
-LegacyMegaWorkflowService_prepare --> trim
+LegacyTicketMonsterService_reject --> LegacyTicketMonsterService_patch
+class "patch" as LegacyTicketMonsterService_patch
+cancelOrder --> contains
+class "contains" as contains #red
+cancelOrder --> contains
+class "contains" as contains #red
+cancelOrder --> update
+class "update" as update #red
+update --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
+update --> getOrderId
+class "getOrderId" as getOrderId #red
+update --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+update --> BaseDAO_audit
+class "audit" as BaseDAO_audit
+BaseDAO_audit --> trim
 class "trim" as trim #red
-LegacyMegaWorkflowService_prepare --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_archiveStage
-class "archiveStage" as LegacyMegaWorkflowService_archiveStage
-LegacyMegaWorkflowService_archiveStage --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyMegaWorkflowService_archiveStage --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_callDaoLayer
-class "callDaoLayer" as LegacyMegaWorkflowService_callDaoLayer
-LegacyMegaWorkflowService_callDaoLayer --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_save
-class "save" as LegacyOrderHistoryDAO_save #pink
-LegacyOrderHistoryDAO_save --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyOrderHistoryDAO_save --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_process
-class "process" as LegacyOrderHistoryDAO_process #pink
-LegacyOrderHistoryDAO_process --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_update
-class "update" as LegacyOrderHistoryDAO_update #pink
-LegacyOrderHistoryDAO_update --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyOrderHistoryDAO_update --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_execute
-class "execute" as LegacyOrderHistoryDAO_execute #pink
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_callBizLayer
-class "callBizLayer" as LegacyMegaWorkflowService_callBizLayer
-LegacyMegaWorkflowService_callBizLayer --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_execute
-class "execute" as LegacyDirtyRouter_execute #pink
-LegacyDirtyRouter_execute --> LegacyDirtyRouter_execute
-class "execute" as LegacyDirtyRouter_execute
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_save
-class "save" as LegacyDirtyRouter_save #pink
-LegacyDirtyRouter_save --> save
-class "save" as save #red
-LegacyMegaWorkflowService_callBizLayer --> Order_setStatus
-class "setStatus" as Order_setStatus #pink
-LegacyMegaWorkflowService_callBizLayer --> Order_setOrderId
-class "setOrderId" as Order_setOrderId #pink
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_process
-class "process" as LegacyDirtyRouter_process #pink
-LegacyDirtyRouter_process --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyDirtyRouter_process --> process
-class "process" as process #red
-process --> getOrderId
-class "getOrderId" as getOrderId #red
-process --> LegacyExecuteHelper_process
-class "process" as LegacyExecuteHelper_process #pink
-process --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-process --> LegacyExecuteOrderDAO_process
-class "process" as LegacyExecuteOrderDAO_process #pink
-LegacyExecuteOrderDAO_process --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyExecuteOrderDAO_process --> LegacyExecuteHelper_process
-class "process" as LegacyExecuteHelper_process #pink
-process --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BaseDAO_audit --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-process --> process
-class "process" as process #red
-process --> LegacyTicketMonsterService_save
-class "save" as LegacyTicketMonsterService_save
-LegacyTicketMonsterService_save --> LegacyTicketMonsterService_update
-class "update" as LegacyTicketMonsterService_update
-LegacyTicketMonsterService_update --> LegacyTicketMonsterService_remove
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyTicketMonsterService_remove
 class "remove" as LegacyTicketMonsterService_remove
 LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
 class "reopen" as LegacyTicketMonsterService_reopen
-process --> LegacyMegaWorkflowService_execute
-class "execute" as LegacyMegaWorkflowService_execute
-process --> LegacyDispatchAction_execute
-class "execute" as LegacyDispatchAction_execute
-LegacyDispatchAction_execute --> OrderForm_getOperator
-class "getOperator" as OrderForm_getOperator #pink
-LegacyDispatchAction_execute --> getUserId
-class "getUserId" as getUserId #red
-LegacyDispatchAction_execute --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyDispatchAction_execute --> LegacyOrderGodService_processAll
-class "processAll" as LegacyOrderGodService_processAll #pink
-LegacyOrderGodService_processAll --> equals
-class "equals" as equals #red
-LegacyOrderGodService_processAll --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyOrderGodService_processAll --> Order_setStatus
-class "setStatus" as Order_setStatus #pink
-LegacyOrderGodService_processAll --> OrderCancelHandler_handle
-class "handle" as OrderCancelHandler_handle #pink
-OrderCancelHandler_handle --> equals
-class "equals" as equals #red
-OrderCancelHandler_handle --> Order_setStatus
-class "setStatus" as Order_setStatus #pink
-OrderCancelHandler_handle --> update
+LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
+class "sync" as LegacyTicketMonsterService_sync
+LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
+class "async" as LegacyTicketMonsterService_async
+LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
+class "review" as LegacyTicketMonsterService_review
+LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
+class "approve" as LegacyTicketMonsterService_approve
+LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
+class "reject" as LegacyTicketMonsterService_reject
+LegacyTicketMonsterService_reject --> LegacyTicketMonsterService_patch
+class "patch" as LegacyTicketMonsterService_patch
+cancelOrder --> update
 class "update" as update #red
-OrderCancelHandler_handle --> OrderDAO_findByOrderId
-class "findByOrderId" as OrderDAO_findByOrderId #pink
-OrderCancelHandler_handle --> LegacyCodeUtil_debug
+update --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
+update --> getOrderId
+class "getOrderId" as getOrderId #red
+update --> LegacyCodeUtil_debug
 class "debug" as LegacyCodeUtil_debug #pink
-OrderCancelHandler_handle --> Order_getStatus
-class "getStatus" as Order_getStatus #pink
-LegacyOrderGodService_processAll --> Order_getStatus
-class "getStatus" as Order_getStatus #pink
-LegacyOrderGodService_processAll --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
 LegacyCodeUtil_debug --> length
 class "length" as length #red
 LegacyCodeUtil_debug --> replace
 class "replace" as replace #red
-LegacyOrderGodService_processAll --> CacheUtil_put
-class "put" as CacheUtil_put #pink
-CacheUtil_put --> put
-class "put" as put #red
-LegacyOrderGodService_processAll --> size
-class "size" as size #red
-LegacyOrderGodService_processAll --> LegacyReflectionInvoker_invokeNoArg
-class "invokeNoArg" as LegacyReflectionInvoker_invokeNoArg #pink
-LegacyReflectionInvoker_invokeNoArg --> LegacyReflectionInvoker_invoke
-class "invoke" as LegacyReflectionInvoker_invoke
-LegacyOrderGodService_processAll --> Order_setUserId
-class "setUserId" as Order_setUserId #pink
-LegacyOrderGodService_processAll --> OrderDAO_findByOrderId
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+update --> BaseDAO_audit
+class "audit" as BaseDAO_audit
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyTicketMonsterService_remove
+class "remove" as LegacyTicketMonsterService_remove
+LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
+class "reopen" as LegacyTicketMonsterService_reopen
+LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
+class "sync" as LegacyTicketMonsterService_sync
+LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
+class "async" as LegacyTicketMonsterService_async
+LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
+class "review" as LegacyTicketMonsterService_review
+LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
+class "approve" as LegacyTicketMonsterService_approve
+LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
+class "reject" as LegacyTicketMonsterService_reject
+LegacyTicketMonsterService_reject --> LegacyTicketMonsterService_patch
+class "patch" as LegacyTicketMonsterService_patch
+cancelOrder --> contains
+class "contains" as contains #red
+cancelOrder --> update
+class "update" as update #red
+update --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
+update --> getOrderId
+class "getOrderId" as getOrderId #red
+update --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+update --> BaseDAO_audit
+class "audit" as BaseDAO_audit
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyTicketMonsterService_remove
+class "remove" as LegacyTicketMonsterService_remove
+LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
+class "reopen" as LegacyTicketMonsterService_reopen
+LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
+class "sync" as LegacyTicketMonsterService_sync
+LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
+class "async" as LegacyTicketMonsterService_async
+LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
+class "review" as LegacyTicketMonsterService_review
+LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
+class "approve" as LegacyTicketMonsterService_approve
+LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
+class "reject" as LegacyTicketMonsterService_reject
+LegacyTicketMonsterService_reject --> LegacyTicketMonsterService_patch
+class "patch" as LegacyTicketMonsterService_patch
+cancelOrder --> update
+class "update" as update #red
+update --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
+update --> getOrderId
+class "getOrderId" as getOrderId #red
+update --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+update --> BaseDAO_audit
+class "audit" as BaseDAO_audit
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyTicketMonsterService_remove
+class "remove" as LegacyTicketMonsterService_remove
+LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
+class "reopen" as LegacyTicketMonsterService_reopen
+LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
+class "sync" as LegacyTicketMonsterService_sync
+LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
+class "async" as LegacyTicketMonsterService_async
+LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
+class "review" as LegacyTicketMonsterService_review
+LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
+class "approve" as LegacyTicketMonsterService_approve
+LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
+class "reject" as LegacyTicketMonsterService_reject
+LegacyTicketMonsterService_reject --> LegacyTicketMonsterService_patch
+class "patch" as LegacyTicketMonsterService_patch
+cancelOrder --> equals
+class "equals" as equals #red
+cancelOrder --> contains
+class "contains" as contains #red
+cancelOrder --> OrderDAO_findByOrderId
 class "findByOrderId" as OrderDAO_findByOrderId #pink
 OrderDAO_findByOrderId --> LegacyCodeUtil_debug
 class "debug" as LegacyCodeUtil_debug #pink
-LegacyOrderGodService_processAll --> Order_getOrderId
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+cancelOrder --> PaymentGatewayBiz_reversePayment
+class "reversePayment" as PaymentGatewayBiz_reversePayment #pink
+PaymentGatewayBiz_reversePayment --> reverse
+class "reverse" as reverse #red
+reverse --> Order_getOrderId
 class "getOrderId" as Order_getOrderId #pink
-LegacyOrderGodService_processAll --> PaymentReconcileBiz_reconcilePayment
-class "reconcilePayment" as PaymentReconcileBiz_reconcilePayment #pink
-PaymentReconcileBiz_reconcilePayment --> getStatus
-class "getStatus" as getStatus #red
-PaymentReconcileBiz_reconcilePayment --> equals
-class "equals" as equals #red
-PaymentReconcileBiz_reconcilePayment --> OrderDetailDAO_loadDirtyOrders
-class "loadDirtyOrders" as OrderDetailDAO_loadDirtyOrders #pink
-PaymentReconcileBiz_reconcilePayment --> PaymentGatewayBiz_processPayment
-class "processPayment" as PaymentGatewayBiz_processPayment #pink
-PaymentReconcileBiz_reconcilePayment --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyOrderGodService_processAll --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-LegacyOrderGodService_processAll --> LegacyBeanFactory_getByAlias
-class "getByAlias" as LegacyBeanFactory_getByAlias #pink
-LegacyBeanFactory_getByAlias --> equals
-class "equals" as equals #red
-LegacyBeanFactory_getByAlias --> LegacyBeanFactory_newBean
-class "newBean" as LegacyBeanFactory_newBean
-LegacyOrderGodService_processAll --> Order_setOrderId
-class "setOrderId" as Order_setOrderId #pink
-LegacyOrderGodService_processAll --> LegacyDirtyRouter_save
-class "save" as LegacyDirtyRouter_save #pink
-LegacyDirtyRouter_save --> save
-class "save" as save #red
-LegacyOrderGodService_processAll --> DateUtil_nowMillis
+reverse --> getOrderId
+class "getOrderId" as getOrderId #red
+reverse --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
+reverse --> getOrderId
+class "getOrderId" as getOrderId #red
+cancelOrder --> DateUtil_nowMillis
 class "nowMillis" as DateUtil_nowMillis #pink
 DateUtil_nowMillis --> currentTimeMillis
 class "currentTimeMillis" as currentTimeMillis #red
-LegacyOrderGodService_processAll --> Order_setCreatedAt
-class "setCreatedAt" as Order_setCreatedAt #pink
-LegacyOrderGodService_processAll --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-LegacyDirtyRouter_update --> update
+DateUtil_nowMillis --> currentTimeMillis
+class "currentTimeMillis" as currentTimeMillis #red
+DateUtil_nowMillis --> currentTimeMillis
+class "currentTimeMillis" as currentTimeMillis #red
+cancelOrder --> Order_getStatus
+class "getStatus" as Order_getStatus #pink
+cancelOrder --> Order_setStatus
+class "setStatus" as Order_setStatus #pink
+cancelOrder --> OrderSubmitHandler_forceCloseByDao
+class "forceCloseByDao" as OrderSubmitHandler_forceCloseByDao #pink
+OrderSubmitHandler_forceCloseByDao --> OrderDAO_softDelete
+class "softDelete" as OrderDAO_softDelete #pink
+OrderDAO_softDelete --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+OrderSubmitHandler_forceCloseByDao --> LegacyCodeUtil_debug
+class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> replace
+class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+cancelOrder --> update
 class "update" as update #red
-LegacyOrderGodService_processAll --> LegacyDirtyRouter_process
-class "process" as LegacyDirtyRouter_process #pink
-LegacyOrderGodService_processAll --> LegacyOrderGodService_defaultProcess
-class "defaultProcess" as LegacyOrderGodService_defaultProcess
-LegacyOrderGodService_defaultProcess --> setStatus
-class "setStatus" as setStatus #red
-LegacyOrderGodService_defaultProcess --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyOrderGodService_defaultProcess --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-LegacyOrderGodService_processAll --> LegacyOrderGodService_forceProcess
-class "forceProcess" as LegacyOrderGodService_forceProcess
-LegacyOrderGodService_forceProcess --> setStatus
-class "setStatus" as setStatus #red
-LegacyOrderGodService_forceProcess --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyOrderGodService_forceProcess --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-LegacyOrderGodService_processAll --> LegacyOrderGodService_manualProcess
-class "manualProcess" as LegacyOrderGodService_manualProcess
-LegacyOrderGodService_manualProcess --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyOrderGodService_manualProcess --> setStatus
-class "setStatus" as setStatus #red
-LegacyOrderGodService_manualProcess --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-process --> LegacyDeepChainAction_execute
-class "execute" as LegacyDeepChainAction_execute
-LegacyDeepChainAction_execute --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyDeepChainAction_execute --> DeepChainCoordinator_start
-class "start" as DeepChainCoordinator_start #pink
-DeepChainCoordinator_start --> isEmpty
-class "isEmpty" as isEmpty #red
-DeepChainCoordinator_start --> trim
-class "trim" as trim #red
-DeepChainCoordinator_start --> DeepNode1Biz_step1
-class "step1" as DeepNode1Biz_step1 #pink
-DeepNode1Biz_step1 --> DeepNode2PaymentService_step2
-class "step2" as DeepNode2PaymentService_step2 #pink
-LegacyDeepChainAction_execute --> LegacyMegaWorkflowService_execute
-class "execute" as LegacyMegaWorkflowService_execute #pink
-LegacyMegaWorkflowService_callBizLayer --> Order_setCreatedAt
-class "setCreatedAt" as Order_setCreatedAt #pink
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-LegacyDirtyRouter_update --> update
-class "update" as update #red
+update --> Order_getOrderId
+class "getOrderId" as Order_getOrderId #pink
 update --> getOrderId
 class "getOrderId" as getOrderId #red
 update --> LegacyCodeUtil_debug
 class "debug" as LegacyCodeUtil_debug #pink
 LegacyCodeUtil_debug --> length
 class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
 LegacyCodeUtil_debug --> replace
 class "replace" as replace #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
 update --> BaseDAO_audit
 class "audit" as BaseDAO_audit
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> trim
+class "trim" as trim #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
+BaseDAO_audit --> length
+class "length" as length #red
 BaseDAO_audit --> length
 class "length" as length #red
 BaseDAO_audit --> trim
 class "trim" as trim #red
 update --> update
 class "update" as update #red
-update --> LegacyTicketMonsterService_remove
-class "remove" as LegacyTicketMonsterService_remove
-LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
-class "reopen" as LegacyTicketMonsterService_reopen
-LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
-class "sync" as LegacyTicketMonsterService_sync
-LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
-class "async" as LegacyTicketMonsterService_async
-LegacyMegaWorkflowService_callBizLayer --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_callUtilLayer
-class "callUtilLayer" as LegacyMegaWorkflowService_callUtilLayer
-LegacyMegaWorkflowService_callUtilLayer --> DateUtil_formatNow
-class "formatNow" as DateUtil_formatNow #pink
-DateUtil_formatNow --> format
-class "format" as format #red
-LegacyMegaWorkflowService_callUtilLayer --> length
-class "length" as length #red
-LegacyMegaWorkflowService_callUtilLayer --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_done
-class "done" as LegacyMegaWorkflowService_done
-LegacyMegaWorkflowService_done --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyMegaWorkflowService_done --> getStatus
-class "getStatus" as getStatus #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_finalizeStage
-class "finalizeStage" as LegacyMegaWorkflowService_finalizeStage
-LegacyMegaWorkflowService_finalizeStage --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-LegacyMegaWorkflowService_finalizeStage --> setStatus
-class "setStatus" as setStatus #red
-LegacyMegaWorkflowService_finalizeStage --> getOrderId
-class "getOrderId" as getOrderId #red
-LegacyMegaWorkflowService_finalizeStage --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_finalizeStage --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_routeStepA
-class "routeStepA" as LegacyMegaWorkflowService_routeStepA
-LegacyMegaWorkflowService_routeStepA --> contains
-class "contains" as contains #red
-LegacyMegaWorkflowService_routeStepA --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_loadLegacyContext
-class "loadLegacyContext" as LegacyMegaWorkflowService_loadLegacyContext
-LegacyMegaWorkflowService_loadLegacyContext --> LegacyReflectionInvoker_invokeNoArg
-class "invokeNoArg" as LegacyReflectionInvoker_invokeNoArg #pink
-LegacyReflectionInvoker_invokeNoArg --> LegacyReflectionInvoker_invoke
-class "invoke" as LegacyReflectionInvoker_invoke
-LegacyReflectionInvoker_invoke --> LegacyReflectionInvoker_invoke
-class "invoke" as LegacyReflectionInvoker_invoke #pink
-LegacyReflectionInvoker_invoke --> getMessage
-class "getMessage" as getMessage #red
-LegacyReflectionInvoker_invoke --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyReflectionInvoker_invoke --> getMethod
-class "getMethod" as getMethod #red
-LegacyReflectionInvoker_invoke --> forName
-class "forName" as forName #red
-LegacyReflectionInvoker_invoke --> newInstance
-class "newInstance" as newInstance #red
-LegacyMegaWorkflowService_loadLegacyContext --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_routeStepB
-class "routeStepB" as LegacyMegaWorkflowService_routeStepB
-LegacyMegaWorkflowService_routeStepB --> length
-class "length" as length #red
-LegacyMegaWorkflowService_routeStepB --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> OrderSubmitHandler_beforeSubmit
-class "beforeSubmit" as OrderSubmitHandler_beforeSubmit #pink
-OrderSubmitHandler_beforeSubmit --> getOrderId
-class "getOrderId" as getOrderId #red
-OrderSubmitHandler_beforeSubmit --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> OrderServiceImpl_buildOrder
-class "buildOrder" as OrderServiceImpl_buildOrder
-OrderServiceImpl_buildOrder --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-OrderServiceImpl_buildOrder --> Order_setCreatedAt
-class "setCreatedAt" as Order_setCreatedAt #pink
-OrderServiceImpl_buildOrder --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-OrderServiceImpl_buildOrder --> nextInt
-class "nextInt" as nextInt #red
-OrderServiceImpl_buildOrder --> setUserId
-class "setUserId" as setUserId #red
-OrderServiceImpl_buildOrder --> setProductCode
-class "setProductCode" as setProductCode #red
-OrderServiceImpl_buildOrder --> setStatus
-class "setStatus" as setStatus #red
-OrderServiceImpl_buildOrder --> setPaymentChannel
-class "setPaymentChannel" as setPaymentChannel #red
-OrderServiceImpl_buildOrder --> setQuantity
-class "setQuantity" as setQuantity #red
-OrderServiceImpl_buildOrder --> abs
-class "abs" as abs #red
-OrderServiceImpl_buildOrder --> setOrderId
-class "setOrderId" as setOrderId #red
-submitOrder --> OrderServiceImpl_validateQuantity
-class "validateQuantity" as OrderServiceImpl_validateQuantity
-submitOrder --> OrderServiceImpl_validateUser
-class "validateUser" as OrderServiceImpl_validateUser
-OrderServiceImpl_validateUser --> isEmpty
-class "isEmpty" as isEmpty #red
-OrderServiceImpl_validateUser --> trim
-class "trim" as trim #red
-submitOrder --> OrderServiceImpl_validateProduct
-class "validateProduct" as OrderServiceImpl_validateProduct
-OrderServiceImpl_validateProduct --> isEmpty
-class "isEmpty" as isEmpty #red
-OrderServiceImpl_validateProduct --> trim
-class "trim" as trim #red
-submitOrder --> OrderServiceImpl_markFail
-class "markFail" as OrderServiceImpl_markFail
-OrderServiceImpl_markFail --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-OrderServiceImpl_markFail --> setStatus
-class "setStatus" as setStatus #red
-OrderServiceImpl_markFail --> update
+update --> update
 class "update" as update #red
-update --> getOrderId
-class "getOrderId" as getOrderId #red
-update --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-update --> BaseDAO_audit
-class "audit" as BaseDAO_audit
-BaseDAO_audit --> length
-class "length" as length #red
-BaseDAO_audit --> trim
-class "trim" as trim #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> update
+class "update" as update #red
+update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> update
+class "update" as update #red
+LegacyDirtyRouter_update --> LegacyDirtyRouter_update
+class "update" as LegacyDirtyRouter_update
+LegacyDirtyRouter_update --> update
+class "update" as update #red
 update --> update
 class "update" as update #red
 update --> LegacyTicketMonsterService_remove
@@ -727,72 +1229,116 @@ LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
 class "approve" as LegacyTicketMonsterService_approve
 LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
 class "reject" as LegacyTicketMonsterService_reject
-submitOrder --> OrderServiceImpl_markSuccess
-class "markSuccess" as OrderServiceImpl_markSuccess
-OrderServiceImpl_markSuccess --> LegacyCodeUtil_debug
+LegacyTicketMonsterService_reject --> LegacyTicketMonsterService_patch
+class "patch" as LegacyTicketMonsterService_patch
+cancelOrder --> Order_setUpdatedAt
+class "setUpdatedAt" as Order_setUpdatedAt #pink
+cancelOrder --> OrderService_cancelOrder
+class "cancelOrder" as OrderService_cancelOrder #pink
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> OrderDal_findById
+class "findById" as OrderDal_findById #pink
+OrderService_cancelOrder --> OrderDal_update
+class "update" as OrderDal_update #pink
+OrderService_cancelOrder --> Order_getStatus
+class "getStatus" as Order_getStatus #pink
+OrderService_cancelOrder --> Order_setStatus
+class "setStatus" as Order_setStatus #pink
+OrderService_cancelOrder --> Order_setUpdatedAt
+class "setUpdatedAt" as Order_setUpdatedAt #pink
+OrderService_cancelOrder --> OrderService_processRefund
+class "processRefund" as OrderService_processRefund
+cancelOrder --> LegacyCodeUtil_debug
 class "debug" as LegacyCodeUtil_debug #pink
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
 LegacyCodeUtil_debug --> length
 class "length" as length #red
 LegacyCodeUtil_debug --> replace
 class "replace" as replace #red
-OrderServiceImpl_markSuccess --> update
-class "update" as update #red
-update --> getOrderId
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+LegacyCodeUtil_debug --> length
+class "length" as length #red
+cancelOrder --> OrderService_cancelOrder
+class "cancelOrder" as OrderService_cancelOrder #pink
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> equals
+class "equals" as equals #red
+OrderService_cancelOrder --> OrderDal_findById
+class "findById" as OrderDal_findById #pink
+OrderService_cancelOrder --> OrderDal_update
+class "update" as OrderDal_update #pink
+OrderService_cancelOrder --> Order_getStatus
+class "getStatus" as Order_getStatus #pink
+OrderService_cancelOrder --> Order_setStatus
+class "setStatus" as Order_setStatus #pink
+OrderService_cancelOrder --> Order_setUpdatedAt
+class "setUpdatedAt" as Order_setUpdatedAt #pink
+OrderService_cancelOrder --> OrderService_processRefund
+class "processRefund" as OrderService_processRefund
+OrderCancelAction_execute --> getOrderId
 class "getOrderId" as getOrderId #red
-update --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-update --> BaseDAO_audit
-class "audit" as BaseDAO_audit
-BaseDAO_audit --> length
-class "length" as length #red
-BaseDAO_audit --> trim
-class "trim" as trim #red
-update --> update
-class "update" as update #red
-update --> LegacyTicketMonsterService_remove
-class "remove" as LegacyTicketMonsterService_remove
-LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
-class "reopen" as LegacyTicketMonsterService_reopen
-LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
-class "sync" as LegacyTicketMonsterService_sync
-LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
-class "async" as LegacyTicketMonsterService_async
-LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
-class "review" as LegacyTicketMonsterService_review
-LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
-class "approve" as LegacyTicketMonsterService_approve
-LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
-class "reject" as LegacyTicketMonsterService_reject
-OrderServiceImpl_markSuccess --> setStatus
-class "setStatus" as setStatus #red
-submitOrder --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> submitOrder
-class "submitOrder" as submitOrder #red
-submitOrder --> submitOrder
-class "submitOrder" as submitOrder #red
-OrderCreateAction_execute --> DateUtil_formatNow
-class "formatNow" as DateUtil_formatNow #pink
-DateUtil_formatNow --> format
-class "format" as format #red
-OrderCreateAction_execute --> OrderCreateAction_validateInput
-class "validateInput" as OrderCreateAction_validateInput
-OrderCreateAction_validateInput --> getQuantity
-class "getQuantity" as getQuantity #red
-OrderCreateAction_validateInput --> trim
-class "trim" as trim #red
-OrderCreateAction_validateInput --> getProductCode
-class "getProductCode" as getProductCode #red
-OrderCreateAction_validateInput --> isEmpty
-class "isEmpty" as isEmpty #red
-OrderCreateAction_validateInput --> getUserId
-class "getUserId" as getUserId #red
+OrderCancelAction_execute --> equals
+class "equals" as equals #red
 @enduml

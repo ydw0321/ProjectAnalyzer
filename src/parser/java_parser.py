@@ -51,6 +51,11 @@ class JavaParser:
 
         # 解析 import 语句
         imports = self._extract_imports(source_code)
+        imported_simple_names = {
+            imp.split('.')[-1]: imp
+            for imp in imports
+            if imp and not imp.endswith('.*')
+        }
         
         # 解析成员变量（字段）- 使用正则表达式
         fields = self._extract_fields_regex(source_code)
@@ -95,18 +100,23 @@ class JavaParser:
                 end_byte = node.end_byte
                 method_code = source_code[start_byte:end_byte]
                 
+                param_count = self._count_method_params(node)
+
                 methods.append({
                     'name': method_name,
                     'class_name': class_info['name'],
+                    'param_count': param_count,
                     'code': method_code,
                     'start_byte': start_byte,
                     'end_byte': end_byte
                 })
-                methods_by_class.setdefault(class_info['name'], set()).add(method_name)
+                methods_by_class.setdefault(class_info['name'], {}).setdefault(method_name, set()).add(param_count)
 
                 local_vars = self._extract_local_vars_regex(method_code)
+                param_vars = self._extract_method_params(node, source_code)
                 method_field_map = dict(field_map)
                 method_field_map.update(local_vars)
+                method_field_map.update(param_vars)
                 
                 # 继续在方法内查找调用
                 for child in node.children:
@@ -130,17 +140,28 @@ class JavaParser:
                     receiver = node.child_by_field_name('object')
                     if receiver:
                         # source_code 已经是字符串
-                        receiver_text = source_code[receiver.start_byte:receiver.end_byte]
+                        receiver_text = source_code[receiver.start_byte:receiver.end_byte].strip()
                         receiver_root = receiver_text.split('.', 1)[0]
-                        # 检查是否是成员变量调用（不是 this、super 或局部变量）
-                        if not receiver_text.startswith('this') and not receiver_text.startswith('super'):
+
+                        # this.xxx.method() 场景：提取 this 后的字段名
+                        if receiver_text.startswith('this.'):
+                            receiver_root = receiver_text[len('this.'):].split('.', 1)[0]
+
+                        # super.xxx() 视为同类/父类调用，不标记 external
+                        if not receiver_text.startswith('super'):
                             target_field = receiver_root
-                            # 尝试通过字段类型推断目标类
+                            # 尝试通过字段/参数/局部变量类型推断目标类
                             target_class = fmap.get(target_field)
 
                             # 静态调用场景: ClassName.method()
                             if not target_class and receiver_root and receiver_root[0].isupper():
                                 target_class = receiver_root
+
+                            # import 辅助消歧：优先使用明确导入的类
+                            if not target_class and receiver_root in imported_simple_names:
+                                target_class = receiver_root
+
+                    arg_count = self._count_call_args(node)
                     
                     # 确定调用类型和目标类
                     if target_field:
@@ -150,6 +171,7 @@ class JavaParser:
                             'caller_class': current_class,
                             'callee': method_name,
                             'callee_class': target_class or 'Unknown',
+                            'arg_count': arg_count,
                             'target_field': target_field,
                             'type': 'external',
                             'call_start_byte': node.start_byte,
@@ -162,6 +184,7 @@ class JavaParser:
                             'caller_class': current_class,
                             'callee': method_name,
                             'callee_class': current_class,
+                            'arg_count': arg_count,
                             'target_field': None,
                             'type': 'internal',
                             'call_start_byte': node.start_byte,
@@ -181,13 +204,16 @@ class JavaParser:
             # 同类调用：仅当被调用方法在当前类中存在时才记为 internal
             if call['type'] == 'internal':
                 caller_class = call.get('caller_class', '')
-                class_methods = methods_by_class.get(caller_class, set())
-                if call['callee'] in class_methods:
+                class_methods = methods_by_class.get(caller_class, {})
+                expected_param_counts = class_methods.get(call['callee'], set())
+                arg_count = call.get('arg_count', -1)
+                if expected_param_counts and (arg_count in expected_param_counts or len(expected_param_counts) == 1):
                     internal_calls.append({
                         'caller': call['caller'],
                         'caller_class': caller_class,
                         'callee': call['callee'],
                         'callee_class': caller_class,
+                        'arg_count': arg_count,
                         'type': 'internal'
                     })
             elif call['type'] == 'external':
@@ -267,19 +293,60 @@ class JavaParser:
             logger.debug("字段提取失败: start=%s, end=%s, error=%s", node.start_byte, node.end_byte, e)
         return None
 
+    def _extract_method_params(self, method_node, source_code):
+        """提取方法参数类型映射（用于 receiver 类型推断）"""
+        param_map = {}
+        params_node = method_node.child_by_field_name('parameters')
+        if not params_node:
+            return param_map
+
+        for child in params_node.children:
+            if child.type not in {'formal_parameter', 'spread_parameter'}:
+                continue
+
+            type_node = child.child_by_field_name('type')
+            name_node = child.child_by_field_name('name')
+            if not type_node or not name_node:
+                continue
+
+            type_name = source_code[type_node.start_byte:type_node.end_byte]
+            param_name = source_code[name_node.start_byte:name_node.end_byte]
+            param_map[param_name] = self._normalize_type_name(type_name)
+
+        return param_map
+
+    def _count_method_params(self, method_node):
+        params_node = method_node.child_by_field_name('parameters')
+        if not params_node:
+            return 0
+        count = 0
+        for child in params_node.children:
+            if child.type in {'formal_parameter', 'spread_parameter'}:
+                count += 1
+        return count
+
+    def _count_call_args(self, call_node):
+        args_node = call_node.child_by_field_name('arguments')
+        if not args_node:
+            return 0
+        named_children = [c for c in args_node.children if getattr(c, 'is_named', False)]
+        return len(named_children)
+
+    def _normalize_type_name(self, type_name):
+        if '.' in type_name:
+            type_name = type_name.split('.')[-1]
+        if '<' in type_name:
+            type_name = type_name.split('<')[0]
+        return type_name.strip() or 'Object'
+
     def _extract_local_vars_regex(self, method_code):
         """提取方法体内局部变量声明（用于调用目标类推断）"""
         local_vars = {}
-        pattern = r'([A-Z][\w\.]*(?:<[^>]+>)?)\s+(\w+)\s*='
+        pattern = r'([A-Z][\w\.]*(?:<[^>]+>)?)\s+(\w+)\s*(?:=|;|,)'
 
         for match in re.finditer(pattern, method_code):
-            type_name = match.group(1)
+            type_name = self._normalize_type_name(match.group(1))
             var_name = match.group(2)
-
-            if '.' in type_name:
-                type_name = type_name.split('.')[-1]
-            if '<' in type_name:
-                type_name = type_name.split('<')[0]
 
             local_vars[var_name] = type_name
 

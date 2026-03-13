@@ -201,10 +201,12 @@ def get_unknown_call_breakdown(query):
     with query.driver.session() as session:
         result = session.run(
             """
-            MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]->(callee:ExternalMethod)
+            MATCH (caller:Method)-[r:CALLS {type: 'external_unknown'}]->(callee:ExternalMethod)
             RETURN caller.class_name AS caller_class,
                    caller.name AS caller_name,
-                   callee.name AS callee_name
+                   callee.name AS callee_name,
+                   r.unknown_category AS rel_unknown_category,
+                   callee.category AS node_unknown_category
             ORDER BY caller.class_name, caller.name, callee.name
             """
         )
@@ -214,7 +216,7 @@ def get_unknown_call_breakdown(query):
     counts = {"jdk_unknown": 0, "business_unknown": 0}
 
     for row in rows:
-        category = classify_unknown_method(row["callee_name"])
+        category = row.get("rel_unknown_category") or row.get("node_unknown_category") or classify_unknown_method(row["callee_name"])
         counts[category] += 1
         row["category"] = category
         classified_rows.append(row)

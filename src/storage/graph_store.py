@@ -2,6 +2,15 @@ from neo4j import GraphDatabase
 from src.config import Config
 
 
+JDK_LIKELY_METHODS = {
+    "abs", "add", "before", "compareTo", "contains", "currentTimeMillis", "divide",
+    "endsWith", "equals", "filter", "findFirst", "format", "getMessage", "getStackTrace",
+    "getTime", "isEmpty", "iterator", "length", "multiply", "nanoTime", "now", "orElse",
+    "randomUUID", "remove", "setScale", "size", "split", "startsWith", "stream", "substring",
+    "subtract", "toString", "trim", "valueOf",
+}
+
+
 class GraphStore:
     def __init__(self, uri=None, user=None, password=None):
         uri = uri or Config.NEO4J_URI
@@ -46,6 +55,11 @@ class GraphStore:
                 file_path=file_path
             )
 
+    def _classify_unknown_method(self, method_name: str) -> str:
+        if method_name in JDK_LIKELY_METHODS:
+            return 'jdk_unknown'
+        return 'business_unknown'
+
     def batch_add_method_nodes(self, method_nodes):
         """批量创建方法节点"""
         if not method_nodes:
@@ -55,7 +69,8 @@ class GraphStore:
                 """
                 UNWIND $rows AS row
                 MERGE (m:Method {name: row.name, class_name: row.class_name})
-                SET m.file_path = row.file_path
+                SET m.file_path = row.file_path,
+                    m.param_count = row.param_count
                 """,
                 rows=method_nodes
             )
@@ -123,11 +138,14 @@ class GraphStore:
 
         for call in calls:
             call_type = call.get('type', 'internal')
+            unknown_category = call.get('unknown_category') or self._classify_unknown_method(call.get('callee', ''))
             row = {
                 'caller': call.get('caller'),
                 'callee': call.get('callee'),
                 'caller_class': call.get('caller_class'),
                 'callee_class': call.get('callee_class'),
+                'arg_count': call.get('arg_count', 0),
+                'unknown_category': unknown_category,
                 'via_field': f"{call.get('caller', '')}_to_{call.get('callee', '')}"
             }
 
@@ -152,7 +170,8 @@ class GraphStore:
                     UNWIND $rows AS row
                     MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
                     MATCH (callee:Method {name: row.callee, class_name: row.target_class})
-                    MERGE (caller)-[:CALLS {type: 'internal'}]->(callee)
+                    MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
+                    SET r.arg_count = row.arg_count
                     """,
                     rows=internal_rows
                 )
@@ -164,10 +183,14 @@ class GraphStore:
                     MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
                     OPTIONAL MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
                     FOREACH (_ IN CASE WHEN callee IS NOT NULL THEN [1] ELSE [] END |
-                        MERGE (caller)-[:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                        MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                        SET r.arg_count = row.arg_count
                     )
                     FOREACH (_ IN CASE WHEN callee IS NULL THEN [1] ELSE [] END |
-                        MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(:ExternalMethod {name: row.callee})
+                        MERGE (ext:ExternalMethod {name: row.callee})
+                        SET ext.category = coalesce(ext.category, row.unknown_category)
+                        MERGE (caller)-[r:CALLS {type: 'external_unknown'}]->(ext)
+                        SET r.arg_count = row.arg_count, r.unknown_category = row.unknown_category
                     )
                     """,
                     rows=external_rows
@@ -178,7 +201,10 @@ class GraphStore:
                     """
                     UNWIND $rows AS row
                     MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
-                    MERGE (caller)-[:CALLS {type: 'external_unknown'}]->(callee:ExternalMethod {name: row.callee})
+                    MERGE (callee:ExternalMethod {name: row.callee})
+                    SET callee.category = coalesce(callee.category, row.unknown_category)
+                    MERGE (caller)-[r:CALLS {type: 'external_unknown'}]->(callee)
+                    SET r.arg_count = row.arg_count, r.unknown_category = row.unknown_category
                     """,
                     rows=unknown_rows
                 )
