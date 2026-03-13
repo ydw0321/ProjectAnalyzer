@@ -2,6 +2,21 @@
 树生成器配置模块
 """
 
+
+def extract_layer(file_path: str) -> str:
+    """从文件路径提取所属层级（兼容 Windows/Unix 路径），供外部模块复用"""
+    from src.tree.config import TreeConfig
+    path_lower = file_path.lower().replace("\\", "/")
+    for base_layer in TreeConfig.BASE_LAYERS:
+        if (
+            f"/{base_layer}/" in path_lower
+            or path_lower.endswith(f"/{base_layer}")
+            or path_lower.endswith(f"/{base_layer}.java")
+        ):
+            return base_layer
+    return "other"
+
+
 class TreeConfig:
     # 基础层级关键词
     BASE_LAYERS = {

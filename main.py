@@ -93,45 +93,68 @@ def phase2_find_caller_nodes(method_index):
     return hot_nodes
 
 
-def phase3_analyze_hot_nodes(method_index, hot_nodes):
-    if not hot_nodes:
-        print("✅ 没有需要分析的节点")
-        return
-
+def phase3_index_all(method_index, hot_nodes, index_all: bool = False):
+    """阶段3：LLM 摘要索引。
+    index_all=True  → 全量索引所有方法（增量跳过已有）
+    index_all=False → 仅索引 top-5 热点方法（快速模式，保持向后兼容）
+    """
     # 延迟导入，确保 graph-only 模式不触发向量和 LLM 依赖
     from src.storage.vector_store import KnowledgeBase
+    from src.llm.batch_indexer import BatchIndexer
     from src.llm.processor import LLMProcessor
-
-    method_map = {m['name']: m for m in method_index}
-
-    print(f"\n🤖 阶段3：调用LLM分析 top5 方法...")
 
     kb = KnowledgeBase()
 
-    for method_name, degree in hot_nodes[:5]:
-        if method_name in method_map:
-            method = method_map[method_name]
-            code = method['code']
-            git_info = {"author": "Unknown", "message": "调用关系分析"}
+    if index_all:
+        print(f"\n🤖 阶段3：全量 LLM 摘要索引（{len(method_index)} 个方法，增量更新）...")
+        # 构建调用计数 map（用于写元数据）
+        call_counts = {name: count for name, count in hot_nodes}
+        indexer = BatchIndexer(knowledge_base=kb)
+        stats = indexer.index_all(
+            method_index,
+            call_counts=call_counts,
+            max_workers=4,
+            skip_existing=True,
+        )
+        print(
+            f"✅ 全量索引完成：总计 {stats['total']}，"
+            f"新增 {stats['indexed']}，跳过 {stats['skipped']}，失败 {stats['failed']}"
+        )
+        print(f"   向量库当前文档数：{kb.count()}")
+    else:
+        if not hot_nodes:
+            print("✅ 没有需要分析的节点")
+            return
+        method_map = {m['name']: m for m in method_index}
+        print(f"\n🤖 阶段3：调用LLM分析 top5 热点方法...")
+        for method_name, degree in hot_nodes[:5]:
+            if method_name in method_map:
+                method = method_map[method_name]
+                git_info = {"author": "Unknown", "message": "调用关系分析"}
+                summary = LLMProcessor.generate_summary(
+                    method_name=method_name,
+                    code=method['code'],
+                    git_info=git_info,
+                    class_name=method.get('class_name', ''),
+                )
+                chunk_id = (
+                    f"{method['file_path']}::{method.get('class_name', '')}::{method_name}"
+                    .replace(os.sep, "/")
+                )
+                metadata = {
+                    "file_path": method['file_path'],
+                    "method_name": method_name,
+                    "class_name": method.get('class_name', ''),
+                    "layer": "unknown",
+                    "call_count": degree,
+                    "callers_count": 0,
+                }
+                kb.add_code_chunk(chunk_id, summary, method['code'], metadata)
+                print(f"  ✅ {method_name}")
+        print(f"✅ 分析完成！已存储 {min(5, len(hot_nodes))} 个方法")
 
-            summary = LLMProcessor.generate_summary(method_name, code, git_info)
 
-            chunk_id = f"{method['file_path']}_{method_name}".replace(os.sep, "_")
-            metadata = {
-                "file_path": method['file_path'],
-                "method_name": method_name,
-                "class_name": method.get('class_name', ''),
-                "is_caller_node": True,
-                "calls_count": degree
-            }
-
-            kb.add_code_chunk(chunk_id, summary, code, metadata)
-            print(f"  ✅ {method_name}")
-
-    print(f"✅ 分析完成！已存储 {min(5, len(hot_nodes))} 个方法")
-
-
-def main(enable_llm=True):
+def main(enable_llm=True, index_all=False):
     print("🚀 Code-GraphRAG 构建流水线\n")
 
     # 初始化图数据库（可选）
@@ -169,9 +192,9 @@ def main(enable_llm=True):
         graph_store.batch_add_belongs_to_relationships(belongs_to_rows)
         print("✅ BELONGS_TO 关系存储完成")
 
-    # 阶段3：LLM 分析（可选）
+    # 阶段3：LLM 摘要索引（可选）
     if enable_llm:
-        phase3_analyze_hot_nodes(method_index, hot_nodes)
+        phase3_index_all(method_index, hot_nodes, index_all=index_all)
     else:
         print("\n⏭️ 阶段3已跳过（graph-only 模式）")
 
@@ -218,8 +241,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--graph-only",
         action="store_true",
-        help="仅执行图存储与树生成流程，跳过向量和 LLM 分析"
+        help="仅执行图存储与树生成流程，跳过向量和 LLM 分析",
+    )
+    parser.add_argument(
+        "--index-all",
+        action="store_true",
+        help="全量 LLM 摘要索引所有方法（增量更新，跳过已有），默认仅索引 top-5",
     )
     args = parser.parse_args()
 
-    main(enable_llm=not args.graph_only)
+    main(enable_llm=not args.graph_only, index_all=args.index_all)

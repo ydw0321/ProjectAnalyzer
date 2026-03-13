@@ -1,22 +1,48 @@
 import requests
 from src.config import Config
+from typing import List, Optional
 
 
 class LLMProcessor:
     @staticmethod
-    def generate_summary(method_name: str, code: str, git_info: dict) -> str:
+    def generate_summary(
+        method_name: str,
+        code: str,
+        git_info: dict,
+        class_name: str = "",
+        layer: str = "",
+        field_deps: Optional[List[str]] = None,
+    ) -> str:
         last_author = git_info.get("author", "Unknown")
         commit_message = git_info.get("message", "Unknown")
 
-        prompt = f"""请分析以下Java方法，用简洁的中文（不超过200字）描述其核心业务功能和外部调用/依赖。
+        layer_hint = f"- 所属层级：{layer}" if layer else ""
+        class_hint = f"- 所属类：{class_name}" if class_name else ""
+        deps_hint = (
+            f"- 字段依赖：{', '.join(field_deps)}"
+            if field_deps
+            else ""
+        )
 
-上下文信息：
+        prompt = f"""你是一个资深 Java 架构师，正在为一个几十万行的历史老项目建立知识库。
+请分析以下 Java 方法，用简洁的中文（不超过 200 字）描述其核心业务功能。
+
+## 上下文信息
 - 方法名：{method_name}
+{class_hint}
+{layer_hint}
+{deps_hint}
 - 最后修改人：{last_author}
 - 修改原因：{commit_message}
 
-源代码：
-```{code}
+## 输出要求
+1. **业务职责**：用一句话说清楚这个方法做什么业务
+2. **关键依赖**：调用了哪些外部服务/DAO/RPC（可从代码推断）
+3. **副作用**：是否写 DB、发消息、调第三方（如有）
+
+## 源代码
+```java
+{code}
 ```"""
 
         try:

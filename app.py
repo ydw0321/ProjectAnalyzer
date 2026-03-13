@@ -43,6 +43,7 @@ for key, default in [
 from ui.layer_tree_panel import render_layer_tree_panel
 from ui.call_graph_panel import render_call_graph_panel, render_detail_bar
 from ui.package_tree_panel import render_package_tree_panel
+from ui.chat_panel import render_chat_panel
 
 # ── 顶部标题 + 工具栏 ────────────────────────────────────────────
 header_col, spacer = st.columns([4, 1])
@@ -121,22 +122,32 @@ with right_col:
             unsafe_allow_html=True,
         )
 
-    # 渲染图，获取点击节点
-    clicked_node = render_call_graph_panel(
-        class_name=selected_class or "",
-        method_name=selected_method or "",
-        depth=depth,
-        direction=direction_key,
-    )
+    tab_graph, tab_chat = st.tabs(["📊 调用图", "💬 智能问答"])
 
-    # 点击图中节点 → 解析并更新选中状态（格式: "ClassName.methodName"）
-    if clicked_node and isinstance(clicked_node, str) and "." in clicked_node:
-        parts = clicked_node.split(".", 1)
-        new_class, new_method = parts[0], parts[1]
-        if new_class != selected_class or new_method != selected_method:
-            st.session_state["selected_class"] = new_class
-            st.session_state["selected_method"] = new_method
-            st.rerun()
+    with tab_graph:
+        # 渲染图，获取点击节点
+        clicked_node = render_call_graph_panel(
+            class_name=selected_class or "",
+            method_name=selected_method or "",
+            depth=depth,
+            direction=direction_key,
+        )
+
+        # 点击图中节点 → 解析并更新选中状态（格式: "ClassName.methodName"）
+        if clicked_node and isinstance(clicked_node, str) and "." in clicked_node:
+            parts = clicked_node.split(".", 1)
+            new_class, new_method = parts[0], parts[1]
+            if new_class != selected_class or new_method != selected_method:
+                st.session_state["selected_class"] = new_class
+                st.session_state["selected_method"] = new_method
+                st.session_state["chat_prefill"] = f"请分析 {new_class}.{new_method} 的业务职责和上下游调用链"
+                st.rerun()
+
+    with tab_chat:
+        render_chat_panel(
+            selected_class=st.session_state.get("selected_class") or "",
+            selected_method=st.session_state.get("selected_method") or "",
+        )
 
 # ── 底部详情栏 ───────────────────────────────────────────────────
 st.divider()
