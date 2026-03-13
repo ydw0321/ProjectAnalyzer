@@ -5,6 +5,33 @@ from typing import List, Optional
 
 class LLMProcessor:
     @staticmethod
+    def _call_llm(prompt: str) -> str:
+        try:
+            headers = {
+                "Authorization": f"Bearer {Config.LLM_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": Config.LLM_MODEL,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ],
+                "stream": False
+            }
+            response = requests.post(
+                Config.LLM_API_URL,
+                headers=headers,
+                json=payload,
+                timeout=Config.LLM_TIMEOUT
+            )
+            result = response.json()
+            if "choices" in result and len(result["choices"]) > 0:
+                return result["choices"][0]["message"]["content"]
+            return result.get("content", "大模型未返回有效内容")
+        except Exception as e:
+            return f"大模型生成失败: {str(e)}"
+
+    @staticmethod
     def generate_summary(
         method_name: str,
         code: str,
@@ -45,27 +72,23 @@ class LLMProcessor:
 {code}
 ```"""
 
-        try:
-            headers = {
-                "Authorization": f"Bearer {Config.LLM_API_KEY}",
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "model": Config.LLM_MODEL,
-                "messages": [
-                    {"role": "user", "content": prompt}
-                ],
-                "stream": False
-            }
-            response = requests.post(
-                Config.LLM_API_URL,
-                headers=headers,
-                json=payload,
-                timeout=Config.LLM_TIMEOUT
-            )
-            result = response.json()
-            if "choices" in result and len(result["choices"]) > 0:
-                return result["choices"][0]["message"]["content"]
-            return result.get("content", "大模型未返回有效内容")
-        except Exception as e:
-            return f"大模型生成失败: {str(e)}"
+        return LLMProcessor._call_llm(prompt)
+
+    @staticmethod
+    def generate_qa_answer(question: str, context: str) -> str:
+        prompt = f"""你是一位资深系统架构顾问，正在帮助用户理解历史项目。
+请严格基于给定上下文回答问题，不要要求用户补充“某个方法源代码”，除非上下文完全为空。
+
+## 用户问题
+{question}
+
+## 已知上下文
+{context}
+
+## 输出要求
+1. 先给结论（2-4句）
+2. 列出关键调用链或关键对象
+3. 明确哪些结论是确定的，哪些是推断
+4. 若上下文不足，说明缺少哪类信息（而不是指定某个虚构方法）
+"""
+        return LLMProcessor._call_llm(prompt)
