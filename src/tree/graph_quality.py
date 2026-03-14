@@ -655,6 +655,7 @@ def get_structural_risk_stats(query):
             """
             MATCH (c1:Class)<-[:BELONGS_TO]-(:Method)-[:CALLS]->(:Method)-[:BELONGS_TO]->(c2:Class)
             WHERE c1.name < c2.name
+            WITH DISTINCT c1, c2
             WITH c1, c2,
                  size([(c1)<-[:BELONGS_TO]-(:Method)-[:CALLS]->(:Method)-[:BELONGS_TO]->(c2) | 1]) AS forward_count,
                  size([(c2)<-[:BELONGS_TO]-(:Method)-[:CALLS]->(:Method)-[:BELONGS_TO]->(c1) | 1]) AS reverse_count

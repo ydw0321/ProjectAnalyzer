@@ -1,5 +1,5 @@
 # service Layer Overview
 
-您尚未提供需要分析的 `GraphRAGAnswer` 具体源代码，仅展示了项目背景和其他方法的样本摘要。
+> Auto-generated (offline). Classes: **0** | Project total calls: 124171
 
-请您粘贴 **`QASession.GraphRAGAnswer`** 方法的具体 Java 代码，我将立即为您生成符合要求的知识库分析文档。
+_No classes found for this layer in the graph._

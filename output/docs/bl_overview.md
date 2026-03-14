@@ -1,11 +1,1016 @@
 # bl Layer Overview
 
-您尚未提供该方法的具体源代码。
+> Auto-generated (offline). Classes: **1010** | Project total calls: 124171
 
-基于现有的上下文（类名 QASession、方法名 GraphRAGAnswer、修改人 GraphRAG），仅能做如下**推测性**骨架分析，供您参考：
+## Classes
 
-1.  **业务职责**：该方法位于分析层， likely 负责基于图数据库（Graph）的检索增强生成（RAG）技术，在会话过程中理解用户问题并生成答案。
-2.  **关键依赖**：大概率依赖图数据库查询接口、向量嵌入服务、以及 LLM（大语言模型）调用 API。
-3.  **副作用**：可能会将本次问答记录写入 DB 以更新会话历史。
-
-**请粘贴源代码，我将为您生成精确的分析。**
+- **BLAccAction** (60 methods): CreateVoucher, calOTtyBComCashLoss, calOTtyBComOSLoss, calOTtyBComPayValue, calOTtyBComPremium, checkAccFac, checkAccTreaty, checkCLAccGen … (+52)
+- **BLAccCommAdjustAction** (6 methods): checkTreaty, genAcc, genAccTB, genAccTR, getBallance, getCommAdjustValue
+- **BLAccFRAction** (36 methods): calFzItemRate, checkBatchFacAccGen, checkFacAccGen, genAcc, genAccDtoInfo, genAccDtoList, genBatchFacAcc, genBatchFacFBAcc … (+28)
+- **BLAccFacQueryAction** (2 methods): findByConditions, findCurrencys
+- **BLAccFacQueryFacade** (2 methods): findByConditions, findCurrecys
+- **BLAccFacade** (24 methods): checkAccTreaty, checkFzAccIn, confirmSettleIn, delete, findByPrimaryKey, genAcc, genAccRePay, genAccReendor … (+16)
+- **BLAccInAction** (7 methods): delete, save, setAccNo, settle, settleFac, settleTreaty, update
+- **BLAccIndividAction** (4 methods): exchTRAcc, exchTRDetailAcc, settleFac, settleTtyAcc
+- **BLAccMainVoucherAction** (1 methods): convertDto
+- **BLAccMainVoucherActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAccMonthTraceAction** (2 methods): convertDto, getYearMonth
+- **BLAccMonthTraceActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAccNumOrderAction** (1 methods): convertDto
+- **BLAccNumOrderActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAccPrintAction** (21 methods): accPrintTR, chgSerialToEName, getAccNos, getAllRiskEName, getComName, getCurrencyFlag, getInnerPayName, getOTRAccItemList … (+13)
+- **BLAccPrintFacade** (7 methods): accTtyBatchPrintR, accTtyLeadingFee, prepareAccPrint, prepareAccTtyBatchCheckPrint, prepareAccTtyBatchMergePrint, prepareAccTtyBatchPrint, prepareItemRPrint
+- **BLAccProfitCommAction** (6 methods): checkTreaty, genAcc, genAccTB, genAccTR, getBallance, getProfitCommValue
+- **BLAccPubAction** (8 methods): getAccDtoList, getAccNoSaveList, getAccPeriodAll, getAccPeriodQtoM, getComList, getFinalReinsList, getNoSaveAcc, saveAcc
+- **BLAccSubDirectionAction** (1 methods): convertDto
+- **BLAccSubDirectionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAccSubVoucherAction** (1 methods): convertDto
+- **BLAccSubVoucherActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAccTBAction** (44 methods): add, adjustAccTRBalance, adjustCommission, checkAcc, checkTBAccGen, checkTBAccPeriodClose, copyFzItemList, copyFzPayItemList … (+36)
+- **BLAccTRAction** (28 methods): addDouble, checkTRAccGen, genAccDtoInfo, genAccDtoListInfo, genAccTRG, genFhTreatyAccPeriodDto, genFzItemDtoInfo, genFzPayItemDtoInfo … (+20)
+- **BLAccTotalPrintAction** (3 methods): getReins, getTotalAcc, getTreatyNoList
+- **BLAccTotalPrintFacade** (3 methods): getTreatyNoList, prepareGetReins, prepareToltalAccList
+- **BLAccTreatyQueryAction** (1 methods): getTreatyList
+- **BLAccTreatyQueryFacade** (1 methods): prepareAccTtyList
+- **BLAccTtyListPrintAction** (12 methods): accTtyNewTRByCurrencySizeList, accTtyNewTRByReinsCodeCurrencySizeList, accTtyNewTRReinsSizeList, getAccTtyBList, getAccTtyBatchList, getAccTtyRList, prepareAccTtyBList, prepareAccTtyBatchList … (+4)
+- **BLAccTtyListPrintFacade** (9 methods): accTtyNewTRByCurrencyReinsSizeList, accTtyNewTRByReinsCodeCurrencyReinsSizeList, accTtyNewTRReinsSizeList, prepareAccTtyBList, prepareAccTtyBatchList, prepareAccTtyNewTRByCurrencyList, prepareAccTtyNewTRByReinsCodeList, prepareAccTtyNewTRList … (+1)
+- **BLAccTtyReendorPrintAction** (1 methods): prepareAccTtyReendor
+- **BLAccTtyReendorPrintFacade** (1 methods): prepareAccTtyReendor
+- **BLAccTtyRepayLossPrintAction** (5 methods): changeCurrency, getCodeEValue, getExchRate, getExchRateFormula, prepareAccTtyRepayLoss
+- **BLAccTtyRepayLossPrintFacade** (1 methods): prepareAccTtyRepayLoss
+- **BLAccTtyRepayOSLossPrintAction** (1 methods): prepareAccTtyRepayOSLoss
+- **BLAccTtyRepayOSLossPrintFacade** (1 methods): prepareAccTtyRepayOSLoss
+- **BLAccTtyRepolicyPrintAction** (6 methods): getAccTRList, getCodeValue, getExchRate, getRiskKindName, isSpecial, prepareAccTtyRepolicy
+- **BLAccTtyRepolicyPrintFacade** (2 methods): getAccTRList, prepareAccTtyRepolicy
+- **BLAccVoucherNoAction** (2 methods): convertDto, getNewVoucherNo
+- **BLAccVoucherNoActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAdditionalTaxAction** (2 methods): convertDto, findByComCode
+- **BLAdditionalTaxActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAdditionalTaxFacade** (1 methods): findByComCode
+- **BLAdditionalTaxFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLAssociateAction** (1 methods): associate
+- **BLAssociateFacade** (1 methods): findAssociate
+- **BLBatchEnquiryFacade** (4 methods): cancleBatchEnquiry, reGenEnquriy, saveAndCalRepolicy, updateTteayNo
+- **BLBillAction** (22 methods): GetCurrentYearStr, GetInitNo, batchInitNo, checkNo, combineAccGroupNo, combineGroupNo, combineSettleGroupNo, combineTreatyGroupNo … (+14)
+- **BLBillFacade** (9 methods): batchInitNo, checkNo, deleteNo, getGroupNo, getNo, occupy, pickNo, pullNo … (+1)
+- **BLCDangerGetAction** (10 methods): delete, genCLimitAmount, genCdangerUnitInfo, genLRCLimitAmount, genShipCode, getCDangerInfo, getLRCDangerInfo, getSumAmountFor1903 … (+2)
+- **BLCTrialAction** (2 methods): getCFeoEnquiryInfo, getCTrialInfo
+- **BLCTrialFacade** (1 methods): getCTrialInfo
+- **BLCancelAccAction** (4 methods): CancelAccC, CancelAccL, CancelAccP, cancleAcc
+- **BLCancelAccFacade** (3 methods): CancelAccC, CancelAccL, CancelAccP
+- **BLCarEndorCheckAction** (2 methods): getAllEndorse, getPrpPmain
+- **BLCarEndorCheckFacade** (6 methods): generateDangerUnitDate, generateDangerUnitInfo, generateFco, generateReinsData, getAllEndorse, getPrpPmain
+- **BLChangePasswordAction** (1 methods): changePassword
+- **BLChangePasswordFacade** (1 methods): changePassword
+- **BLCheckDataAction** (3 methods): checkDataResult, getCheckPoint, query
+- **BLCheckDataFacade** (1 methods): query
+- **BLCodeAction** (2 methods): findByConditions, getCount
+- **BLCodeFacade** (2 methods): findByConditions, getCount
+- **BLCustomDataCheckAction** (1 methods): getDataCheck
+- **BLCustomDataCheckFacade** (1 methods): getDataCheck
+- **BLDangerAction** (17 methods): getCDangerInfo, getCDangerList, getDangerDetailList, getEndorFacOptFlag, getLDangerInfo, getOwnRiskByKindCode, getPDangerByPolicy, getPDangerByPreEndor … (+9)
+- **BLDangerFacade** (11 methods): getCDangerInfo, getDangerDetailList, getDangerPlanList, getDangerRiskList, getOwnRiskByKindCode, getPDangerInfo, getTDangerInfo, isSplitDangerByKind … (+3)
+- **BLDataCheckAction** (6 methods): getTBdiffChgPremium, getTBdiffOutStanding, getTBdiffPayValue, getTBdiffPremium, getTBdifferValue, prepareAccCheckPrint
+- **BLDataCheckFacade** (1 methods): prepareAccCheck
+- **BLDetailReportPrintAction** (4 methods): getAccTROutStandingDetailList, getAccTRRepayDetailList, getAccTtyFRDetail, getRisk
+- **BLDetailReportPrintFacade** (2 methods): getReportPrintDtoList, getRisk
+- **BLEnquiryAction** (42 methods): CopyFeoEnquiryToEndorse, CopyFeoEnquiryToPolicy, CopyFeoEnquiryToPreProtocol, CreateFeoEnquiryDto, UpdEnquiryNo, UpdateEnquiryFlag, delete, dohaveFeo … (+34)
+- **BLEnquiryFacade** (23 methods): CopyFeoEnquiryToPolicy, Update, UpdateEnquiryFlag, delete, deleteForPrpall, findByConditions, findByPK, genEnquiryDtoForAdjust … (+15)
+- **BLErrorDataProcessFacade** (4 methods): reGenerateClaim, reGenerateReendor, reGenerateRpolicy, setReinsFlag
+- **BLExcelAction** (2 methods): getStringCellValue, importExcelFhreten
+- **BLExcelFacade** (1 methods): importExcelFhreten
+- **BLExcessLossAccAction** (14 methods): genAcc, genAccB, genAccFzB, genAccFzPayB, genAccFzPayR, genAccFzPlanB, genAccFzPlanR, genAccFzR … (+6)
+- **BLExcessLossAccFacade** (3 methods): deleteAcc, saveAcc, settleAcc
+- **BLExchGetAction** (3 methods): changeCurrency, getExchRate, getExchValue
+- **BLExchGetFacade** (1 methods): getExchRate
+- **BLFDEventAction** (1 methods): convertDto
+- **BLFDEventActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFDEventFacade** (0 methods)
+- **BLFDEventFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFacBatchInFoAction** (5 methods): convertDto, delete, findByPrimaryKey, insert, update
+- **BLFacBatchInFoActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFacBatchInFoFacade** (0 methods)
+- **BLFacBatchInFoFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFacBatchReinsurerAction** (1 methods): convertDto
+- **BLFacBatchReinsurerActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFacBatchReinsurerFacade** (0 methods)
+- **BLFacBatchReinsurerFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFacRepayCalcNoticePrintAction** (3 methods): getDamageEName, getRiskEName, prepareFacRepayCalcNotice
+- **BLFacRepayCalcNoticePrintFacade** (1 methods): prepareFacRepayCalcNotice
+- **BLFacRepayNoticeReinsPrintAction** (2 methods): getRiskEName, prepareFacRepayNoticeReins
+- **BLFacRepayNoticeReinsPrintFacade** (1 methods): prepareFacRepayNoticeReins
+- **BLFacXLayerAction** (10 methods): deleteFeoXInfo, findFeoXFac, findFeoXfacE, findfeoxLayer, getChangePreium, getChangePreiumEndor, getXFacLayer, saveXfac … (+2)
+- **BLFacXLayerFacade** (4 methods): deleteFeoXInfo, findFeoXFac, getXFacLayer, save
+- **BLFciReclauseAction** (1 methods): convertDto
+- **BLFciReclauseActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFciRecoinsAction** (1 methods): convertDto
+- **BLFciRecoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFciReitemAction** (1 methods): convertDto
+- **BLFciReitemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFciRepolicyAction** (3 methods): convertDto, createRepolicy, setAccFlag
+- **BLFciRepolicyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFciRepolicyFacade** (0 methods)
+- **BLFciRepolicyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFciRetotAction** (1 methods): convertDto
+- **BLFciRetotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoAbstractAction** (3 methods): convertDto, createAbstract, getAbstractInfo
+- **BLFcoAbstractActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoAbstractFacade** (0 methods)
+- **BLFcoAbstractFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoCededAction** (1 methods): convertDto
+- **BLFcoCededActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoCededFacade** (0 methods)
+- **BLFcoCededFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoCoinsAction** (1 methods): convertDto
+- **BLFcoCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoCoinsFacade** (0 methods)
+- **BLFcoCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoCommissionAction** (1 methods): convertDto
+- **BLFcoCommissionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoCommissionFacade** (0 methods)
+- **BLFcoCommissionFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoFacAction** (7 methods): convertDto, createFac, getFacInfo, getReinsForFacR, getReinsForFacRAll, sumByCurrencyFlag, sumFacShare
+- **BLFcoFacActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoFacFacade** (0 methods)
+- **BLFcoFacFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoFeeAction** (1 methods): convertDto
+- **BLFcoFeeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoFeeFacade** (0 methods)
+- **BLFcoFeeFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoItemAction** (1 methods): convertDto
+- **BLFcoItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoItemFacade** (0 methods)
+- **BLFcoItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoLimitAction** (1 methods): convertDto
+- **BLFcoLimitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoLimitFacade** (0 methods)
+- **BLFcoLimitFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoPlanAction** (1 methods): convertDto
+- **BLFcoPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoPlanFacade** (0 methods)
+- **BLFcoPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoPolicyAction** (5 methods): convertDto, findAllByConditions, getCFcoInfo, insertAll, insertAllSubmitEnquiry
+- **BLFcoPolicyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoPolicyFacade** (1 methods): findAllByConditions
+- **BLFcoPolicyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoRecoinsAction** (6 methods): convertDto, createRecoins, getBaseRate, getCoinsShare, getCoinsShareRate, getRecoinsInfo
+- **BLFcoRecoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoRecoinsFacade** (0 methods)
+- **BLFcoRecoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoRepolicyAction** (8 methods): amountSwitchChg, convertDto, createRepolicy, findAccBatchFacDetail, findAccBatchFacSum, getInfoByNoticeNos, setPolicyInSuredName, update
+- **BLFcoRepolicyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoRepolicyAdjustAction** (10 methods): adjustFcoInfo, adjustFcoReCoinsInfo, adjustFsoInfo, adjustPrpCInfo, adjustPrpTInfo, adjustRepolicyInfo, getAdjustInfo, getTreatyInfo … (+2)
+- **BLFcoRepolicyAdjustFacade** (5 methods): adjustFcoReCoinsInfo, adjustRepolicyInfo, getInfoByRepolicyNo, getTreatyInfo, getXTreatyInfo
+- **BLFcoRepolicyFacade** (7 methods): findAccBatchFacDetail, findAccBatchFacSum, findByConditions, findByPrimaryKey, genRepolicyInfo, getInfoByNoticeNos, getRowsCount
+- **BLFcoRepolicyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoRetotAction** (10 methods): SumByNoticeTcry, amountSwitchChg, convertDto, createRetot, getNoticeNo, getRepolicyNoByNoticeNo, getRetotInfo, getRetotOfAcc … (+2)
+- **BLFcoRetotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoRetotFacade** (0 methods)
+- **BLFcoRetotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoShareAction** (11 methods): convertDto, createShare, getFacShare, getHTShare, getInfoExceptTty, getShareByReinsMode, getShareInfo, getShareInfoByReinsMode … (+3)
+- **BLFcoShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoShareFacade** (0 methods)
+- **BLFcoShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoSpecialAction** (1 methods): convertDto
+- **BLFcoSpecialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoSpecialFacade** (0 methods)
+- **BLFcoSpecialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoSpecialMapAction** (1 methods): convertDto
+- **BLFcoSpecialMapActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoSpecialMapFacade** (0 methods)
+- **BLFcoSpecialMapFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoengageAction** (1 methods): convertDto
+- **BLFcoengageActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFcoengageFacade** (0 methods)
+- **BLFcoengageFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdConfigAction** (1 methods): convertDto
+- **BLFdConfigActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdConfigFacade** (0 methods)
+- **BLFdConfigFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdOwnRiskConfigAction** (3 methods): convertDto, findOwnRiskConfigByConditions, isSameTreaty
+- **BLFdOwnRiskConfigActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdOwnRiskConfigFacade** (1 methods): findOwnRiskConfigByConditions
+- **BLFdOwnRiskConfigFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdReportAction** (1 methods): convertDto
+- **BLFdReportActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdReportFacade** (0 methods)
+- **BLFdReportFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdRiskConfigAction** (1 methods): convertDto
+- **BLFdRiskConfigActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdRiskConfigFacade** (0 methods)
+- **BLFdRiskConfigFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdTreatyGroupConfigAction** (1 methods): convertDto
+- **BLFdTreatyGroupConfigActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFdTreatyGroupConfigFacade** (1 methods): hasDefaultFhTreatyGroup
+- **BLFdTreatyGroupConfigFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoCoinsAction** (1 methods): convertDto
+- **BLFeoCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoCoinsFacade** (0 methods)
+- **BLFeoCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoEngageAction** (1 methods): convertDto
+- **BLFeoEngageActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoEngageFacade** (2 methods): findByConditions, findSumOverageByNoticeNo
+- **BLFeoEnquiryAction** (3 methods): convertDto, findByQuotationNo, findByQuotationNo1
+- **BLFeoEnquiryActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoEnquiryFacade** (2 methods): getFeoEnquiryDto, getFeoEnquiryDtoList
+- **BLFeoEnquiryFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoItemAction** (2 methods): convertDto, findSumOveragebyNoticeNo
+- **BLFeoItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoItemFacade** (2 methods): findByConditions, findSumOverageByNoticeNo
+- **BLFeoParticularAction** (1 methods): convertDto
+- **BLFeoParticularActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoParticularEngageAction** (1 methods): convertDto
+- **BLFeoParticularEngageActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoParticularTotAction** (1 methods): convertDto
+- **BLFeoParticularTotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoReinsReceiveAction** (1 methods): convertDto
+- **BLFeoReinsReceiveActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoReinsReceiveFacade** (2 methods): findByConditions, findSumOverageByNoticeNo
+- **BLFeoReinsReceiveFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoReinsReceiveTraceAction** (2 methods): convertDto, getAdjustTraceInfo
+- **BLFeoReinsReceiveTraceActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoReinsReceiveTraceFacade** (0 methods)
+- **BLFeoReinsReceiveTraceFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoTotAction** (1 methods): convertDto
+- **BLFeoTotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoTotFacade** (1 methods): findByConditions
+- **BLFeoXLayerAction** (1 methods): convertDto
+- **BLFeoXLayerActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXLayerFacade** (0 methods)
+- **BLFeoXLayerFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXLayerTraceAction** (1 methods): convertDto
+- **BLFeoXLayerTraceActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXPlanAction** (1 methods): convertDto
+- **BLFeoXPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXPlanTraceAction** (1 methods): convertDto
+- **BLFeoXPlanTraceActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXReinsAction** (1 methods): convertDto
+- **BLFeoXReinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXReinsFacade** (0 methods)
+- **BLFeoXReinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFeoXReinsTraceAction** (1 methods): convertDto
+- **BLFeoXReinsTraceActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhAccDelayFacade** (0 methods)
+- **BLFhCommRateAction** (1 methods): convertDto
+- **BLFhCommRateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhCommRateFacade** (0 methods)
+- **BLFhCommRateFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhExItemKindAction** (3 methods): convertDto, findByConditions, insert
+- **BLFhExItemKindActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhExItemKindFacade** (1 methods): insert
+- **BLFhExItemKindFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhExchRateAction** (2 methods): convertDto, insertDtoList
+- **BLFhExchRateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhExchRateFacade** (0 methods)
+- **BLFhExchRateFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhFinalReinsAction** (1 methods): convertDto
+- **BLFhFinalReinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhFinalReinsFacade** (0 methods)
+- **BLFhFinalReinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhInterestAction** (2 methods): convertDto, insertDtoList
+- **BLFhInterestActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhInterestFacade** (0 methods)
+- **BLFhInterestFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhItemAction** (2 methods): convertDto, findByTreatyNo
+- **BLFhItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhItemFacade** (0 methods)
+- **BLFhItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhMaterialAction** (1 methods): convertDto
+- **BLFhMaterialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhMaterialFacade** (0 methods)
+- **BLFhMaterialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhModulusAction** (1 methods): convertDto
+- **BLFhModulusActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhModulusFacade** (0 methods)
+- **BLFhModulusFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhPaymentAction** (1 methods): convertDto
+- **BLFhPaymentActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhPaymentFacade** (0 methods)
+- **BLFhPaymentFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhPeriodStateAction** (4 methods): conserveAccPeriod, convertDto, getNextAccPeriod, setPeriodState
+- **BLFhPeriodStateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhPeriodStateFacade** (0 methods)
+- **BLFhPeriodStateFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhPriorityAction** (1 methods): convertDto
+- **BLFhPriorityActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhPriorityFacade** (0 methods)
+- **BLFhPriorityFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhReinsAction** (4 methods): convertDto, findByTreatyNo, getReinsForTtyR, getReinsInfo
+- **BLFhReinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhReinsFacade** (2 methods): findByTreatyNo, findByTreatyNo1
+- **BLFhReinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRetenAction** (2 methods): convertDto, insertAll
+- **BLFhRetenActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRetenCollateAction** (1 methods): convertDto
+- **BLFhRetenCollateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRetenCollateFacade** (0 methods)
+- **BLFhRetenCollateFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRetenFacade** (3 methods): deleteAll, insertAll, updateAll
+- **BLFhRetenFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRiskAction** (3 methods): convertDto, findByConditions, findRiskByClassCode
+- **BLFhRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRiskClassRetenAction** (3 methods): convertDto, findRiskClassRetenByConditions, insertAll
+- **BLFhRiskClassRetenActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRiskClassRetenFacade** (2 methods): findRiskClassRetenByConditions, getRiskClassRetenList
+- **BLFhRiskClassRetenFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhRiskFacade** (1 methods): findRiskByClassCode
+- **BLFhRiskFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhSectionAction** (8 methods): convertDto, delete, findByConditions, findByPrimaryKey, findCurrencys, findFhItemRate, insert, update
+- **BLFhSectionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhSectionFacade** (3 methods): findByPrimaryKeyPrintR, findCurrencys, findItemRate
+- **BLFhSectionFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhSectionFinalReinsAction** (1 methods): convertDto
+- **BLFhSectionFinalReinsActionBase** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, findList, getCount, insert, update
+- **BLFhSectionFinalReinsFacade** (0 methods)
+- **BLFhSectionFinalReinsFacadeBase** (7 methods): deleteByConditions, findByConditions, findByPrimaryKey, findList, getCount, insert, update
+- **BLFhSectionReinsAction** (1 methods): convertDto
+- **BLFhSectionReinsActionBase** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, findList, getCount, insert, update
+- **BLFhSectionReinsFacade** (0 methods)
+- **BLFhSectionReinsFacadeBase** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, findList, getCount, insert, update
+- **BLFhStatiTypeAction** (2 methods): convertDto, insertDtoList
+- **BLFhStatiTypeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhStatiTypeFacade** (0 methods)
+- **BLFhStatiTypeFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhTreatyAccPeriodAction** (1 methods): convertDto
+- **BLFhTreatyAccPeriodActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhTreatyAction** (8 methods): convertDto, copy, delete, extend, findByPrimaryKey, insert, setTreatyNo, update
+- **BLFhTreatyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhTreatyFacade** (5 methods): copy, exitReinsUpdate, extend, findPrismTyeatyNoByConditions, findTreatyListByTreatyGroupNames
+- **BLFhTreatyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhTreatyGroupAction** (3 methods): convertDto, findValidTreatyGroupList, findValidTreatyListByGroupNo
+- **BLFhTreatyGroupActionBase** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, setTreatyGroupNO, update
+- **BLFhTreatyGroupFacade** (2 methods): findValidTreatyGroupList, findValidTreatyListByGroupNo
+- **BLFhTreatyGroupFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhTreatyGroupSeqAction** (1 methods): convertDto
+- **BLFhTreatyGroupSeqActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXComShareAction** (4 methods): convertDto, getFhXComShareList, insertAll, setFhXComShreList
+- **BLFhXComShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXComShareFacade** (2 methods): getFhXComShareList, insertAll
+- **BLFhXComShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXCompanyAction** (1 methods): convertDto
+- **BLFhXCompanyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXCompanyFacade** (0 methods)
+- **BLFhXCompanyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXLayerAction** (3 methods): convertDto, insert, update
+- **BLFhXLayerActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXLayerFacade** (0 methods)
+- **BLFhXLayerFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXPlanAction** (1 methods): convertDto
+- **BLFhXPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXPlanFacade** (0 methods)
+- **BLFhXPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXReinsAction** (1 methods): convertDto
+- **BLFhXReinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXReinsFacade** (0 methods)
+- **BLFhXReinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXReinstTimeInfoAction** (1 methods): convertDto
+- **BLFhXReinstTimeInfoActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXReinstTimeInfoFacade** (0 methods)
+- **BLFhXReinstTimeInfoFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXRiskAction** (1 methods): convertDto
+- **BLFhXRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXRiskFacade** (0 methods)
+- **BLFhXRiskFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXTreatyAction** (5 methods): convertDto, findByConditions, genRenewalLayer, insert, setFhxTreatyNo
+- **BLFhXTreatyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXTreatyFacade** (3 methods): deleteByConditions, generateRiskShareForAdjust, getState
+- **BLFhXTreatyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFhXTreatyPayAccAction** (36 methods): convertDto, createEventShareAcc, createFsoXreplansub, createRiskShareAcc, deleteEventShareAcc, deleteRiskShareAcc, generateBrachEventPayFzItem, generateBrachFzItem … (+28)
+- **BLFhXTreatyPayAction** (23 methods): autoEncodeEvent, calAsEventShare, calEventShare, calRiskShare, calRiskShareForAdjust, convertDto, deleteEvent, deletePay … (+15)
+- **BLFhXTreatyPayFacade** (16 methods): deleteEvent, deleteEventShareAcc, deletePay, deleteRiskShareAcc, encodeEvent, generateEventShare, generatePay, generateRiskShare … (+8)
+- **BLFiClaimAction** (5 methods): convertDto, findAllByConditions, insertAll, insertAllRecovery, insertBatchAll
+- **BLFiClaimActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFiClaimCoinsAction** (1 methods): convertDto
+- **BLFiClaimCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFiClaimCoinsFacade** (0 methods)
+- **BLFiClaimCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFiClaimFacade** (1 methods): findMaxSerialNoByCaseType
+- **BLFiClaimFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFiClaimItemAction** (1 methods): convertDto
+- **BLFiClaimItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFiClaimItemFacade** (0 methods)
+- **BLFiClaimItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFjSettleAction** (1 methods): convertDto
+- **BLFjSettleActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFjVouRelateAction** (1 methods): convertDto
+- **BLFjVouRelateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFlgNoticeAction** (7 methods): LargeLossRecordinsert, cancelNoticeRecordInsert, claimAdjustNoticeRecordInsert, claimBackRecordInsert, convertDto, endorseAdjustNoticeRecordInsert, facClaimRecordInsert
+- **BLFlgNoticeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFlgNoticeFacade** (2 methods): dealNotice, getNoticeCount
+- **BLFlgNoticeFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFliChargeAction** (1 methods): convertDto
+- **BLFliChargeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFliPersonLossAction** (1 methods): convertDto
+- **BLFliPersonLossActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFliReitemAction** (1 methods): convertDto
+- **BLFliReitemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFliRepayAction** (3 methods): convertDto, createRepay, setAccFlag
+- **BLFliRepayActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFliRepayFacade** (0 methods)
+- **BLFliRepayFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFliRetotAction** (1 methods): convertDto
+- **BLFliRetotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloAbstractAction** (3 methods): convertDto, createAbstract, genAbstract
+- **BLFloAbstractActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloAbstractFacade** (0 methods)
+- **BLFloAbstractFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloReitemAction** (2 methods): convertDto, createReItem
+- **BLFloReitemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloReitemFacade** (0 methods)
+- **BLFloReitemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloRepayAction** (2 methods): convertDto, createRepay
+- **BLFloRepayActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloRepayAdjustAction** (10 methods): adjustFloInfo, adjustFsoInfo, adjustPrpCInfo, adjustPrpLInfo, adjustRepayInfo, findFcoRepolicy, findFcoShareByRepolicyNo, getAdjustInfo … (+2)
+- **BLFloRepayAdjustFacade** (5 methods): adjustRepayInfo, findFcoRepolicy, findFcoShareByRepolicyNo, getInfoByRepayNo, getTreatyNoByRiskCode
+- **BLFloRepayFacade** (0 methods)
+- **BLFloRepayFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloRepayPrintAction** (1 methods): prepareFloRepay
+- **BLFloRepayPrintFacade** (1 methods): prepareFloRepay
+- **BLFloRetotAction** (2 methods): convertDto, createRetot
+- **BLFloRetotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloRetotFacade** (0 methods)
+- **BLFloRetotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloShareAction** (2 methods): convertDto, createShare
+- **BLFloShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloShareFacade** (1 methods): getOSFloShare
+- **BLFloShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloatAccAction** (14 methods): DtoToXml, convertDto, deleteFz, findbusinesschannel, findsumbalance, genFzAccInfo, genFzItemDtoInfo, genFzPayAccDtoInfo … (+6)
+- **BLFloatAccActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloatAccFacade** (11 methods): accno, deleteFzAcc, exchrate, findbusinesschannel, findsumbalance, insert, insertItem, insertPayAcc … (+3)
+- **BLFloatAccFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFloatAccItemAction** (1 methods): convertDto
+- **BLFloatAccItemActionBase** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, getFzAcc, insert, update
+- **BLFloatAccItemFacade** (0 methods)
+- **BLFloatAccItemFacadeBase** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, getFzAcc, insert, update
+- **BLFoadjusttracelistAction** (2 methods): convertDto, getFoAdjustTraceList
+- **BLFoadjusttracelistActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFoadjusttracelistFacade** (1 methods): getFoAdjustTraceList
+- **BLFoadjusttracelistFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFoadjusttracemainAction** (1 methods): convertDto
+- **BLFoadjusttracemainActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFoadjusttracemainFacade** (0 methods)
+- **BLFoadjusttracemainFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpiReclauseAction** (4 methods): convertDto, reendorToRepolicy, repolicyToReendor, setFlag
+- **BLFpiReclauseActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpiRecoinsAction** (4 methods): convertDto, reendorToRepolicy, repolicyToReendor, setFlag
+- **BLFpiRecoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpiReendorAction** (4 methods): convertDto, createReendor, reendorToRepolicy, setAccFlag
+- **BLFpiReendorActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpiReendorFacade** (0 methods)
+- **BLFpiReendorFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpiReitemAction** (4 methods): convertDto, reendorToRepolicy, repolicyToReendor, setFlag
+- **BLFpiReitemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpiRetotAction** (4 methods): convertDto, reendorToRepolicy, repolicyToReendor, setFlag
+- **BLFpiRetotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoAbstractAction** (5 methods): convertDto, createAbstract, createAbstract1, reendorToRepolicy, repolicyToReendor
+- **BLFpoAbstractActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoAbstractFacade** (0 methods)
+- **BLFpoAbstractFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoCededAction** (1 methods): convertDto
+- **BLFpoCededActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoCededFacade** (0 methods)
+- **BLFpoCededFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoCoinsAction** (1 methods): convertDto
+- **BLFpoCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoCoinsFacade** (0 methods)
+- **BLFpoCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoCommissionAction** (1 methods): convertDto
+- **BLFpoCommissionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoCommissionFacade** (0 methods)
+- **BLFpoCommissionFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoFacAction** (5 methods): convertDto, createFac, reendorParticularsPrint, reendorToRepolicy, sumFacShare
+- **BLFpoFacActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoFacFacade** (0 methods)
+- **BLFpoFacFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoFeeAction** (1 methods): convertDto
+- **BLFpoFeeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoFeeFacade** (0 methods)
+- **BLFpoFeeFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoItemAction** (1 methods): convertDto
+- **BLFpoItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoItemFacade** (0 methods)
+- **BLFpoItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoLimitAction** (1 methods): convertDto
+- **BLFpoLimitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoLimitFacade** (0 methods)
+- **BLFpoLimitFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoPlanAction** (1 methods): convertDto
+- **BLFpoPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoPlanFacade** (0 methods)
+- **BLFpoPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoPolicyAction** (4 methods): convertDto, findAllByConditions, insertAll, insertAllForEnquiry
+- **BLFpoPolicyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoPolicyFacade** (1 methods): findAllByConditions
+- **BLFpoPolicyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoRecoinsAction** (6 methods): convertDto, createRecoins, getInfoByPaycode, getcoinsByReendor, reendorToRepolicy, sumCoinsShare
+- **BLFpoRecoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoRecoinsFacade** (0 methods)
+- **BLFpoRecoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoReendorAction** (12 methods): convertDto, createReendor, deleteToReins, findAccBatchFacDetail, findAccBatchFacSum, findByRepolicyNo, genBackEndorse, genFrontEndorse … (+4)
+- **BLFpoReendorActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoReendorAdjustAction** (6 methods): adjustFpoInfo, adjustPrpPInfo, adjustReendorInfo, getAdjustInfo, getTreatyInfo, saveFoAdjustTraceInfo
+- **BLFpoReendorAdjustFacade** (3 methods): adjustReendorInfo, getAdjustValidateInfo, getTreatyInfo
+- **BLFpoReendorFacade** (3 methods): deleteToReins, findAccBatchFacDetail, findAccBatchFacSum
+- **BLFpoReendorFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoRetotAction** (9 methods): convertDto, createRetot, getRetotOfAcc, reendorParticularsPrint, reendorToRepolicy, repolicyToReendor, sumByNoticeTCry, sumBySCurrency … (+1)
+- **BLFpoRetotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoRetotFacade** (0 methods)
+- **BLFpoRetotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoShareAction** (8 methods): calOldTreaty, calTreaty, calcCoinsReten, convertDto, createShare, getShareByReinsMode, reendorToRepolicy, repolicyToReendor
+- **BLFpoShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoShareFacade** (0 methods)
+- **BLFpoShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoengageAction** (1 methods): convertDto
+- **BLFpoengageActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpoengageFacade** (0 methods)
+- **BLFpoengageFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpospecialAction** (1 methods): convertDto
+- **BLFpospecialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpospecialFacade** (0 methods)
+- **BLFpospecialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpospecialmapAction** (1 methods): convertDto
+- **BLFpospecialmapActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFpospecialmapFacade** (0 methods)
+- **BLFpospecialmapFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoReplanAction** (34 methods): chgSerialToDate, convertDto, crtReendorReplan, crtReendorReplanForAdjust, crtRepayReplan, crtReplanExceptTty, crtReplanExceptTtyForAdjust, crtReplanTty … (+26)
+- **BLFsoReplanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoReplanFacade** (1 methods): findCurrencys
+- **BLFsoReplanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoReplanKindAction** (2 methods): convertDto, insertFsoreplanKind
+- **BLFsoReplanKindActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoReplanSelectAction** (1 methods): convertDto
+- **BLFsoReplanSelectActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoReplanSubAction** (1 methods): convertDto
+- **BLFsoReplanSubActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoXReplanAction** (9 methods): convertDto, genEAccPayDate, genFsoXReplanMonth, genPAccPayDate, genTtyFsoXReplanInfo, genTtyFsoXReplanInfoE, getMaxSerialNo, save … (+1)
+- **BLFsoXReplanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoXReplanFacade** (4 methods): genETtyFsoXReplanInfo, genTtyFsoXReplanInfo, getMaxSerialENo, getMaxSerialNo
+- **BLFsoXReplanKindAction** (2 methods): convertDto, getMaxSerialNo
+- **BLFsoXReplanKindActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFsoXReplanSubAction** (2 methods): convertDto, getMaxSerialNo
+- **BLFsoXReplanSubActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoEventAction** (1 methods): convertDto
+- **BLFxoEventActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoEventFacade** (0 methods)
+- **BLFxoEventFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoEventShareAction** (2 methods): convertDto, findByConditions
+- **BLFxoEventShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoEventShareFacade** (0 methods)
+- **BLFxoEventShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoEventShareSubAction** (1 methods): convertDto
+- **BLFxoEventShareSubActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoPayAction** (2 methods): convertDto, findByConditions
+- **BLFxoPayActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoPayFacade** (0 methods)
+- **BLFxoPayFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, updatePay
+- **BLFxoRiskShareAction** (6 methods): adjustPayInfo, adjustRepayInfo, convertDto, findByConditions, findFxoRiskShareByRepolicyNo, saveFoAdjustTraceInfo
+- **BLFxoRiskShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoRiskShareFacade** (2 methods): adjustRepayInfo, findFxoRiskShareByRepolicyNo
+- **BLFxoRiskShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoRiskShareSubAction** (1 methods): convertDto
+- **BLFxoRiskShareSubActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFxoreplanAction** (11 methods): calResidualLossRiskShare, calRiskResidualLossShare, calRiskShare, facXCal, genFsoXReplanCoins, genFsoXReplanInfo, genFsoXReplanReins, generatePay … (+3)
+- **BLFzAccAction** (18 methods): checkDel, checkDelTB, convertDto, existOTtyBAcc, findBySumConditions, getIFacAccR, getOFacAccB, getOFacAccR … (+10)
+- **BLFzAccActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzAccExchRateAction** (1 methods): convertDto
+- **BLFzAccExchRateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzAccExchRateFacade** (0 methods)
+- **BLFzAccExchRateFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzAccFacade** (4 methods): findByConditions, findByPrimaryKey, getCount, getTtyMaxPeriod
+- **BLFzAccInVerifyAction** (1 methods): convertDto
+- **BLFzAccInVerifyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzAccInVerifyFacade** (1 methods): saveFzAccInVerify
+- **BLFzAccInVerifyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzCancelAction** (1 methods): convertDto
+- **BLFzCancelActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzItemAction** (3 methods): convertDto, findBySumConditions, insertAll
+- **BLFzItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPayAccAction** (8 methods): convertDto, findSettleFzPayAccByconditions, findXSettleFzPayAccByconditions, getFzPayAccItemList, getPayAccNo, getPayAccOSLoss, insertAll, prepareFzAccItemList
+- **BLFzPayAccActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPayAccFacade** (3 methods): findSettleFzPayAccByconditions, findXSettleFzPayAccByconditions, prepareFzPayAccItemList
+- **BLFzPayAccFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPayItemAction** (3 methods): convertDto, getItemInfo, insertAll
+- **BLFzPayItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPayItemFacade** (0 methods)
+- **BLFzPayItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPaymentRefAction** (1 methods): convertDto
+- **BLFzPaymentRefActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPlanDetailAction** (5 methods): convertDto, copyDto, getFzPlanDetail, insertAll, mergePlanDetailInfo
+- **BLFzPlanDetailActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzPlanMainAction** (7 methods): convertDto, copyDto, getFzPlanMain, getPlanDetailB, getPlanDetailR, insertAll, mergePlanInfo
+- **BLFzPlanMainActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLFzTtyRlistAction** (1 methods): convertDto
+- **BLFzTtyRlistActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGSSettleFacade** (0 methods)
+- **BLGenerateCarDataAction** (1 methods): GenerateProposalReinsData
+- **BLGetMiddleCostAction** (1 methods): getEndorMiddleCost
+- **BLGetMiddleCostFacade** (1 methods): getEndorMiddleCost
+- **BLGrEPIInBillAction** (1 methods): convertDto
+- **BLGrEPIInBillActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrEPIInBillFacade** (0 methods)
+- **BLGrEPIInBillFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrEPIPattenInBillAction** (1 methods): convertDto
+- **BLGrEPIPattenInBillActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrEPIPattenInBillFacade** (0 methods)
+- **BLGrEPIPattenInBillFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInSectionAction** (1 methods): convertDto
+- **BLGrInSectionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInSectionEndorAction** (1 methods): convertDto
+- **BLGrInSectionEndorActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInSectionEndorFacade** (0 methods)
+- **BLGrInSectionEndorFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInSectionFacade** (0 methods)
+- **BLGrInSectionFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInTreatyAction** (3 methods): convertDto, delete, getNo
+- **BLGrInTreatyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInTreatyEndorAction** (1 methods): convertDto
+- **BLGrInTreatyEndorActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInTreatyEndorFacade** (0 methods)
+- **BLGrInTreatyEndorFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrInTreatyFacade** (1 methods): getNo
+- **BLGrInTreatyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrTrackEPIInBillAction** (1 methods): convertDto
+- **BLGrTrackEPIInBillActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrTrackEPIInBillFacade** (0 methods)
+- **BLGrTrackEPIInBillFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrTrackEPIPattenInBillAction** (1 methods): convertDto
+- **BLGrTrackEPIPattenInBillActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrTrackEPIPattenInBillFacade** (0 methods)
+- **BLGrTrackEPIPattenInBillFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerAction** (1 methods): convertDto
+- **BLGrXInLayerActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerEndorAction** (1 methods): convertDto
+- **BLGrXInLayerEndorActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerEndorFacade** (0 methods)
+- **BLGrXInLayerEndorFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerFacade** (0 methods)
+- **BLGrXInLayerFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerPayPlanAction** (1 methods): convertDto
+- **BLGrXInLayerPayPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerPayPlanEndorAction** (1 methods): convertDto
+- **BLGrXInLayerPayPlanEndorActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerPayPlanEndorFacade** (0 methods)
+- **BLGrXInLayerPayPlanEndorFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInLayerPayPlanFacade** (0 methods)
+- **BLGrXInLayerPayPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInTreatyAction** (1 methods): convertDto
+- **BLGrXInTreatyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLGrXInTreatyEndorAction** (1 methods): convertDto
+- **BLGrXInTreatyEndorActionBase** (8 methods): delete, deleteByConditions, findByConditions, findByConditionsForEndor, findByPrimaryKey, getCount, insert, update
+- **BLGrXInTreatyEndorFacade** (0 methods)
+- **BLGrXInTreatyEndorFacadeBase** (8 methods): delete, deleteByConditions, findByConditions, findByConditionsForEndor, findByPrimaryKey, getCount, insert, update
+- **BLGrXInTreatyFacade** (0 methods)
+- **BLGrXInTreatyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLInsuranceAbilityAction** (1 methods): getRiskInfo
+- **BLInsuranceAbilityFacade** (1 methods): getRiskInfo
+- **BLLDangerAction** (10 methods): delete, findByPrimaryKey, genLDangerInfo, getCertiNo, getDangerUnit, getFhXtreatyDto, getPreEndorNo, ifOffLineCal … (+2)
+- **BLLTrialAction** (2 methods): getLTrialInfo, save
+- **BLLTrialFacade** (2 methods): getLTrialInfo, save
+- **BLLargeLossInfoAction** (1 methods): getLossInfo
+- **BLLargeLossInfoFacade** (1 methods): getLossInfo
+- **BLLegalAccPrintAction** (2 methods): getLegalAccPrintList, getLegalAccUwYearList
+- **BLLegalAccPrintFacade** (2 methods): getLegalAccUwYearList, getLegalPrintAccList
+- **BLLogonAction** (1 methods): checkUser
+- **BLLogonFacade** (1 methods): checkUser
+- **BLManualOffLineCalAction** (7 methods): getOffLineEndor, getOffLinePay, getOffLinePolicy, getProessInfo, offLineCalEndor, offLineCalPay, offLineCalPolicy
+- **BLManualOffLineCalFacade** (4 methods): getProcssInfo, offLineCal, setBusinessNo, setOfflineForm
+- **BLModifyEnquiryCTrialAction** (10 methods): Facultative, appendRetention, deleteReinsTrialInfo, getCtrialInfo, getPriority, getPtrialInfo, getSerialNoShare, getSerialNoTrial … (+2)
+- **BLNoInitAction** (2 methods): getComAndClass, initNo
+- **BLNoInitFacade** (2 methods): getComAndClass, initNo
+- **BLOffLineCalAction** (19 methods): fenetOffLineOutstanding, fenetOffLinePay, genDangerUnitOffLine, getDBConnection, getOffLineEndor, getOffLinePay, getOffLinePolicy, getPrpJLogList … (+11)
+- **BLOffLineCalFacade** (5 methods): genReinsData, offLineCal, offLineDealExtendFhx, offLineGen, offLineGenAcc
+- **BLOffLineReinsDMAction** (16 methods): approveDM, cDangerPlanToTDangerPlan, genAllPlanInfo, genCdangerPlanInfo, genFsoReplanInfo, getFcoShareDtoList, getMaxPaylNo, getMaxSerialNo … (+8)
+- **BLOffLineReinsDMFacade** (1 methods): genReinsDMInfo
+- **BLOffLineTtyAccFacade** (1 methods): offLineTtyAccServlet
+- **BLPDangerGetAction** (12 methods): cDangerToPDanger, delete, deleteAll, genLRPLimitAmount, genPLimitAmount, genShipCode, getLRPDangerInfo, getPDangerInfo … (+4)
+- **BLPaymentAction** (21 methods): DtoToXml, clearPaymentData, findByConditions, findFhTreatyByPrimaryKey, initEnv, orgnizeXml, processPaymentList, reinsToPayment … (+13)
+- **BLPaymentFacade** (2 methods): clearDate, findByConditions
+- **BLPlanAction** (3 methods): getPlanbyNoticeNo, getPlanbyReendor, getPlanbyRepolicy
+- **BLPlanFacade** (2 methods): findByConditions, findReendorPlan
+- **BLProfitAccInfoAction** (14 methods): DtoToXml, convertDto, deleteFz, findbusinesschannel, findsumbalance, genFzAccInfo, genFzItemDtoInfo, genFzPayAccDtoInfo … (+6)
+- **BLProfitAccInfoActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLProfitAccInfoFacade** (11 methods): accno, deleteFzAcc, exchrate, findbusinesschannel, findsumbalance, insert, insertItem, insertPayAcc … (+3)
+- **BLProfitAccInfoFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCNonReinsShareAction** (1 methods): convertDto
+- **BLPrpCNonReinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCNonReinsShareFacade** (5 methods): deleteAndInsertAll, findByConditions, getCNonReinsTrailList, getCount, getMaxSerialNo
+- **BLPrpCNonReinsTrialAction** (3 methods): convertDto, offLineDealExtendPrpC, rePolicyPremium
+- **BLPrpCNonReinsTrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCNonReinsTrialFacade** (7 methods): deleteAndInsertAll, findByConditions, getCNonReinsTrailList, getCount, getMaxSerialNo, rePolicyGnpi, rePolicyPremium
+- **BLPrpCdangerCoinsAction** (3 methods): convertDto, genCdangerCoinsInfo, getBaseRate
+- **BLPrpCdangerCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerCoinsFacade** (0 methods)
+- **BLPrpCdangerCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerItemAction** (4 methods): convertDto, genCdangerItemInfo, itemKindToDangerItem, splitRiderItem
+- **BLPrpCdangerItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerItemFacade** (0 methods)
+- **BLPrpCdangerItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerPlanAction** (4 methods): convertDto, createPlanDetailForFacAcc, genCdangerPlanInfo, insertAll
+- **BLPrpCdangerPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerPlanFacade** (0 methods)
+- **BLPrpCdangerPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerRiskAction** (1 methods): convertDto
+- **BLPrpCdangerRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerRiskFacade** (0 methods)
+- **BLPrpCdangerRiskFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerTotAction** (2 methods): convertDto, genCdangerTotInfo
+- **BLPrpCdangerTotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerTotFacade** (0 methods)
+- **BLPrpCdangerTotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerUnitAction** (9 methods): convertDto, findByConditions, genCdangerUnitInfo, setDefaultPMLValue, setDefaultRiskInfo, sumPremOnStatiType, sumStatiPremium, updateAmount … (+1)
+- **BLPrpCdangerUnitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCdangerUnitFacade** (0 methods)
+- **BLPrpCdangerUnitFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCreinsShareAction** (1 methods): convertDto
+- **BLPrpCreinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCreinsShareFacade** (0 methods)
+- **BLPrpCreinsShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCreinsTrialAction** (1 methods): convertDto
+- **BLPrpCreinsTrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpCreinsTrialFacade** (0 methods)
+- **BLPrpCreinsTrialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDAccItemAction** (1 methods): convertDto
+- **BLPrpDAccItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDAccItemFacade** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getRowsCount, isExist, save, update
+- **BLPrpDAccountAction** (1 methods): convertDto
+- **BLPrpDAccountActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDAccountFacade** (3 methods): isExist, save, saveAll
+- **BLPrpDAccountFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDArticleAction** (1 methods): convertDto
+- **BLPrpDArticleActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDArticleFacade** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getRowsCount, isExist, save, update
+- **BLPrpDCodeFacade** (8 methods): delete, findByConditions, findByPrimaryKey, findPayComeCodebyComecode, getRowsCount, isExist, save, update
+- **BLPrpDCodeTypeAction** (1 methods): convertDto
+- **BLPrpDCodeTypeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDCodeTypeFacade** (0 methods)
+- **BLPrpDCodeTypeFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDComAccountAction** (1 methods): convertDto
+- **BLPrpDComAccountActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDComAccountFacade** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getRowsCount, isExist, save, update
+- **BLPrpDPlaneAction** (1 methods): convertDto
+- **BLPrpDPlaneActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDReinsAction** (1 methods): convertDto
+- **BLPrpDReinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDReinsCodeAction** (1 methods): convertDto
+- **BLPrpDReinsCodeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDReinsCodeFacade** (2 methods): findProduceCodeByConditions, findReinsCodeByProduceCode
+- **BLPrpDReinsCodeFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDReinsFacade** (3 methods): isExist, save, updateReinsInfo
+- **BLPrpDReinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDReinsRelateAction** (1 methods): convertDto
+- **BLPrpDReinsRelateActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDReinsRelateFacade** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getRowsCount, isExist, save, update
+- **BLPrpDRiskKindAction** (1 methods): convertDto
+- **BLPrpDRiskKindActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDRiskKindFacade** (7 methods): delete, findByConditions, findByPrimaryKey, getRowsCount, isExist, save, update
+- **BLPrpDartItemAction** (1 methods): convertDto
+- **BLPrpDartItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDartItemFacade** (8 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getRowsCount, isExist, save, update
+- **BLPrpDchannelAction** (1 methods): convertDto
+- **BLPrpDchannelActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDclassAction** (2 methods): convertDto, translateCode
+- **BLPrpDclassActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDcodeAction** (1 methods): convertDto
+- **BLPrpDcodeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDcodeRiskAction** (1 methods): convertDto
+- **BLPrpDcodeRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDcompanyAction** (7 methods): convertDto, getAllSubCenterCode, getAllSubComCode, getCenterCode, getComCName, getCompanyName, getLowerComCode
+- **BLPrpDcompanyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDcompanyFacade** (3 methods): findByConditions, findByPrimaryKey, getAllSubComCode
+- **BLPrpDcurrencyAction** (1 methods): convertDto
+- **BLPrpDcurrencyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDcurrencyFacade** (2 methods): findByPrimaryKey, findNamebyCode
+- **BLPrpDexchAction** (1 methods): convertDto
+- **BLPrpDexchActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDkindAction** (1 methods): convertDto
+- **BLPrpDkindActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDkindFacade** (2 methods): findByConditions, findByPrimaryKey
+- **BLPrpDlimitAction** (1 methods): convertDto
+- **BLPrpDlimitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDriskAction** (2 methods): convertDto, translateCode
+- **BLPrpDriskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDriskFacade** (2 methods): findByConditions, findByPrimaryKey
+- **BLPrpDuserAction** (2 methods): convertDto, translateCode
+- **BLPrpDuserActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpDuserFacade** (1 methods): findByPrimaryKey
+- **BLPrpGroupAction** (1 methods): convertDto
+- **BLPrpGroupActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpJreinsFacAction** (1 methods): convertDto
+- **BLPrpJreinsFacActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpJreinsFeeAction** (1 methods): convertDto
+- **BLPrpJreinsFeeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpJreinsFeeItemAction** (1 methods): convertDto
+- **BLPrpJreinsFeeItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpJreinsPaymentAction** (2 methods): convertDto, getLastDateOfMonth
+- **BLPrpJreinsPaymentActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpJreinsPaymentItemAction** (1 methods): convertDto
+- **BLPrpJreinsPaymentItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerCoinsAction** (3 methods): convertDto, getLdangerCoins, updateCoinsAmount
+- **BLPrpLdangerCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerCoinsFacade** (0 methods)
+- **BLPrpLdangerCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerItemAction** (3 methods): convertDto, getLdangerItem, getPrpdangerItem
+- **BLPrpLdangerItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerItemFacade** (0 methods)
+- **BLPrpLdangerItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerTotAction** (2 methods): convertDto, getLdangerTot
+- **BLPrpLdangerTotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerTotFacade** (0 methods)
+- **BLPrpLdangerTotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerUnitAction** (4 methods): convertDto, getLDangerSumPaid, getLdangerUnit, sumPayValueOnStatiType
+- **BLPrpLdangerUnitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLdangerUnitFacade** (0 methods)
+- **BLPrpLdangerUnitFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLreinsShareAction** (1 methods): convertDto
+- **BLPrpLreinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLreinsShareFacade** (0 methods)
+- **BLPrpLreinsShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLreinsTrialAction** (1 methods): convertDto
+- **BLPrpLreinsTrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpLreinsTrialFacade** (0 methods)
+- **BLPrpLreinsTrialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpMaxNoAction** (2 methods): convertDto, save
+- **BLPrpMaxNoActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpMaxUseAction** (1 methods): convertDto
+- **BLPrpMaxUseActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPNonReinsShareAction** (1 methods): convertDto
+- **BLPrpPNonReinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPNonReinsShareFacade** (5 methods): deleteAndInsertAll, findByConditions, getCNonReinsTrailList, getCount, getMaxSerialNo
+- **BLPrpPNonReinsTrialAction** (3 methods): convertDto, offLineDealExtendPrpP, rePolicyPremium
+- **BLPrpPNonReinsTrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPNonReinsTrialFacade** (7 methods): deleteAndInsertAll, findByConditions, getCNonReinsTrailList, getCount, getMaxSerialNo, reEndorGnpi, reEndorPremium
+- **BLPrpPdangerCoinsAction** (6 methods): cCoinsToPdangerCoins, cDangerCoinsToPDangerCoins, convertDto, genPdangerCoinsInfo, getInfoByEndorseNo, updateCoinsTot
+- **BLPrpPdangerCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerCoinsFacade** (0 methods)
+- **BLPrpPdangerCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerItemAction** (9 methods): cDangerItemToPDangerItem, convertDto, copyPDangerItem, genPdangerItemInfo, getNewPrpPdangerDtoItemList, getNewYJPrpPdangerDtoItemList, pDangerItemToCDangerItem, setAddress … (+1)
+- **BLPrpPdangerItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerItemFacade** (0 methods)
+- **BLPrpPdangerItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerPlanAction** (4 methods): cDangerPlanToPDangerPlan, convertDto, genPdangerPlanInfo, getInfoByEndorseNo
+- **BLPrpPdangerPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerPlanFacade** (0 methods)
+- **BLPrpPdangerPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerRiskAction** (3 methods): cDangerRiskToPDangerRisk, convertDto, getInfoByEndorseNo
+- **BLPrpPdangerRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerRiskFacade** (0 methods)
+- **BLPrpPdangerRiskFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerTotAction** (4 methods): cDangerTotToPDangerTot, convertDto, genPdangerTotInfo, getInfoByEndorseNo
+- **BLPrpPdangerTotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerTotFacade** (0 methods)
+- **BLPrpPdangerTotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerUnitAction** (8 methods): cDangerUnitToPDangerUnit, convertDto, findByConditions, genPdangerUnitInfo, getPreviousEndorseNo, pDangerUnitToCDangerUnit, updateChgAmount, updateDangerunitPartici
+- **BLPrpPdangerUnitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPdangerUnitFacade** (1 methods): getPreviousEndorseNo
+- **BLPrpPdangerUnitFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPreinsShareAction** (1 methods): convertDto
+- **BLPrpPreinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPreinsShareFacade** (0 methods)
+- **BLPrpPreinsShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPreinsTrialAction** (1 methods): convertDto
+- **BLPrpPreinsTrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpPreinsTrialFacade** (1 methods): deleteBySpeValueConditions
+- **BLPrpPreinsTrialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpReinsNotionAction** (1 methods): convertDto
+- **BLPrpReinsNotionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpReinsNotionFacade** (0 methods)
+- **BLPrpReinsNotionFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpReinsVerifyAction** (2 methods): convertDto, verify
+- **BLPrpReinsVerifyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpReinsVerifyFacade** (3 methods): findByConditions, findByPKAndType, verify
+- **BLPrpReinsVerifyFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpSpecialReinsConditionAction** (1 methods): convertDto
+- **BLPrpSpecialReinsConditionActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpSpecialReinsConditionFacade** (0 methods)
+- **BLPrpSpecialReinsConditionFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTNonReinsShareAction** (2 methods): convertDto, tNonReinsShareToCReinsShare
+- **BLPrpTNonReinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTNonReinsTrialAction** (2 methods): convertDto, tNonReinsTrialToCReinsTrial
+- **BLPrpTNonReinsTrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTaskAction** (1 methods): convertDto
+- **BLPrpTaskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerCoinsAction** (3 methods): convertDto, genTdangerCoinsInfo, tDangerCoinsToCDangerCoins
+- **BLPrpTdangerCoinsActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerCoinsFacade** (0 methods)
+- **BLPrpTdangerCoinsFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerItemAction** (5 methods): convertDto, genTdangerItemInfo, itemKindToDangerItem, splitRiderItem, tDangerItemToCDangerItem
+- **BLPrpTdangerItemActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerItemFacade** (0 methods)
+- **BLPrpTdangerItemFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerPlanAction** (4 methods): convertDto, genTdangerPlanInfo, insertAll, tDangerPlanToCDangerPlan
+- **BLPrpTdangerPlanActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerPlanFacade** (0 methods)
+- **BLPrpTdangerPlanFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerRiskAction** (2 methods): convertDto, tDangerRiskToCDangerRisk
+- **BLPrpTdangerRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerRiskFacade** (0 methods)
+- **BLPrpTdangerRiskFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerTotAction** (3 methods): convertDto, genTdangerTotInfo, tDangerTotToCDangerTot
+- **BLPrpTdangerTotActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerTotFacade** (0 methods)
+- **BLPrpTdangerTotFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerUnitAction** (7 methods): convertDto, genTdangerUnitInfo, setDefaultPMLValue, setDefaultRiskInfo, tDangerUnitToCDangerUnit, updateAmount, updateDangerunitPartici
+- **BLPrpTdangerUnitActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTdangerUnitFacade** (1 methods): getPrpTdangerUnitDtoList
+- **BLPrpTdangerUnitFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTreinsShareAction** (2 methods): convertDto, tReinsShareToCReinsShare
+- **BLPrpTreinsShareActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTreinsShareFacade** (0 methods)
+- **BLPrpTreinsShareFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTreinstrialAction** (2 methods): convertDto, tReinsTrialToCReinsTrial
+- **BLPrpTreinstrialActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpTreinstrialFacade** (2 methods): checkMasterPolicy, deleteBySpeValueConditions
+- **BLPrpTreinstrialFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpUserGradeAction** (1 methods): convertDto
+- **BLPrpUserGradeActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpdCircRiskAction** (1 methods): convertDto
+- **BLPrpdCircRiskActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpdproductAction** (4 methods): convertDto, findKindCodeByConddition, findLiabCodeByConddition, findRiskCodeByConddition
+- **BLPrpdproductActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrpdproductFacade** (3 methods): findKindCodeByConddition, findLiabCodeByConddition, findRiskCodeByConddition
+- **BLPrpdproductFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrppreinscededAction** (1 methods): convertDto
+- **BLPrppreinscededActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPrppreinscededFacade** (0 methods)
+- **BLPrppreinscededFacadeBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLPubRateAction** (3 methods): getExchangeRate, getMonthShortRate, getStraightExchangeRate
+- **BLPubRateFacade** (4 methods): getDayShortRate, getExchangeRate, getMonthShortRate, getShortRate
+- **BLReendorAction** (38 methods): UpdReendorNo, addRetGen, adjustApprove, adjustApproveByKind, approve, approveIn, approveSave, approveUndo … (+30)
+- **BLReendorFacade** (15 methods): approve, approveUndo, arrangeFac, arrangeLegal, arrangeTreaty, delete, findByConditions, findByPrimaryKey … (+7)
+- **BLReendorParticularsPrintFacade** (1 methods): reendorParticularsPrintReendor
+- **BLReinsAction** (22 methods): SaveFeoEnquiry, SaveFeoReinsReceive, evaluateDangerRisk, getDangerExItemKind, getDangerRiskKind, getFeoEnquiryInfo, getFhModulusItemName, getFhRetenValue … (+14)
+- **BLReinsAllBackTrialAction** (7 methods): generate, generateCNonreinsChg, generateCreinsChgShare, generateCreinsChgTrial, generatePNonreinsChg, generatePreinsChgShare, generatePreinsChgTrial
+- **BLReinsAllCancelTrialAction** (5 methods): generate, generateCancelShare, generateCancelTrial, generateNonCancel, isFirstEndor
+- **BLReinsCTrialAction** (16 methods): AgreementShare, CommixShare, Facultative, NonTreaty, OverShare, QuotaShare, QuotaShareLayer, SpecialShare … (+8)
+- **BLReinsClaimInterfAction** (12 methods): genClaimFlgNotice, genReinsClaimData, genReinsClaimDataRecovery, genReinsPayData, getDangerNo, getDangerUnit, getLargeCashLoss, getSumFacShare … (+4)
+- **BLReinsCodeFacade** (1 methods): findByConditions
+- **BLReinsFacade** (15 methods): SaveFeoEnquiry, SaveFeoReinsReceive, evaluateDangerRisk, getDangerExItemKind, getDangerRiskKind, getEndorChgMiddleCost, getFeoEnquiryInfo, getFhModulusItemName … (+7)
+- **BLReinsIndivAction** (3 methods): getCoinsLimitRate, getLimitRate, getPartLimitRate
+- **BLReinsInterfFacade** (11 methods): deleteReinsUnitData, genReinsClaimData, genReinsClaimDataRcobery, genReinsClaimListData, genReinsEndorAppData, genReinsEndorData, genReinsPolicyData, genReinsQuotationData … (+3)
+- **BLReinsLTrailFacade** (1 methods): simulateRepayByDangerNo
+- **BLReinsLTrialAction** (6 methods): CalRepay, deleteReinsTrialInfo, genPrpLreinsShareDto, genPrpLreinsTrialDto, simulateRepayByDangerNo, simulateRepayForXOL
+- **BLReinsPTrialAction** (23 methods): AgreementShare, CommixShare, Facultative, NonTreaty, OverShare, QuotaShare, QuotaShareLayer, QuotaShareNotOverShare … (+15)
+- **BLReinsPTrialChgAction** (11 methods): adjustTrialResult, generate, generateChgNonShare, generateChgNonShareOC, generateChgNonTrial, generateChgShare, generateChgTrial, generatePreviousChgNonShare … (+3)
+- **BLReinsPaymentInterfAction** (30 methods): checkdate, confirmSettleIn, getBusinessFlag, getPaymentComcode, getTtyClass, getTtyCode, getTtyId, getopttype … (+22)
+- **BLReinsPrpallInterfAction** (18 methods): checkPrpallData, copyFeoEnquiryToEPreProtocol, deleteDangerUnit, genDangerUnit, genReinsEndorAppData, genReinsEndorData, genReinsPolicyData, genReinsQuotationData … (+10)
+- **BLReinsTrialAction** (18 methods): AgreementShare, CommixShare, Facultative, NonTreaty, OverShare, QuotaShare, QuotaShareLayer, SpecialShare … (+10)
+- **BLReinsTrialInterfFacade** (4 methods): getFeoXLayerList, getReinsTrialEndorFhXList, getReinsTrialFhXList, getReinsTrialList
+- **BLReinsUndrtInterfAction** (19 methods): addRetentionValue, deleteReinsUnitData, genReEndorAccCal, genRePayAccCal, genRePolicyAccCal, genRetenReinsTrial, getRiskEvaluateMode, ifOffLineCal … (+11)
+- **BLReinsVerifyAction** (1 methods): findByPKAndType
+- **BLRepayAction** (31 methods): approveSave, authorizeClaimAdd, calLdangerItemAndSum, calLegAndFacOfShare, calRetAndExcOfShare, calRetentionOfShare, calTreatyOfShare, checkRepay … (+23)
+- **BLRepayFacade** (16 methods): approve, checkRepay, chkPayShareDel, delete, findByConditions, findByPK, findByPrimaryKey, genRepay … (+8)
+- **BLRepayGetLossInfoAction** (2 methods): getLossInfo, getRepayInfo
+- **BLRepayGetLossInfoFacade** (2 methods): getLossInfo, getRepayInfo
+- **BLRepolicyAction** (43 methods): UpdRepolicyNo, addRetGen, adjustApprove, adjustApproveByKind, adjustRecoins, amountSwitchChg, approve, approveIn … (+35)
+- **BLRepolicyAmountSwitchChgFacade** (1 methods): repolicyAmountSwitchChg
+- **BLRepolicyFacade** (18 methods): approve, approveUndoRepolicy, arrangeFac, arrangeLegal, arrangeRecoins, arrangeTreaty, autoArrangeRepolicy, delete … (+10)
+- **BLRepolicyNoGeneratorAction** (1 methods): getRepolicyNo
+- **BLRepolicyReendorListAction** (1 methods): prepareAccyRepolicyReendor
+- **BLRepolicyReendorListFacade** (1 methods): prepareAccyRepolicyReendor
+- **BLRepolicyTreatyAction** (1 methods): getTreatybyRepolicy
+- **BLRepolicyTreatyFacade** (1 methods): findByRepolicyNo
+- **BLReportPrintAction** (44 methods): genFacAdjustList, genFacCancelList, genFoAdjustTraceReport, getAccFBList, getAccFRList, getAccTBList, getAccTBTotalList, getAccTROutStandingList … (+36)
+- **BLReportPrintFacade** (1 methods): getReportPrintDtoList
+- **BLRiskPoolAction** (16 methods): getRiskPoolMode, riskPool, riskPool_Health, riskPool_Health_E, riskPool_Health_P, riskPool_Health_T, riskPool_Prop, riskPool_Prop_E … (+8)
+- **BLRiskPoolFacade** (2 methods): getRiskPoolMode, riskPool
+- **BLSettleAction** (18 methods): checkAccIsSettle, confirmSettle, deleteSettle, genFjSettle, genNoPaidAccReport, getAccForSettle, getFReinsOfAccForSettle, getNoSettleAccList … (+10)
+- **BLSettleFacade** (11 methods): confirmSettle, deleteSettle, findByConditions, genNoPaidAccReport, getAccForSettle, getFRReinsOfAccForSettle, getNoSettleAccList, printSettle … (+3)
+- **BLSffAction** (9 methods): authorizeOfTty, calUnAccPeriod, checkAccPayDate, checkApprove, checkApproveUnadjusted, checkApproveUndo, difFacAccPayDate, getAccPeriod … (+1)
+- **BLSlipPrintAction** (24 methods): getEndorseNo, getPolicyNo, getProposalNo, prepareSlipPrintCarP, prepareSlipPrintCarT, prepareSlipPrintCargoP, prepareSlipPrintCargoT, prepareSlipPrintConstructP … (+16)
+- **BLSlipPrintFacade** (1 methods): prepareSlipPrint
+- **BLSplitFAbstractTreatyAction** (2 methods): getTreatybyReendor, getTreatybyRepolicy
+- **BLSplitFAbstractTreatyFacade** (2 methods): findByReendorNo, findByRepolicyNo
+- **BLSplitRepayPrintAction** (3 methods): getComName, getExchRate, prepareSplitRepay
+- **BLSplitRepayPrintFacade** (1 methods): prepareSplitRepay
+- **BLTDangerGetAction** (10 methods): delete, deleteAll, genLRTLimitAmount, genShipCode, genTLimitAmount, genTdangerUnitInfo, getLRTDangerInfo, getTDangerInfo … (+2)
+- **BLTDangerGetActionUseGgvatRate** (2 methods): getFOrD, vatRate
+- **BLTdangerToCdangerAction** (3 methods): getPrpTdangerUnitToPrpC, isTreatyValid, reinsByPML
+- **BLTtyAccFacade** (6 methods): genCommAdjustAcc, genProfitCommAcc, genTtyAccTB, genTtyAccTR, getCommAdjustValue, getProfitCommValue
+- **BLTtyAdjustAction** (11 methods): adjustReendor, adjustRepay, adjustRepolicy, approveAdjusted, checkFcoAbstract, checkFcoShare, checkFloAbstract, checkFloShare … (+3)
+- **BLTtyAdjustFacade** (3 methods): adjustReendor, adjustRepay, adjustRepolicy
+- **BLTtyRepayNoticePrintAction** (2 methods): getBasicInfo, getTtyRepayNoticePrintInfo
+- **BLTtyRepayNoticePrintFacade** (1 methods): getTtyRepayNoticePrintInfo
+- **BLUtiGroupAction** (1 methods): convertDto
+- **BLUtiGroupActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLUtiKeyAction** (1 methods): convertDto
+- **BLUtiKeyActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLUtiMenuAction** (1 methods): convertDto
+- **BLUtiMenuActionBase** (7 methods): delete, deleteByConditions, findByConditions, findByPrimaryKey, getCount, insert, update
+- **BLVerifyAction** (5 methods): delete, findByConditions, findByPK, prpReinsVerifyInfo, save
+- **BLVerifyFacade** (6 methods): delete, findByConditions, findByPK, getRowsCount, prpReinsVerifyInfo, save
+- **BLVoucherAction** (15 methods): createFacSVoucherInfo, createFacVoucherInfo, createFacYVoucherInfo, createTtyBCVoucherInfo, createTtyBSVoucherInfo, createTtyBVoucherInfo, createTtyBYVoucherInfo, createTtyRVoucherInfo … (+7)
+- **BLXAccAction** (85 methods): adjustFzInfoToReins, adjustLastMonth, adjustPayAcc, adjustReins, checkAdjustTBXAcc, checkAdjustTRXAcc, checkPartTBXTryAcc, checkTBXTryAcc … (+77)
+- **BLXAccFacade** (26 methods): adjustAccDtoList, checkAdjustXAcc, checkXTryAcc, deleteAdjustTBXAcc, deleteAdjustTRXAcc, deleteReinstTBXAcc, deleteReinstTRXAcc, deleteXBAcc … (+18)
+- **BLXFacAccGenAction** (27 methods): calFzItemRate, checkFacAccGen, genAcc, genAccDtoInfo, genFBAcc, genFRAcc, genFzItemDtoInfo, genFzItemDtoMap … (+19)
+- **BLXFacAccGenFacade** (1 methods): genAcc
+- **BLXFacAction** (5 methods): delete, findByConditions, findByConditionsForC, findByConditionsForE, setFlag
+- **BLXFacApproveAction** (20 methods): authorizeClaimAdd, authorizeReendorAdd, authorizeRepolicyAdd, genEAccPayDate, genFsoXReplanCoins, genFsoXReplanCoinsE, genFsoXReplanInfo, genFsoXReplanKindMain … (+12)
+- **BLXFacFacade** (6 methods): delete, findByConditions, findByConditionsForC, findByConditionsForE, setFsoDeleteAccFlag, settleXFac
+- **BLXFacUndoApproveAction** (4 methods): getXFacAccFlag, xfacUndoApproveReendor, xfacUndoApproveRepay, xfacUndoApproveRepolicy
+- **BLYJPReinsTrialAction** (15 methods): AgreementShare, Facultative, NonTreaty, OverShare, QuotaShare, QuotaShareLayer, SpecialShare, appendRetention … (+7)
+- **BLYJReinsCTrialAction** (15 methods): AgreementShare, CommixShare, Facultative, NonTreaty, OverShare, QuotaShare, QuotaShareLayer, SpecialShare … (+7)
+- **BLYJReinsTrialAction** (18 methods): AgreementShare, CommixShare, Facultative, NonTreaty, OverShare, QuotaShare, QuotaShareLayer, SpecialShare … (+10)
+- **FBLiXianPross** (1 methods): offLineCal
+- **FPLiXianPross** (1 methods): offLineCal
+- **LPLiXianPross** (1 methods): offLineCal
+- **PALiXianPross** (1 methods): offLineCal
