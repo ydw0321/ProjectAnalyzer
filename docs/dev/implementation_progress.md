@@ -99,6 +99,50 @@
   - `critical_chain_coverage = 83.87% (26/31)`
 - 输出文件：`output/quality/graph_quality_benchmark.reins.quick.json`。
 
+#### 2026-03-14 追加实现（P0 指标口径 + 首次断点）
+
+- 在 `src/tree/graph_quality.py` 新增口径指标：
+  - `critical_chain_reach_share = critical_methods / reachable_methods`
+  - 保留原 `critical_chain_coverage = reachable_critical_methods / critical_methods` 作为互补口径
+- 在关键链评估结果中新增 `first_break` 字段：
+  - 包含 `break_hop_index`、`from`、`to`、`reason`
+  - `reason` 支持 `missing_call` / `missing_method_definition`
+- 在控制台报告中新增“关键链可达占比”输出，并在失败链路时打印 `first_break`。
+- reins 快速回归验证通过（`--max-depth 4`）：
+  - `critical_chain_reach_share = 0.90% (31/3449)`
+  - `critical_chain_results[*].first_break` 字段已出现在 JSON（全 PASS 时为 `null`）。
+
+#### 2026-03-14 追加实现（P0 入口可解释 + P1 可行动分类与报告口径）
+
+- P0 完成：入口识别可解释化
+  - `src/tree/query_service.py`
+    - `get_entry_methods()` 增加 `entry_rule_trace` 与 `entry_confidence`（high/medium/low）
+    - 入口规则扩展至 `Action/Controller/Interf/Job/Batch`、`execute/do/send`、路径 token 与出度分段
+  - `src/tree/graph_quality.py`
+    - 新增 `entry_rule_stats`（规则命中分布）
+    - 新增 `entry_confidence_proxy`（高置信入口占比）
+
+- P1 完成：unknown 可行动分类
+  - 将 unknown 从 2 类扩展为 5 类：
+    - `jdk_core`
+    - `infra_framework`
+    - `third_party_lib`
+    - `internal_shared_lib_missing`
+    - `true_unresolved`
+  - 保留兼容字段：`jdk_unknown` / `business_unknown`
+  - 新增 `unknown_top_callers`（caller class/method + count + ratio + dominant_category）
+
+- P1 完成：报告口径统一基础元信息 + 完整性段
+  - `run_id`、`snapshot_ts`、`project_path`、`dedup_rule_version`、`query_max_depth`
+  - `integrity_checks`：`method_count`、`class_count`、`call_edge_count`、`isolated_method_count`
+
+- 脚本同步：
+  - `tests/test_graph_quality_breakdown.py` 已切换展示 5 类统计与 Top unknown 调用点
+
+- 快速回归结果（reins，`--max-depth 4`）：
+  - `output/quality/graph_quality_benchmark.reins.quick.json` 与 `output/quality/graph_quality_breakdown.reins.quick.json` 均已产出
+  - unknown 分类样例：`jdk_core=9469`、`infra_framework=2366`、`third_party_lib=7`、`internal_shared_lib_missing=21517`、`true_unresolved=14244`
+
 ### 验收清单（Neo4j 启动后执行）
 
 ```bash

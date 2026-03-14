@@ -22,6 +22,11 @@ def main():
     parser.add_argument("--max-util-unknown-ratio", type=float, default=0.85, help="util unknown 占比上限")
     parser.add_argument("--min-critical-chain-coverage", type=float, default=0.0, help="关键链覆盖率下限")
     parser.add_argument("--min-critical-definition-presence", type=float, default=0.0, help="关键链定义命中率下限")
+    parser.add_argument("--max-layer-violation-rate", type=float, default=None, help="分层违规率上限")
+    parser.add_argument("--max-cycle-count", type=float, default=None, help="循环依赖数上限")
+    parser.add_argument("--max-god-method-ratio", type=float, default=None, help="God method 比例上限")
+    parser.add_argument("--max-isolated-method-ratio", type=float, default=None, help="孤立方法比例上限")
+    parser.add_argument("--max-hotspot-fragility-top20-share", type=float, default=None, help="热点脆弱度 Top20 占比上限")
     parser.add_argument("--critical-chains", default=None, help="关键链路配置文件路径（JSON）")
     parser.add_argument(
         "--output",
@@ -80,6 +85,44 @@ def main():
         ),
     ]
 
+    optional_checks = []
+    if args.max_layer_violation_rate is not None:
+        optional_checks.append(
+            (
+                metrics["layer_violation_rate"] <= args.max_layer_violation_rate,
+                f"分层违规率超阈值: {metrics['layer_violation_rate']:.2%} > {args.max_layer_violation_rate:.2%}",
+            )
+        )
+    if args.max_cycle_count is not None:
+        optional_checks.append(
+            (
+                metrics["cycle_count"] <= args.max_cycle_count,
+                f"循环依赖数超阈值: {metrics['cycle_count']} > {args.max_cycle_count}",
+            )
+        )
+    if args.max_god_method_ratio is not None:
+        optional_checks.append(
+            (
+                metrics["god_method_ratio"] <= args.max_god_method_ratio,
+                f"God method 比例超阈值: {metrics['god_method_ratio']:.2%} > {args.max_god_method_ratio:.2%}",
+            )
+        )
+    if args.max_isolated_method_ratio is not None:
+        optional_checks.append(
+            (
+                metrics["isolated_method_ratio"] <= args.max_isolated_method_ratio,
+                f"孤立方法比例超阈值: {metrics['isolated_method_ratio']:.2%} > {args.max_isolated_method_ratio:.2%}",
+            )
+        )
+    if args.max_hotspot_fragility_top20_share is not None:
+        optional_checks.append(
+            (
+                metrics["hotspot_fragility_top20_share"] <= args.max_hotspot_fragility_top20_share,
+                f"热点脆弱度 Top20 占比超阈值: {metrics['hotspot_fragility_top20_share']:.2%} > {args.max_hotspot_fragility_top20_share:.2%}",
+            )
+        )
+    checks.extend(optional_checks)
+
     failures = [message for passed, message in checks if not passed]
 
     print("=" * 60)
@@ -94,6 +137,11 @@ def main():
     print(f"关键链覆盖率: {metrics['critical_chain_coverage']:.2%}")
     print(f"关键链保留率: {metrics['critical_chain_retention']:.2%}")
     print(f"关键跳点丢失率: {metrics['critical_hop_dropout']:.2%}")
+    print(f"分层违规率: {metrics['layer_violation_rate']:.2%}")
+    print(f"循环依赖数: {metrics['cycle_count']}")
+    print(f"God method 比例: {metrics['god_method_ratio']:.2%}")
+    print(f"孤立方法比例: {metrics['isolated_method_ratio']:.2%}")
+    print(f"热点脆弱度 Top20 占比: {metrics['hotspot_fragility_top20_share']:.2%}")
     print(f"util unknown 占比: {metrics['util_unknown_ratio']:.2%}")
 
     if failures:

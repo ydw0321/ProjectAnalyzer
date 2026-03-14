@@ -104,10 +104,13 @@ class GraphQueryService:
         """, {'class_name': class_name})
         return result
 
-    def _entry_score(self, method: Dict) -> int:
+    def _entry_score(self, method: Dict):
         """Heuristic score for entry method candidates.
 
-        Higher score means more likely to be an externally-invoked entrypoint.
+        Returns:
+            (score, trace)
+            - score: int
+            - trace: [{'rule': str, 'delta': int}]
         """
         method_name = (method.get('method_name') or '').lower()
         class_name = (method.get('class_name') or '').lower()
@@ -116,36 +119,56 @@ class GraphQueryService:
         layer = self._extract_layer(file_path)
 
         score = 0
+        trace = []
+
+        def hit(rule: str, delta: int):
+            nonlocal score
+            score += delta
+            trace.append({'rule': rule, 'delta': delta})
 
         # Layer/path signal
         if layer in {'controller', 'action'}:
-            score += 8
-        if any(token in file_path for token in ('/interf/', '/interface/', '/api/', '/web/', '/struts/')):
-            score += 4
+            hit('layer.controller_action', 8)
+        if any(token in file_path for token in ('/interf/', '/interface/', '/api/', '/web/', '/struts/', '/job/', '/batch/', '/task/', '/schedule/')):
+            hit('path.entry_like_segment', 4)
 
         # Class naming signal
         if class_name.endswith('action') or class_name.endswith('controller'):
-            score += 8
+            hit('class.suffix_action_controller', 8)
         if class_name.endswith('interf') or class_name.endswith('api'):
-            score += 4
+            hit('class.suffix_interf_api', 4)
+        if class_name.endswith('job') or class_name.endswith('batch'):
+            hit('class.suffix_job_batch', 5)
 
         # Method naming signal
         if method_name in {'execute', 'invoke', 'process', 'dispatch'}:
-            score += 7
+            hit('method.name_entry_exact', 7)
+        if method_name.startswith(('do', 'send')):
+            hit('method.prefix_do_send', 4)
         if method_name.startswith(('do', 'handle', 'submit', 'query', 'list', 'get', 'find', 'send')):
-            score += 2
+            hit('method.prefix_entry_like', 2)
 
         # Entrypoints usually have fanout
+        if out_degree >= 1:
+            hit('fanout.ge_1', 1)
         if out_degree >= 3:
-            score += 2
+            hit('fanout.ge_3', 2)
         if out_degree >= 10:
-            score += 2
+            hit('fanout.ge_10', 2)
 
         # Filter obvious non-entry helpers
         if method_name.startswith(('set', 'get', 'is')) and out_degree == 0:
-            score -= 5
+            hit('penalty.getter_setter_no_fanout', -5)
 
-        return score
+        return score, trace
+
+    @staticmethod
+    def _entry_confidence(score: int) -> str:
+        if score >= 18:
+            return 'high'
+        if score >= 12:
+            return 'medium'
+        return 'low'
     
     # ==================== 调用链查询 ====================
     
@@ -162,10 +185,12 @@ class GraphQueryService:
 
         scored = []
         for method in all_methods:
-            score = self._entry_score(method)
+            score, trace = self._entry_score(method)
             if score >= 8:
                 item = dict(method)
                 item['entry_score'] = score
+                item['entry_rule_trace'] = trace
+                item['entry_confidence'] = self._entry_confidence(score)
                 scored.append(item)
 
         scored.sort(key=lambda x: (x.get('entry_score', 0), x.get('out_degree', 0)), reverse=True)

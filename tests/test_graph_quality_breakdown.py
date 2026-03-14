@@ -31,27 +31,51 @@ def main():
 
     counts = report["details"]["unknown_breakdown"]
     items = report["unknown_call_details"]
-    business_items = [item for item in items if item["category"] == "business_unknown"]
-    jdk_items = [item for item in items if item["category"] == "jdk_unknown"]
+    actionable_categories = [
+        "jdk_core",
+        "infra_framework",
+        "third_party_lib",
+        "internal_shared_lib_missing",
+        "true_unresolved",
+    ]
+    grouped = {
+        category: [item for item in items if item.get("category") == category]
+        for category in actionable_categories
+    }
+    top_callers = report["details"].get("unknown_top_callers", [])
 
     print("=" * 60)
     print("图质量 unknown 分类测试")
     print("=" * 60)
     print(f"总 unknown 数: {counts['total_unknown']}")
-    print(f"JDK/标准库 unknown: {counts['jdk_unknown']}")
-    print(f"业务 unknown: {counts['business_unknown']}")
+    print(f"JDK/标准库 unknown(兼容): {counts['jdk_unknown']}")
+    print(f"业务 unknown(兼容): {counts['business_unknown']}")
+    print("\n可行动分类统计:")
+    for category in actionable_categories:
+        print(f"  - {category}: {counts.get(category, 0)}")
 
-    print("\n业务 unknown 明细:")
-    if business_items:
-        for item in business_items[:args.show_items]:
+    print("\ntrue_unresolved 明细:")
+    if grouped["true_unresolved"]:
+        for item in grouped["true_unresolved"][:args.show_items]:
             print(f"  - {item['caller_class']}.{item['caller_name']} -> {item['callee_name']}")
     else:
         print("  (无)")
 
-    print("\nJDK/标准库 unknown 示例:")
-    if jdk_items:
-        for item in jdk_items[:args.show_items]:
+    print("\ninternal_shared_lib_missing 示例:")
+    if grouped["internal_shared_lib_missing"]:
+        for item in grouped["internal_shared_lib_missing"][:args.show_items]:
             print(f"  - {item['caller_class']}.{item['caller_name']} -> {item['callee_name']}")
+    else:
+        print("  (无)")
+
+    print("\nTop unknown 调用点:")
+    if top_callers:
+        for item in top_callers[:args.show_items]:
+            print(
+                f"  - {item['caller_class']}.{item['caller_name']}: "
+                f"{item['count']} ({item.get('ratio', 0.0):.2%}), "
+                f"dominant={item.get('dominant_category')}"
+            )
     else:
         print("  (无)")
 
