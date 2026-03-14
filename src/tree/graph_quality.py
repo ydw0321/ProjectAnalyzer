@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import time
+from typing import List, Dict, Tuple
 
 from src.tree.query_service import GraphQueryService
 
@@ -242,6 +243,153 @@ def evaluate_critical_chains(query, critical_chains):
         "total_hops": total_hops,
         "chains": chain_results,
     }
+
+
+def suggest_critical_chains(
+    chain_count=10,
+    max_hops=5,
+    entry_limit=80,
+    max_per_core_prefix=2,
+    core_prefix_len=3,
+) -> Dict:
+    """Suggest candidate critical chains from the current graph.
+
+    Strategy:
+    1) pick top entrypoint candidates from GraphQueryService
+    2) for each entry, find one "best" non-unknown path up to max_hops
+    3) return top-N chains by path length and signal score
+    """
+    chain_count = max(1, int(chain_count))
+    max_hops = max(2, int(max_hops))
+    entry_limit = max(chain_count, int(entry_limit))
+    max_per_core_prefix = max(1, int(max_per_core_prefix))
+    core_prefix_len = max(1, int(core_prefix_len))
+
+    def _class_score(class_name: str) -> int:
+        name = (class_name or "").lower()
+        if any(k in name for k in ("controller", "action", "interf")):
+            return 1
+        if "facade" in name:
+            return 3
+        if any(k in name for k in ("service", "biz", "bl")):
+            return 4
+        if any(k in name for k in ("dal", "dao", "repository")):
+            return 5
+        if any(k in name for k in ("util", "helper", "common")):
+            return -2
+        return 0
+
+    candidates = []
+    with GraphQueryService() as query:
+        entries = query.get_entry_methods()[:entry_limit]
+        for entry in entries:
+            e_class = entry.get("class_name")
+            e_method = entry.get("method_name")
+            if not e_class or not e_method:
+                continue
+
+            hops: List[Tuple[str, str]] = [(e_class, e_method)]
+            visited = {(e_class, e_method)}
+            curr_class, curr_method = e_class, e_method
+            type_score = 0
+
+            for _ in range(max_hops - 1):
+                calls = query.get_method_calls(curr_method, curr_class, limit=120)
+                valid = []
+                for call in calls:
+                    callee_class = call.get("callee_class")
+                    callee_method = call.get("callee_name")
+                    call_type = call.get("call_type")
+                    if not callee_class or not callee_method:
+                        continue
+                    if call_type == "external_unknown":
+                        continue
+                    key = (callee_class, callee_method)
+                    if key in visited:
+                        continue
+
+                    score = (3 if call_type == "internal" else 2) + _class_score(callee_class)
+                    valid.append((score, callee_class, callee_method, call_type))
+
+                if not valid:
+                    break
+
+                valid.sort(key=lambda x: x[0], reverse=True)
+                _best_score, next_class, next_method, next_type = valid[0]
+                visited.add((next_class, next_method))
+                hops.append((next_class, next_method))
+                curr_class, curr_method = next_class, next_method
+                type_score += 3 if next_type == "internal" else 2
+
+            if len(hops) < 2:
+                continue
+
+            chain_name = f"auto_{e_class}_{e_method}".replace(" ", "_")
+            candidates.append(
+                {
+                    "name": chain_name,
+                    "hops": hops,
+                    "meta": {
+                        "entry_class": e_class,
+                        "entry_method": e_method,
+                        "entry_score": entry.get("entry_score", 0),
+                        "node_count": len(hops),
+                        "type_score": type_score,
+                    },
+                }
+            )
+
+    # de-duplicate by exact hop sequence
+    dedup = {}
+    for chain in candidates:
+        key = tuple(chain["hops"])
+        prev = dedup.get(key)
+        if not prev or chain["meta"]["entry_score"] > prev["meta"]["entry_score"]:
+            dedup[key] = chain
+
+    ranked = sorted(
+        dedup.values(),
+        key=lambda c: (
+            len(c["hops"]),
+            c["meta"].get("type_score", 0),
+            c["meta"].get("entry_score", 0),
+        ),
+        reverse=True,
+    )
+
+    # Diversity control: limit candidates sharing the same core path prefix
+    # (excluding entry hop) to avoid near-identical suggestions.
+    prefix_counts = {}
+    final = []
+    for chain in ranked:
+        core = chain["hops"][1 : 1 + core_prefix_len] if len(chain["hops"]) > 1 else []
+        core_key = tuple(core)
+        used = prefix_counts.get(core_key, 0)
+        if used >= max_per_core_prefix:
+            continue
+
+        prefix_counts[core_key] = used + 1
+        final.append(chain)
+        if len(final) >= chain_count:
+            break
+
+    return {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "max_hops": max_hops,
+        "entry_limit": entry_limit,
+        "max_per_core_prefix": max_per_core_prefix,
+        "core_prefix_len": core_prefix_len,
+        "generated_count": len(final),
+        "chains": [{"name": c["name"], "hops": c["hops"], "meta": c["meta"]} for c in final],
+    }
+
+
+def save_critical_chain_candidates(payload: Dict, output_path: str):
+    output_dir = os.path.dirname(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as file:
+        json.dump(payload, file, ensure_ascii=False, indent=2)
 
 
 def classify_unknown_method(method_name):

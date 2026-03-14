@@ -58,6 +58,37 @@
 | .gitignore 补全 | `.gitignore` | `output/trees/`, `output/quality/`, `.parse_cache.json` |
 | README 同步 | `README.md` | 增量模式、Spring 注解感知、规则集扩展说明 |
 
+### 2026-03-14 增补 — 分析层可配置与可解释性增强
+
+| 任务 | 文件 | 说明 |
+|------|------|------|
+| 关键链配置化 | `src/tree/graph_quality.py`, `config/critical_chains.json` | 关键链路支持 JSON 配置加载（`config/critical_chains.json`），无配置自动回退内置默认；支持 hop 多格式归一化 |
+| 关键链解释性指标 | `src/tree/graph_quality.py`, `tests/test_graph_quality_thresholds.py` | 新增 `critical_definition_presence`（定义命中率）与 `critical_chain_coverage`（可达覆盖率），用于区分“配置不匹配”与“真实断链” |
+| 入口识别优化 | `src/tree/query_service.py` | `get_entry_methods()` 从单一路径规则升级为多信号评分（层级、类名、方法名、出度），提升历史项目入口召回 |
+| 候选关键链自动发现 | `src/tree/graph_quality.py`, `tests/test_graph_quality.py` | 新增 `suggest_critical_chains()`，可基于图结构自动生成候选关键链；CLI 支持 `--suggest-critical-chains-output` 导出 JSON 供人工筛选 |
+
+#### 当前验证结论（reins 图）
+
+- 关键链定义命中率 `critical_definition_presence=0%`，明确指向“默认链路配置与项目不匹配”而非图构建失败。
+- 可达率在入口识别优化后从约 `10.54%` 提升到约 `13.31%`（同一图快照条件下）。
+
+#### 2026-03-14 追加修复（候选链稳定性）
+
+- 修复 `suggest_critical_chains()` 初版中 Neo4j 变长路径参数化语法不兼容问题（`[:CALLS*1..$max_hops]`）。
+- 生成策略改为“逐跳扩展 + 贪心打分”：按当前节点调用关系逐层选择最优下一跳，避免大规模路径枚举。
+- 复测通过：`tests/test_graph_quality.py` 已成功写出候选链文件 `output/quality/critical_chain_candidates.json`。
+- 当前观察：候选链仍有同构路径集中，后续可增加前缀去重与分层多样性约束。
+
+#### 2026-03-14 追加增强（候选链多样性约束）
+
+- 在 `suggest_critical_chains()` 增加核心前缀分桶限流：
+  - 参数：`max_per_core_prefix`（默认 2）
+  - 参数：`core_prefix_len`（默认 3，从第 2 跳开始计）
+- 在 `tests/test_graph_quality.py` 新增 CLI 参数：
+  - `--suggest-max-per-core-prefix`
+  - `--suggest-core-prefix-len`
+- 目标：降低候选链同构聚集，提升人工筛选效率。
+
 ### 验收清单（Neo4j 启动后执行）
 
 ```bash

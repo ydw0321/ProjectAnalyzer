@@ -8,6 +8,22 @@
 
 ## 一、项目概述
 
+### 最新补充（2026-03-14）
+
+- 图质量分析支持关键链路配置文件：`config/critical_chains.json`
+- 图质量新增可解释性指标：
+  - `critical_definition_presence`（关键链定义在当前图中的命中率）
+  - `critical_chain_coverage`（关键链方法被入口可达集合覆盖的比例）
+- 入口识别升级为多信号评分（不再仅限 `controller/action` 路径）
+- 支持自动生成关键链候选：
+  - 命令：`python tests/test_graph_quality.py --suggest-critical-chains-output output/quality/critical_chain_candidates.json`
+  - 用途：先自动发现候选，再人工确认并写回 `config/critical_chains.json`
+- 候选链生成已从“变长路径枚举”调整为“逐跳扩展 + 贪心打分”，规避 Neo4j 变长路径参数化语法限制。
+- 候选链已可稳定导出到 `output/quality/critical_chain_candidates.json`，但仍需后续增强多样性去重。
+- 已增加候选链多样性参数：
+  - `--suggest-max-per-core-prefix`：同核心前缀最多保留数量（默认 2）
+  - `--suggest-core-prefix-len`：核心前缀长度（默认 3，从第 2 跳开始计）
+
 ### 项目名称
 **Code-GraphRAG**（智能代码知识库构建工具）
 
