@@ -89,6 +89,16 @@
   - `--suggest-core-prefix-len`
 - 目标：降低候选链同构聚集，提升人工筛选效率。
 
+#### 2026-03-14 追加落地（reins 专用关键链配置）
+
+- 新增配置文件：`config/critical_chains.reins.json`（不覆盖原 `config/critical_chains.json`）。
+- 配置来源：`output/quality/critical_chain_candidates.json` 的人工筛选版本，聚焦 reins 真实链路。
+- 快速验证（`--max-depth 4`）结果：
+  - `key_chain_hit_rate = 100% (8/8)`
+  - `critical_definition_presence = 100% (31/31)`
+  - `critical_chain_coverage = 83.87% (26/31)`
+- 输出文件：`output/quality/graph_quality_benchmark.reins.quick.json`。
+
 ### 验收清单（Neo4j 启动后执行）
 
 ```bash

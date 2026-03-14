@@ -333,6 +333,41 @@ python main.py --neo4j-only --incremental
 
 注解规则集在 `config/reflection_patterns.yaml` 中维护，可直接修改无需改代码。
 
+## 图质量基准与关键链配置
+
+图质量脚本支持外部关键链配置，并可自动产出候选链用于人工筛选。
+
+### 1) 生成候选关键链
+
+```bash
+python tests/test_graph_quality.py \
+	--output output/quality/graph_quality_benchmark.json \
+	--critical-chains config/critical_chains.json \
+	--suggest-critical-chains-output output/quality/critical_chain_candidates.json \
+	--suggest-chain-count 12 \
+	--suggest-max-hops 5 \
+	--suggest-max-per-core-prefix 2 \
+	--suggest-core-prefix-len 3
+```
+
+参数说明：
+
+- `--suggest-max-per-core-prefix`：同一核心前缀最多保留数量，用于抑制同构候选链堆叠。
+- `--suggest-core-prefix-len`：核心前缀长度（从第 2 跳开始计）。
+
+### 2) 使用项目专用关键链进行基准
+
+仓库内已提供 reins 示例配置：`config/critical_chains.reins.json`。
+
+```bash
+python tests/test_graph_quality.py \
+	--max-depth 4 \
+	--output output/quality/graph_quality_benchmark.reins.quick.json \
+	--critical-chains config/critical_chains.reins.json
+```
+
+该配置用于替代默认电商示例链，避免在 reins 图上出现“关键链定义命中率为 0” 的误判。
+
 ## 常见问题
 
 ### 1. 是否需要 npm？

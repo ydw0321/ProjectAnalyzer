@@ -1,0 +1,206 @@
+{
+    "profile": "reins",
+    "source": "output/quality/critical_chain_candidates.json",
+    "chains": [
+        {
+            "name": "reins_trial_priority_flow",
+            "hops": [
+                [
+                    "BLYJPReinsTrialAction",
+                    "getPriority"
+                ],
+                [
+                    "BLYJPReinsTrialAction",
+                    "openCover"
+                ],
+                [
+                    "BLPubRateAction",
+                    "getExchangeRate"
+                ],
+                [
+                    "BLPubRateAction",
+                    "getStraightExchangeRate"
+                ],
+                [
+                    "BLPrpDchannelActionBase",
+                    "findByPrimaryKey"
+                ]
+            ]
+        },
+        {
+            "name": "repolicy_main_info_flow",
+            "hops": [
+                [
+                    "BLRepolicyAction",
+                    "getReMainInfo"
+                ],
+                [
+                    "BLAccPrintAction",
+                    "getComName"
+                ],
+                [
+                    "BLEnquiryAction",
+                    "findByConditions"
+                ],
+                [
+                    "BLEnquiryAction",
+                    "findByPK"
+                ],
+                [
+                    "BLFeoEnquiryFacade",
+                    "getFeoEnquiryDto"
+                ]
+            ]
+        },
+        {
+            "name": "fac_xlayer_enquiry_flow",
+            "hops": [
+                [
+                    "UIFacXLayerAction",
+                    "getFeoXFacForPrpallDto"
+                ],
+                [
+                    "BLFeoEnquiryFacade",
+                    "getFeoEnquiryDto"
+                ],
+                [
+                    "BLFeoEnquiryAction",
+                    "findByQuotationNo"
+                ],
+                [
+                    "BLPrpReinsVerifyActionBase",
+                    "findByConditions"
+                ],
+                [
+                    "BLPrpReinsVerifyActionBase",
+                    "getCount"
+                ]
+            ]
+        },
+        {
+            "name": "acc_init_balance_flow",
+            "hops": [
+                [
+                    "UIAccAction",
+                    "accInitIn"
+                ],
+                [
+                    "UIFciRepolicyAction",
+                    "findByConditions"
+                ],
+                [
+                    "UIAccCalFacade",
+                    "execute"
+                ],
+                [
+                    "UIAccAction",
+                    "calBalance"
+                ],
+                [
+                    "AccPrintDto",
+                    "getFzAccDto"
+                ]
+            ]
+        },
+        {
+            "name": "batch_enquiry_legal_print_flow",
+            "hops": [
+                [
+                    "UIBatchEnquiryAction",
+                    "genFeoReinsReceive"
+                ],
+                [
+                    "UIAccAction",
+                    "findByPrimaryKey"
+                ],
+                [
+                    "UILegalAccPrintFacade",
+                    "execute"
+                ],
+                [
+                    "BLLegalAccPrintFacade",
+                    "getLegalPrintAccList"
+                ],
+                [
+                    "BLLegalAccPrintAction",
+                    "getLegalAccPrintList"
+                ]
+            ]
+        },
+        {
+            "name": "c_trial_channel_lookup_flow",
+            "hops": [
+                [
+                    "BLCTrialAction",
+                    "getCTrialInfo"
+                ],
+                [
+                    "BLAccAction",
+                    "setFlag"
+                ],
+                [
+                    "BLReendorAction",
+                    "findByPrimaryKey"
+                ],
+                [
+                    "BLPrpDclassAction",
+                    "translateCode"
+                ],
+                [
+                    "BLPrpDchannelActionBase",
+                    "findByPrimaryKey"
+                ]
+            ]
+        },
+        {
+            "name": "tty_repay_notice_flow",
+            "hops": [
+                [
+                    "BLTtyRepayNoticePrintAction",
+                    "getBasicInfo"
+                ],
+                [
+                    "BLAccPrintAction",
+                    "getRiskEName"
+                ],
+                [
+                    "BLReendorAction",
+                    "findByPrimaryKey"
+                ],
+                [
+                    "BLPrpDclassAction",
+                    "translateCode"
+                ],
+                [
+                    "BLPrpDchannelActionBase",
+                    "findByPrimaryKey"
+                ]
+            ]
+        },
+        {
+            "name": "danger_total_channel_flow",
+            "hops": [
+                [
+                    "BLPrpLdangerTotAction",
+                    "getLdangerTot"
+                ],
+                [
+                    "BLAccAction",
+                    "setFlag"
+                ],
+                [
+                    "BLReendorAction",
+                    "findByPrimaryKey"
+                ],
+                [
+                    "BLPrpDclassAction",
+                    "translateCode"
+                ],
+                [
+                    "BLPrpDchannelActionBase",
+                    "findByPrimaryKey"
+                ]
+            ]
+        }
+    ]
+}
