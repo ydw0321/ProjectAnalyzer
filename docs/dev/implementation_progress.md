@@ -143,6 +143,38 @@
   - `output/quality/graph_quality_benchmark.reins.quick.json` 与 `output/quality/graph_quality_breakdown.reins.quick.json` 均已产出
   - unknown 分类样例：`jdk_core=9469`、`infra_framework=2366`、`third_party_lib=7`、`internal_shared_lib_missing=21517`、`true_unresolved=14244`
 
+#### 2026-03-14 追加实现（P2-F 离线化 + P3 域级/对比能力收口）
+
+- P2-F 完成：离线文档导出与指标解释工具
+  - `scripts/generate_docs.py`
+    - 默认改为离线模式，无 OpenAI Key 也可生成 overview
+    - 新增 `--llm-summary` 显式开关，只有开启时才调用 LLM
+    - 新增 `--layer` 以便单层导出
+  - `scripts/explain_metric.py`
+    - 支持 15 个质量指标的公式说明、当前值、阈值含义、改进建议
+    - 支持基于 `output/quality/graph_quality_benchmark.json` 展示与上次运行的 delta
+
+- P3-G1 完成：域级指标拆分
+  - `src/tree/graph_quality.py`
+    - 新增 `_extract_domain()` 与 `compute_domain_breakdown()`
+    - `details.domain_breakdown` 输出每个业务域的 `class_count`、`method_count`、`unknown_call_count`、`entry_count`
+    - 控制台报告新增“域级指标 Top 10”表格
+
+- P3-G2 完成：运行对比与增量趋势
+  - `src/tree/graph_quality.py`
+    - 新增 `load_prev_report()`、`compute_metrics_delta()`、`get_top_changes()`、`enrich_with_delta()`
+    - JSON 报告新增 `metrics_delta`、`top_changes`、`prev_run_id`、`prev_timestamp`
+  - `tests/test_graph_quality.py`
+    - 保存新报告前自动加载上一次输出作为基线，无需额外 CLI 参数
+
+- README 同步完成：
+  - 增补结构风险阈值、`explain_metric.py`、离线文档导出、域级指标与运行对比说明
+
+- reins 回归验证（`--max-depth 4 --critical-chains config/critical_chains.reins.json`）：
+  - `domain_breakdown` 已写入 benchmark JSON
+  - 控制台已输出“域级指标 Top 10”与“与上次运行对比”
+  - delta 样例：`broken_chain_rate`、`business_broken_chain_rate`、`reachability_rate` 已可稳定显示
+
 ### 验收清单（Neo4j 启动后执行）
 
 ```bash

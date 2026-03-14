@@ -368,6 +368,103 @@ python tests/test_graph_quality.py \
 
 该配置用于替代默认电商示例链，避免在 reins 图上出现“关键链定义命中率为 0” 的误判。
 
+### 3) 结构风险指标与分层违规阈值
+
+benchmark 命令支持通过 `--threshold-*` 参数自定义告警线：
+
+```bash
+python tests/test_graph_quality.py \
+	--max-depth 4 \
+	--threshold-layer-violation 0.05 \
+	--threshold-cycle-count 100 \
+	--threshold-god-method 0.03 \
+	--threshold-isolated 0.10 \
+	--threshold-hotspot-fragility 0.40
+```
+
+| 指标 | 含义 | 默认阈值 |
+|------|------|----------|
+| `layer_violation_rate` | 跨层调用比例 | 0.10 |
+| `cycle_count` | 调用环路数（去重后） | 200 |
+| `god_method_ratio` | 上帝方法占比（出度 ≥50） | 0.05 |
+| `isolated_method_ratio` | 孤立方法占比（入度=出度=0） | 0.20 |
+| `hotspot_fragility_top20_share` | Top-20 热点调用图中心度占比 | 0.50 |
+
+### 4) 指标解释工具
+
+对任意指标，可用 `explain_metric.py` 查看计算公式、当前值与行动建议：
+
+```bash
+# 查看单个指标
+python scripts/explain_metric.py --metric layer_violation_rate
+
+# 同时显示上次运行对比
+python scripts/explain_metric.py --metric cycle_count --report output/quality/graph_quality_benchmark.json
+
+# 列出所有可用指标
+python scripts/explain_metric.py --list
+```
+
+支持的指标名称：`broken_chain_rate`、`reachability_rate`、`unknown_call_ratio`、`entry_confidence_proxy`、`critical_chain_coverage`、`layer_violation_rate`、`cycle_count`、`god_method_ratio`、`isolated_method_ratio`、`hotspot_fragility_top20_share` 等 15 个。
+
+### 5) 离线文档导出
+
+`generate_docs.py` 默认以离线模式生成层级 overview，无需 OpenAI Key：
+
+```bash
+# 导出所有层的 overview 文档（离线，无需 LLM）
+python scripts/generate_docs.py --output-dir output/docs
+
+# 仅导出单个层
+python scripts/generate_docs.py --layer service --output-dir output/docs
+
+# 启用 LLM 摘要（需要 OPENAI_API_KEY）
+python scripts/generate_docs.py --llm-summary --output-dir output/docs
+```
+
+输出文件保存到 `--output-dir`（默认 `output/docs/`），每个层生成一个 Markdown 文件，包含：类名列表、方法摘要、依赖关系。
+
+### 6) 域级指标与运行对比
+
+benchmark 报告中包含两类新字段：
+
+**域级指标（`details.domain_breakdown`）**按项目子域聚合统计：
+
+```json
+{
+  "domain_breakdown": {
+    "account": {
+      "class_count": 42,
+      "method_count": 318,
+      "unknown_call_count": 127,
+      "entry_count": 8
+    }
+  }
+}
+```
+
+**运行对比（`metrics_delta`）**自动与上次保存的报告对比：
+
+```json
+{
+  "metrics_delta": {
+    "broken_chain_rate": {
+      "current": 0.08,
+      "previous": 0.12,
+      "delta": -0.04,
+      "abs_delta": 0.04
+    }
+  },
+  "top_changes": [
+    {"metric": "broken_chain_rate", "delta": -0.04, "abs_delta": 0.04}
+  ],
+  "prev_run_id": "20240315-120000-abcd",
+  "prev_timestamp": "2024-03-15 12:00:00"
+}
+```
+
+每次运行 benchmark 都会自动读取上次输出文件作为基线，无需额外参数。
+
 ## 常见问题
 
 ### 1. 是否需要 npm？

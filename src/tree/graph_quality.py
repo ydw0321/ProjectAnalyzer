@@ -733,6 +733,172 @@ def get_structural_risk_stats(query):
     }
 
 
+# ─── Domain breakdown ─────────────────────────────────────────────────────────
+
+_DOMAIN_SKIP_SEGMENTS = {
+    "",
+    ".",
+    "..",
+    "fixtures",
+    "src",
+    "main",
+    "java",
+    "resources",
+    "simple",
+    "ssh",
+    "reins",
+    "target",
+    "build",
+    "test",
+    "tests",
+    # layer names that should be skipped (look one level up)
+    "controller",
+    "action",
+    "service",
+    "facade",
+    "biz",
+    "bl",
+    "dal",
+    "dao",
+    "model",
+    "entity",
+    "vo",
+    "dto",
+    "util",
+    "utils",
+    "helper",
+    "common",
+    "utility",
+}
+
+
+def _extract_domain(file_path: str) -> str:
+    """Derive a domain label from a Java file path.
+
+    Strategy: split the path, drop known non-domain segments, and take the
+    last non-trivial directory component (the immediate parent of the .java
+    file, or one level above if that parent is a layer name).
+    """
+    parts = file_path.replace("\\", "/").split("/")
+    # Drop the .java filename
+    if parts and parts[-1].lower().endswith(".java"):
+        parts = parts[:-1]
+    # Walk from the end, skip known layer names, return first meaningful segment
+    for part in reversed(parts):
+        lp = part.lower()
+        if lp and lp not in _DOMAIN_SKIP_SEGMENTS and not lp.endswith(".java"):
+            return lp
+    return "other"
+
+
+def compute_domain_breakdown(all_classes, all_methods, unknown_items, entry_methods):
+    """Group class/method/unknown/entry counts by project domain.
+
+    Domain is derived from the file path using :func:`_extract_domain`.
+
+    Returns a dict keyed by domain label with counts:
+      {domain: {class_count, method_count, unknown_call_count, entry_count}}
+    sorted by class_count descending.
+    """
+    from collections import defaultdict
+
+    class_to_domain: dict[str, str] = {}
+    domain_classes: dict[str, set] = defaultdict(set)
+
+    for cls in all_classes:
+        fp = cls.get("file_path") or ""
+        name = cls.get("class_name") or ""
+        domain = _extract_domain(fp)
+        class_to_domain[name] = domain
+        domain_classes[domain].add(name)
+
+    domain_method_counts: dict[str, int] = defaultdict(int)
+    for m in all_methods:
+        cls = m.get("class_name") or ""
+        fp = m.get("file_path") or ""
+        domain = class_to_domain.get(cls) or _extract_domain(fp)
+        domain_method_counts[domain] += 1
+
+    domain_unknown_counts: dict[str, int] = defaultdict(int)
+    for item in unknown_items:
+        cls = item.get("caller_class") or ""
+        domain = class_to_domain.get(cls, "other")
+        domain_unknown_counts[domain] += 1
+
+    domain_entry_counts: dict[str, int] = defaultdict(int)
+    for e in entry_methods:
+        cls = e.get("class_name") or ""
+        domain = class_to_domain.get(cls, "other")
+        domain_entry_counts[domain] += 1
+
+    result = {}
+    for domain in sorted(domain_classes, key=lambda d: -len(domain_classes[d])):
+        result[domain] = {
+            "class_count": len(domain_classes[domain]),
+            "method_count": domain_method_counts[domain],
+            "unknown_call_count": domain_unknown_counts[domain],
+            "entry_count": domain_entry_counts[domain],
+        }
+    return result
+
+
+# ─── Delta / comparison ───────────────────────────────────────────────────────
+
+
+def compute_metrics_delta(current_metrics: dict, prev_metrics: dict) -> dict:
+    """Return per-metric delta between *current* and *previous* runs.
+
+    Only numeric metrics that exist in both dicts are included.
+    Result format: {metric: {current, previous, delta, abs_delta}}
+    """
+    result = {}
+    for key, curr in current_metrics.items():
+        if not isinstance(curr, (int, float)):
+            continue
+        prev = prev_metrics.get(key)
+        if not isinstance(prev, (int, float)):
+            continue
+        delta = curr - prev
+        result[key] = {
+            "current": curr,
+            "previous": prev,
+            "delta": delta,
+            "abs_delta": abs(delta),
+        }
+    return result
+
+
+def get_top_changes(delta: dict, n: int = 5) -> list:
+    """Return the *n* metrics with the largest absolute change."""
+    items = sorted(delta.items(), key=lambda x: x[1]["abs_delta"], reverse=True)
+    return [{"metric": k, **v} for k, v in items[:n]]
+
+
+def enrich_with_delta(report: dict, prev_report: dict) -> dict:
+    """Attach *metrics_delta* and *top_changes* to *report* in-place.
+
+    Also records *prev_run_id* / *prev_timestamp* so runs can be linked.
+    Safe to call even when *prev_report* is empty or None.
+    """
+    if not prev_report or "metrics" not in prev_report:
+        return report
+    delta = compute_metrics_delta(report["metrics"], prev_report["metrics"])
+    report["metrics_delta"] = delta
+    report["top_changes"] = get_top_changes(delta, n=5)
+    report["prev_run_id"] = prev_report.get("run_id", "unknown")
+    report["prev_timestamp"] = prev_report.get("timestamp", "unknown")
+    return report
+
+
+def load_prev_report(output_path: str) -> dict:
+    """Load the report that currently lives at *output_path* (before overwriting)."""
+    try:
+        with open(output_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 def build_report(max_depth=10, critical_chains_path=None):
     run_id = f"gq-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:8]}"
     critical_chains, critical_chains_source = load_critical_chains(critical_chains_path)
@@ -759,6 +925,10 @@ def build_report(max_depth=10, critical_chains_path=None):
     business_unknown = unknown_breakdown["counts"].get("business_unknown", 0)
     unknown_items = unknown_breakdown["items"]
     unknown_top_callers = unknown_breakdown.get("top_callers", [])
+
+    domain_breakdown = compute_domain_breakdown(
+        all_classes, all_methods, unknown_items, entry_methods
+    )
 
     critical_classes = {
         class_name
@@ -871,6 +1041,7 @@ def build_report(max_depth=10, critical_chains_path=None):
                 "isolated_method_count": integrity["isolated_method_count"],
             },
             "structural_risks": structural_risks,
+            "domain_breakdown": domain_breakdown,
             "coverage_metric_note": (
                 "critical_chain_coverage = reachable_critical_methods / critical_methods, "
                 "critical_chain_reach_share = critical_methods / reachable_methods"
@@ -983,6 +1154,46 @@ def print_report(report):
                 f"{first_break['to']['class']}.{first_break['to']['method']} "
                 f"({first_break['reason']})"
             )
+
+    # ── Domain breakdown ──
+    domain_breakdown = details.get("domain_breakdown", {})
+    if domain_breakdown:
+        print()
+        print("域级指标 Top 10:")
+        top_domains = list(domain_breakdown.items())[:10]
+        header = f"  {'域':<20} {'类':>5} {'方法':>7} {'断链调用':>8} {'入口':>5}"
+        print(header)
+        print("  " + "-" * (len(header) - 2))
+        for domain, stats in top_domains:
+            print(
+                f"  {domain:<20} "
+                f"{stats['class_count']:>5} "
+                f"{stats['method_count']:>7} "
+                f"{stats['unknown_call_count']:>8} "
+                f"{stats['entry_count']:>5}"
+            )
+
+    # ── Delta vs previous run ──
+    metrics_delta = report.get("metrics_delta", {})
+    top_changes = report.get("top_changes", [])
+    if top_changes:
+        prev_ts = report.get("prev_timestamp", "?")
+        print()
+        print(f"与上次运行对比 (prev: {prev_ts}):")
+        for item in top_changes:
+            name = item["metric"]
+            curr = item["current"]
+            delta = item["delta"]
+            sign = "+" if delta >= 0 else ""
+            is_pct = isinstance(curr, float) and abs(curr) <= 1.0
+            if is_pct:
+                print(
+                    f"  {name}: {curr:.2%}  ({sign}{delta:.2%})"
+                )
+            else:
+                print(
+                    f"  {name}: {curr}  ({sign}{delta:.2f})"
+                )
 
 
 def save_report(report, output_path):

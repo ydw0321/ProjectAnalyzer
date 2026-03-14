@@ -7,6 +7,8 @@ import argparse
 from src.tree import (
     build_report,
     ensure_graph_data,
+    enrich_with_delta,
+    load_prev_report,
     print_report,
     save_critical_chain_candidates,
     save_report,
@@ -69,7 +71,9 @@ def main():
     args = parser.parse_args()
 
     ensure_graph_data(args.bootstrap)
+    prev_report = load_prev_report(args.output)
     report = build_report(args.max_depth, critical_chains_path=args.critical_chains)
+    enrich_with_delta(report, prev_report)
     save_report(report, args.output)
 
     print_report(report)
