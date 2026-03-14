@@ -14,6 +14,72 @@
 | Phase 2 | GraphRAG 检索引擎 | ✅ 已实现 | 2026-03-13 |
 | Phase 3 | 多端问答界面 | ✅ 已实现 | 2026-03-13 |
 | Phase 4 | 文档生成（离线报告）| ✅ 已实现 | 2026-03-13 |
+| Phase 5 | 调用图精度提升（4周计划）| ✅ 已实现 | 2026-03-14 |
+
+---
+
+## Phase 5 — 调用图精度提升（4周深度改造）
+
+> **目标**：以不破坏关键链路命中（6/6 = 100%）为前提，降低 `unknown_calls` 和 `broken_chain_rate`，并补齐大项目可持续运行能力。
+>
+> **基线（ssh project）**：`unknown_calls=1363`（jdk=1093, business=270），`broken_chain_rate=77.2%`，`key_chain_hit=100%`
+
+### Week 1 — 匹配与推断增强
+
+| 任务 | 文件 | 说明 |
+|------|------|------|
+| 签名容差匹配 | `src/config.py`, `src/storage/graph_store.py` | 新增 `SIGNATURE_MATCH_TOLERANT`/`SIGNATURE_TOLERANT_MAX_DIFF` 配置；3层匹配：exact → fallback → tolerant；所有 CALLS 边携带 `match_mode` 属性 |
+| External unknown 二次补链 | `src/storage/graph_store.py` | Pass 1: 唯一名称精确补链（`confidence=1.0`）；Pass 2: 文件路径邻近度启发式（`inferred_reason=path_proximity:N`）；`resolve_external_unknown_calls()` 返回总补链数 |
+| 字段提取增强 | `src/parser/java_parser.py` | 正则扩展至 package-private 字段、`@注解` 前置字段 |
+| 局部变量推断增强 | `src/parser/java_parser.py` | for-each 和 try-with-resources 变量提取 |
+| 类型转换 receiver 推断 | `src/parser/java_parser.py` | `((TypeName) expr).method()` → 提取转换后类型 |
+
+### Week 2 — 可解释性与复杂调用覆盖
+
+| 任务 | 文件 | 说明 |
+|------|------|------|
+| 链式调用返回类型推断 | `src/parser/java_parser.py` | 新增 `method_return_types` 字典；`_infer_chain_receiver_type()` 支持 1跳链式推断（`obj.getX().method()`）；方法 dict 新增 `return_type` 字段 |
+| 质量报告分层 | `src/tree/graph_quality.py` | 新增 `critical_chain_retention`、`critical_hop_dropout`、`util_unknown_ratio` 三维指标；分离关键路径与工具类噪声 |
+| 阈值回归门禁扩展 | `tests/test_graph_quality_thresholds.py` | 3 个新 CLI 参数 + 3 个新阈值检查 |
+
+### Week 3 — 规模化与框架调用补链
+
+| 任务 | 文件 | 说明 |
+|------|------|------|
+| 增量解析模式 | `src/scanner/scanner.py`, `main.py`, `src/storage/graph_store.py` | SHA-256 文件哈希缓存（`.parse_cache.json`）；`compute_delta()` 返回变更/删除文件集；`--incremental` 标志；`delete_file_data()` 按文件清除旧图数据 |
+| Spring/MyBatis 注解感知 | `src/parser/java_parser.py`, `src/storage/graph_store.py` | `_extract_spring_annotations()`：`@Autowired`/`@Resource`/`@Inject` 多行感知字段提取；`_get_class_annotations()`：`@Service`/`@Mapper` 类注解检测；Class 节点新增 `is_mapper`/`is_service` 属性；Pass 3 (Mapper) 补链至 `@Mapper` 接口方法（`confidence=0.80`） |
+| 注解规则集配置化 | `config/reflection_patterns.yaml` | 可扩展 YAML 规则文件，无需改代码即可新增注解规则 |
+
+### Week 4 — 稳定化与发布
+
+| 任务 | 文件 | 说明 |
+|------|------|------|
+| 回归测试基础设施 | `scripts/run_regression.py` | 统一离线回归入口；区分 offline/online 套件；提供 Neo4j 手动验证清单 |
+| .gitignore 补全 | `.gitignore` | `output/trees/`, `output/quality/`, `.parse_cache.json` |
+| README 同步 | `README.md` | 增量模式、Spring 注解感知、规则集扩展说明 |
+
+### 验收清单（Neo4j 启动后执行）
+
+```bash
+# 1. SSH 项目全量构建 + 质量门禁
+python main.py --neo4j-only --reset-graph
+python tests/test_graph_quality_thresholds.py \
+  --max-unknown-ratio 0.80 \
+  --min-reachability  0.55 \
+  --min-critical-chain-retention 1.0
+
+# 2. SSH unknown 分类报告
+python tests/test_graph_quality_breakdown.py
+# 目标: business_unknown < 180（基线270，目标降幅 ≥33%）
+
+# 3. 增量一致性验证
+python main.py --neo4j-only --reset-graph
+python main.py --neo4j-only --incremental  # 无变更，CALLS 数量应不变
+
+# 4. 离线套件（无需Neo4j）
+python scripts/run_regression.py
+# 预期：3+ PASS，0 FAIL
+```
 
 ---
 
