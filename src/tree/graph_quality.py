@@ -7,7 +7,7 @@ import time
 from src.tree.query_service import GraphQueryService
 
 
-CRITICAL_CHAINS = [
+DEFAULT_CRITICAL_CHAINS = [
     {
         "name": "order_create_main_flow",
         "hops": [
@@ -69,6 +69,59 @@ CRITICAL_CHAINS = [
         ],
     },
 ]
+
+
+def _normalize_chain_hops(raw_hops):
+    """Normalize hop definitions to tuple pairs: [(class, method), ...]."""
+    hops = []
+    for item in raw_hops or []:
+        if isinstance(item, (list, tuple)) and len(item) == 2:
+            cls, method = item[0], item[1]
+        elif isinstance(item, dict):
+            cls = item.get("class")
+            method = item.get("method")
+        else:
+            continue
+        if cls and method:
+            hops.append((str(cls), str(method)))
+    return hops
+
+
+def load_critical_chains(config_path=None):
+    """Load critical chains from JSON config. Fall back to embedded defaults.
+
+    JSON format:
+    {
+      "chains": [
+        {"name": "flow_name", "hops": [["ClassA", "m1"], ["ClassB", "m2"]]}
+      ]
+    }
+    """
+    default_path = os.path.join("config", "critical_chains.json")
+    path = config_path or default_path
+
+    if not os.path.exists(path):
+        return DEFAULT_CRITICAL_CHAINS, "embedded_default"
+
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            payload = json.load(file)
+
+        raw_chains = payload.get("chains", []) if isinstance(payload, dict) else []
+        chains = []
+        for chain in raw_chains:
+            if not isinstance(chain, dict):
+                continue
+            name = chain.get("name")
+            hops = _normalize_chain_hops(chain.get("hops"))
+            if name and len(hops) >= 2:
+                chains.append({"name": str(name), "hops": hops})
+
+        if chains:
+            return chains, path
+        return DEFAULT_CRITICAL_CHAINS, "embedded_default"
+    except Exception:
+        return DEFAULT_CRITICAL_CHAINS, "embedded_default"
 
 
 JDK_LIKELY_METHODS = {
@@ -136,14 +189,14 @@ def collect_reachable_methods(query, max_depth):
     return entry_methods, reachable_methods
 
 
-def evaluate_critical_chains(query):
-    total_chains = len(CRITICAL_CHAINS)
+def evaluate_critical_chains(query, critical_chains):
+    total_chains = len(critical_chains)
     full_hit_chains = 0
     total_hops = 0
     hit_hops = 0
     chain_results = []
 
-    for chain in CRITICAL_CHAINS:
+    for chain in critical_chains:
         hop_results = []
         is_full_hit = True
 
@@ -231,15 +284,22 @@ def get_unknown_call_breakdown(query):
     return {"counts": counts, "items": classified_rows}
 
 
-def build_report(max_depth=10):
+def build_report(max_depth=10, critical_chains_path=None):
+    critical_chains, critical_chains_source = load_critical_chains(critical_chains_path)
+
     with GraphQueryService() as query:
         all_methods = query.get_all_methods()
         call_stats = query.get_call_statistics()
         entry_methods, reachable_methods = collect_reachable_methods(query, max_depth)
-        chain_eval = evaluate_critical_chains(query)
+        chain_eval = evaluate_critical_chains(query, critical_chains)
         unknown_breakdown = get_unknown_call_breakdown(query)
 
     total_methods = len(all_methods)
+    all_method_keys = {
+        (m.get("class_name"), m.get("method_name"))
+        for m in all_methods
+        if m.get("class_name") and m.get("method_name")
+    }
     total_calls = call_stats.get("total", 0)
     unknown_calls = call_stats.get("external_unknown", 0)
     business_unknown = unknown_breakdown["counts"].get("business_unknown", 0)
@@ -247,9 +307,16 @@ def build_report(max_depth=10):
 
     critical_classes = {
         class_name
-        for chain in CRITICAL_CHAINS
+        for chain in critical_chains
         for class_name, _ in chain["hops"]
     }
+    critical_methods = {
+        (class_name, method_name)
+        for chain in critical_chains
+        for class_name, method_name in chain["hops"]
+    }
+    critical_reachable_count = len(critical_methods & reachable_methods)
+    critical_defined_count = len(critical_methods & all_method_keys)
     critical_unknown_calls = sum(
         1 for item in unknown_items if item.get("caller_class") in critical_classes
     )
@@ -273,6 +340,16 @@ def build_report(max_depth=10):
     critical_chain_retention = key_chain_hop_hit_rate
     critical_hop_dropout = 1.0 - critical_chain_retention
     util_unknown_ratio = (util_unknown_calls / unknown_calls) if unknown_calls else 0.0
+    critical_chain_coverage = (
+        critical_reachable_count / len(critical_methods)
+        if critical_methods
+        else 0.0
+    )
+    critical_definition_presence = (
+        critical_defined_count / len(critical_methods)
+        if critical_methods
+        else 0.0
+    )
 
     return {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -284,6 +361,8 @@ def build_report(max_depth=10):
             "critical_chain_retention": critical_chain_retention,
             "critical_hop_dropout": critical_hop_dropout,
             "util_unknown_ratio": util_unknown_ratio,
+            "critical_chain_coverage": critical_chain_coverage,
+            "critical_definition_presence": critical_definition_presence,
         },
         "details": {
             "total_methods": total_methods,
@@ -298,6 +377,11 @@ def build_report(max_depth=10):
             "total_key_chains": chain_eval["total_chains"],
             "matched_key_hops": chain_eval["hit_hops"],
             "total_key_hops": chain_eval["total_hops"],
+            "critical_chain_source": critical_chains_source,
+            "configured_critical_chain_count": len(critical_chains),
+            "critical_method_count": len(critical_methods),
+            "defined_critical_method_count": critical_defined_count,
+            "reachable_critical_method_count": critical_reachable_count,
             "critical_unknown_calls": critical_unknown_calls,
             "util_unknown_calls": util_unknown_calls,
             "unknown_breakdown": unknown_breakdown["counts"],
@@ -322,12 +406,16 @@ def print_report(report):
     print(f"  业务断链率: {metrics['business_broken_chain_rate']:.2%} ({unknown_breakdown['business_unknown']}/{details['total_calls']})")
     print(f"  可达率: {metrics['reachability_rate']:.2%} ({details['reachable_methods']}/{details['total_methods']})")
     print(f"  关键链路命中率: {metrics['key_chain_hit_rate']:.2%} ({details['matched_key_chains']}/{details['total_key_chains']})")
+    print(f"  关键链定义命中率: {metrics['critical_definition_presence']:.2%} ({details['defined_critical_method_count']}/{details['critical_method_count']})")
+    print(f"  关键链覆盖率: {metrics['critical_chain_coverage']:.2%} ({details['reachable_critical_method_count']}/{details['critical_method_count']})")
     print(f"  关键链保留率: {metrics['critical_chain_retention']:.2%}")
     print(f"  关键跳点丢失率: {metrics['critical_hop_dropout']:.2%}")
     print(f"  util unknown 占比: {metrics['util_unknown_ratio']:.2%}")
     print()
     print("补充指标:")
     print(f"  关键链路逐跳命中率: {details['key_chain_hop_hit_rate']:.2%} ({details['matched_key_hops']}/{details['total_key_hops']})")
+    print(f"  关键链配置来源: {details['critical_chain_source']}")
+    print(f"  配置关键链数量: {details['configured_critical_chain_count']}")
     print(f"  入口方法数: {details['entry_method_count']}")
     print(f"  内部调用数: {details['internal_calls']}")
     print(f"  外部调用数: {details['external_calls']}")

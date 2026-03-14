@@ -1,0 +1,154 @@
+{
+    "chains": [
+        {
+            "name": "order_create_main_flow",
+            "hops": [
+                [
+                    "OrderController",
+                    "createOrder"
+                ],
+                [
+                    "OrderBiz",
+                    "submitOrder"
+                ],
+                [
+                    "OrderFacade",
+                    "placeOrder"
+                ],
+                [
+                    "OrderService",
+                    "createOrder"
+                ],
+                [
+                    "OrderDal",
+                    "insert"
+                ]
+            ]
+        },
+        {
+            "name": "order_cancel_main_flow",
+            "hops": [
+                [
+                    "OrderController",
+                    "cancelOrder"
+                ],
+                [
+                    "OrderBiz",
+                    "handleOrderCancellation"
+                ],
+                [
+                    "OrderFacade",
+                    "cancelOrder"
+                ],
+                [
+                    "OrderService",
+                    "cancelOrder"
+                ],
+                [
+                    "OrderDal",
+                    "update"
+                ]
+            ]
+        },
+        {
+            "name": "product_query_main_flow",
+            "hops": [
+                [
+                    "ProductController",
+                    "getProduct"
+                ],
+                [
+                    "ProductBiz",
+                    "queryProduct"
+                ],
+                [
+                    "ProductFacade",
+                    "getProductDetails"
+                ],
+                [
+                    "ProductService",
+                    "getProduct"
+                ],
+                [
+                    "ProductDal",
+                    "findById"
+                ]
+            ]
+        },
+        {
+            "name": "product_list_main_flow",
+            "hops": [
+                [
+                    "ProductController",
+                    "listProducts"
+                ],
+                [
+                    "ProductBiz",
+                    "listProductsByCategory"
+                ],
+                [
+                    "ProductFacade",
+                    "getProductsByCategory"
+                ],
+                [
+                    "ProductService",
+                    "getProductsByCategory"
+                ],
+                [
+                    "ProductDal",
+                    "findByCategory"
+                ]
+            ]
+        },
+        {
+            "name": "user_register_main_flow",
+            "hops": [
+                [
+                    "UserController",
+                    "register"
+                ],
+                [
+                    "UserBiz",
+                    "registerUser"
+                ],
+                [
+                    "UserFacade",
+                    "register"
+                ],
+                [
+                    "UserService",
+                    "registerUser"
+                ],
+                [
+                    "UserDal",
+                    "insert"
+                ]
+            ]
+        },
+        {
+            "name": "user_list_main_flow",
+            "hops": [
+                [
+                    "UserController",
+                    "listUsers"
+                ],
+                [
+                    "UserBiz",
+                    "fetchAllUsers"
+                ],
+                [
+                    "UserFacade",
+                    "getAllUsers"
+                ],
+                [
+                    "UserService",
+                    "getAllUsers"
+                ],
+                [
+                    "UserDal",
+                    "findAll"
+                ]
+            ]
+        }
+    ]
+}

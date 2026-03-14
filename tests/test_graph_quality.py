@@ -25,10 +25,15 @@ def main():
         default="output/quality/graph_quality_benchmark.json",
         help="基准结果 JSON 输出路径",
     )
+    parser.add_argument(
+        "--critical-chains",
+        default=None,
+        help="关键链路配置文件路径（JSON），不传则使用 config/critical_chains.json 或内置默认",
+    )
     args = parser.parse_args()
 
     ensure_graph_data(args.bootstrap)
-    report = build_report(args.max_depth)
+    report = build_report(args.max_depth, critical_chains_path=args.critical_chains)
     save_report(report, args.output)
 
     print_report(report)

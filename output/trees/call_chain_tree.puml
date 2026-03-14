@@ -1,374 +1,1128 @@
 @startuml
 
-class "execute" as OrderCreateAction_execute
-OrderCreateAction_execute --> OrderForm_getUserId
-class "getUserId" as OrderForm_getUserId #pink
-OrderCreateAction_execute --> OrderForm_getProductCode
-class "getProductCode" as OrderForm_getProductCode #pink
-OrderCreateAction_execute --> submitOrder
-class "submitOrder" as submitOrder #pink
-submitOrder --> OrderServiceAsync_submitOrder
-class "submitOrder" as OrderServiceAsync_submitOrder #pink
-OrderServiceAsync_submitOrder --> OrderServiceAsync_submitOrder
-class "submitOrder" as OrderServiceAsync_submitOrder #pink
-submitOrder --> OrderSubmitHandler_beforeSubmit
-class "beforeSubmit" as OrderSubmitHandler_beforeSubmit #pink
-OrderSubmitHandler_beforeSubmit --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-OrderSubmitHandler_beforeSubmit --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> OrderSubmitHandler_afterSubmit
-class "afterSubmit" as OrderSubmitHandler_afterSubmit #pink
-OrderSubmitHandler_afterSubmit --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-OrderSubmitHandler_afterSubmit --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> PaymentGatewayBiz_processPayment
-class "processPayment" as PaymentGatewayBiz_processPayment #pink
-PaymentGatewayBiz_processPayment --> LegacyRpcClient_post
-class "post" as LegacyRpcClient_post #pink
-LegacyRpcClient_post --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-PaymentGatewayBiz_processPayment --> Order_setPaymentChannel
-class "setPaymentChannel" as Order_setPaymentChannel #pink
-PaymentGatewayBiz_processPayment --> WechatPaymentServiceImpl_pay
-class "pay" as WechatPaymentServiceImpl_pay #pink
-WechatPaymentServiceImpl_pay --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-PaymentGatewayBiz_processPayment --> CacheUtil_get
-class "get" as CacheUtil_get #pink
-CacheUtil_get --> CacheUtil_get
-class "get" as CacheUtil_get #pink
-PaymentGatewayBiz_processPayment --> equals
+class "sendFacToPayment" as BLReinsPaymentInterfAction_sendFacToPayment
+BLReinsPaymentInterfAction_sendFacToPayment --> PrpMaxUseDtoBase_setTtyCode
+class "setTtyCode" as PrpMaxUseDtoBase_setTtyCode #pink
+PrpMaxUseDtoBase_setTtyCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> BLAccAction_getAccPeriod
+class "getAccPeriod" as BLAccAction_getAccPeriod #pink
+BLAccAction_getAccPeriod --> TreatyReportPrintDto_getYear
+class "getYear" as TreatyReportPrintDto_getYear #pink
+BLAccAction_getAccPeriod --> current
+class "current" as current #red
+BLAccAction_getAccPeriod --> getMonth
+class "getMonth" as getMonth #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FciReclauseDtoBase_getRepolicyNo
+class "getRepolicyNo" as FciReclauseDtoBase_getRepolicyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_setUwYear
+class "setUwYear" as FciRepolicyDtoBase_setUwYear #pink
+FciRepolicyDtoBase_setUwYear --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_getUwYear
+class "getUwYear" as FciRepolicyDtoBase_getUwYear #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_setReinsType
+class "setReinsType" as FciRepolicyDtoBase_setReinsType #pink
+FciRepolicyDtoBase_setReinsType --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_getRemarks
+class "getRemarks" as FciRepolicyDtoBase_getRemarks #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_setUpdaterCode
+class "setUpdaterCode" as FciRepolicyDtoBase_setUpdaterCode #pink
+FciRepolicyDtoBase_setUpdaterCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_setUpdateDate
+class "setUpdateDate" as FciRepolicyDtoBase_setUpdateDate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FciRepolicyDtoBase_setBrokerCode
+class "setBrokerCode" as FciRepolicyDtoBase_setBrokerCode #pink
+FciRepolicyDtoBase_setBrokerCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> PrpReinsVerifyDto_setSumPremium
+class "setSumPremium" as PrpReinsVerifyDto_setSumPremium #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> UIAccAction_getPayAccNo
+class "getPayAccNo" as UIAccAction_getPayAccNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_checkdate
+class "checkdate" as BLReinsPaymentInterfAction_checkdate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_getBusinessFlag
+class "getBusinessFlag" as BLReinsPaymentInterfAction_getBusinessFlag #pink
+BLReinsPaymentInterfAction_getBusinessFlag --> equals
 class "equals" as equals #red
-PaymentGatewayBiz_processPayment --> startsWith
-class "startsWith" as startsWith #red
-PaymentGatewayBiz_processPayment --> length
-class "length" as length #red
-PaymentGatewayBiz_processPayment --> RetryInterceptor_doRetry
-class "doRetry" as RetryInterceptor_doRetry #pink
-PaymentGatewayBiz_processPayment --> ServiceLocator_getPaymentService
-class "getPaymentService" as ServiceLocator_getPaymentService #pink
-ServiceLocator_getPaymentService --> equals
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_transAccPeriod
+class "transAccPeriod" as BLReinsPaymentInterfAction_transAccPeriod #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_getTtyClass
+class "getTtyClass" as BLReinsPaymentInterfAction_getTtyClass #pink
+BLReinsPaymentInterfAction_getTtyClass --> BLFcoCededActionBase_findByPrimaryKey
+class "findByPrimaryKey" as BLFcoCededActionBase_findByPrimaryKey #pink
+BLFcoCededActionBase_findByPrimaryKey --> BLFcoCededActionBase_findByPrimaryKey
+class "findByPrimaryKey" as BLFcoCededActionBase_findByPrimaryKey #pink
+BLReinsPaymentInterfAction_getTtyClass --> GrInTreatyDtoBase_getTreatyType
+class "getTreatyType" as GrInTreatyDtoBase_getTreatyType #pink
+BLReinsPaymentInterfAction_getTtyClass --> equals
 class "equals" as equals #red
-PaymentGatewayBiz_processPayment --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-PaymentGatewayBiz_processPayment --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_getopttype
+class "getopttype" as BLReinsPaymentInterfAction_getopttype #pink
+BLReinsPaymentInterfAction_getopttype --> equals
+class "equals" as equals #red
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_getTtyCode
+class "getTtyCode" as BLReinsPaymentInterfAction_getTtyCode #pink
+BLReinsPaymentInterfAction_getTtyCode --> equals
+class "equals" as equals #red
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_getPaymentComcode
+class "getPaymentComcode" as BLReinsPaymentInterfAction_getPaymentComcode #pink
+BLReinsPaymentInterfAction_getPaymentComcode --> BLPrpDCodeFacade_findPayComeCodebyComecode
+class "findPayComeCodebyComecode" as BLPrpDCodeFacade_findPayComeCodebyComecode #pink
+BLPrpDCodeFacade_findPayComeCodebyComecode --> close
+class "close" as close #red
+BLPrpDCodeFacade_findPayComeCodebyComecode --> open
+class "open" as open #red
+BLPrpDCodeFacade_findPayComeCodebyComecode --> get
+class "get" as get #red
+BLPrpDCodeFacade_findPayComeCodebyComecode --> beginTransaction
+class "beginTransaction" as beginTransaction #red
+BLPrpDCodeFacade_findPayComeCodebyComecode --> commitTransaction
+class "commitTransaction" as commitTransaction #red
+BLPrpDCodeFacade_findPayComeCodebyComecode --> BLPrpDCodeFacade_findPayComeCodebyComecode
+class "findPayComeCodebyComecode" as BLPrpDCodeFacade_findPayComeCodebyComecode #pink
+BLReinsPaymentInterfAction_getPaymentComcode --> equals
+class "equals" as equals #red
+BLReinsPaymentInterfAction_sendFacToPayment --> BLReinsPaymentInterfAction_getTtyId
+class "getTtyId" as BLReinsPaymentInterfAction_getTtyId #pink
+BLReinsPaymentInterfAction_getTtyId --> equals
+class "equals" as equals #red
+BLReinsPaymentInterfAction_sendFacToPayment --> BLFcoCededActionBase_update
+class "update" as BLFcoCededActionBase_update #pink
+BLFcoCededActionBase_update --> BLFcoCededActionBase_update
+class "update" as BLFcoCededActionBase_update #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> BLFcoCededActionBase_findByPrimaryKey
+class "findByPrimaryKey" as BLFcoCededActionBase_findByPrimaryKey #pink
+BLFcoCededActionBase_findByPrimaryKey --> BLFcoCededActionBase_findByPrimaryKey
+class "findByPrimaryKey" as BLFcoCededActionBase_findByPrimaryKey #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> BLFcoCededActionBase_findByConditions
+class "findByConditions" as BLFcoCededActionBase_findByConditions #pink
+BLFcoCededActionBase_findByConditions --> BLFcoCededActionBase_getCount
+class "getCount" as BLFcoCededActionBase_getCount #pink
+BLFcoCededActionBase_getCount --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> LegacyMegaWorkflowService_save
-class "save" as LegacyMegaWorkflowService_save #pink
-LegacyMegaWorkflowService_save --> LegacyMegaWorkflowService_execute
-class "execute" as LegacyMegaWorkflowService_execute
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_loadLegacyContext
-class "loadLegacyContext" as LegacyMegaWorkflowService_loadLegacyContext
-LegacyMegaWorkflowService_loadLegacyContext --> LegacyReflectionInvoker_invokeNoArg
-class "invokeNoArg" as LegacyReflectionInvoker_invokeNoArg #pink
-LegacyReflectionInvoker_invokeNoArg --> LegacyReflectionInvoker_invoke
-class "invoke" as LegacyReflectionInvoker_invoke
-LegacyReflectionInvoker_invoke --> getMessage
-class "getMessage" as getMessage #red
-LegacyReflectionInvoker_invoke --> forName
-class "forName" as forName #red
-LegacyReflectionInvoker_invoke --> newInstance
-class "newInstance" as newInstance #red
-LegacyReflectionInvoker_invoke --> getMethod
-class "getMethod" as getMethod #red
-LegacyReflectionInvoker_invoke --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyReflectionInvoker_invoke --> LegacyReflectionInvoker_invoke
-class "invoke" as LegacyReflectionInvoker_invoke #pink
-LegacyMegaWorkflowService_loadLegacyContext --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_routeStepA
-class "routeStepA" as LegacyMegaWorkflowService_routeStepA
-LegacyMegaWorkflowService_routeStepA --> contains
-class "contains" as contains #red
-LegacyMegaWorkflowService_routeStepA --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_routeStepB
-class "routeStepB" as LegacyMegaWorkflowService_routeStepB
-LegacyMegaWorkflowService_routeStepB --> length
-class "length" as length #red
-LegacyMegaWorkflowService_routeStepB --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_callBizLayer
-class "callBizLayer" as LegacyMegaWorkflowService_callBizLayer
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-LegacyDirtyRouter_update --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update
-LegacyDirtyRouter_update --> LegacyDirtyRouter_update
-class "update" as LegacyDirtyRouter_update #pink
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_process
-class "process" as LegacyDirtyRouter_process #pink
-LegacyDirtyRouter_process --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyDirtyRouter_process --> LegacyDirtyRouter_process
-class "process" as LegacyDirtyRouter_process #pink
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_execute
-class "execute" as LegacyDirtyRouter_execute #pink
-LegacyDirtyRouter_execute --> LegacyDirtyRouter_execute
-class "execute" as LegacyDirtyRouter_execute
-LegacyMegaWorkflowService_callBizLayer --> Order_setStatus
-class "setStatus" as Order_setStatus #pink
-LegacyMegaWorkflowService_callBizLayer --> Order_setCreatedAt
-class "setCreatedAt" as Order_setCreatedAt #pink
-LegacyMegaWorkflowService_callBizLayer --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-LegacyMegaWorkflowService_callBizLayer --> LegacyDirtyRouter_save
-class "save" as LegacyDirtyRouter_save #pink
-LegacyDirtyRouter_save --> LegacyDirtyRouter_save
-class "save" as LegacyDirtyRouter_save #pink
-LegacyMegaWorkflowService_callBizLayer --> Order_setOrderId
-class "setOrderId" as Order_setOrderId #pink
-LegacyMegaWorkflowService_callBizLayer --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_callDaoLayer
-class "callDaoLayer" as LegacyMegaWorkflowService_callDaoLayer
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_process
-class "process" as LegacyOrderHistoryDAO_process #pink
-LegacyOrderHistoryDAO_process --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_execute
-class "execute" as LegacyOrderHistoryDAO_execute #pink
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_update
-class "update" as LegacyOrderHistoryDAO_update #pink
-LegacyOrderHistoryDAO_update --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-LegacyOrderHistoryDAO_update --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_callDaoLayer --> LegacyOrderHistoryDAO_save
-class "save" as LegacyOrderHistoryDAO_save #pink
-LegacyOrderHistoryDAO_save --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-LegacyOrderHistoryDAO_save --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_callDaoLayer --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_callUtilLayer
-class "callUtilLayer" as LegacyMegaWorkflowService_callUtilLayer
-LegacyMegaWorkflowService_callUtilLayer --> length
-class "length" as length #red
-LegacyMegaWorkflowService_callUtilLayer --> DateUtil_formatNow
-class "formatNow" as DateUtil_formatNow #pink
-DateUtil_formatNow --> format
-class "format" as format #red
-LegacyMegaWorkflowService_callUtilLayer --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_finalizeStage
-class "finalizeStage" as LegacyMegaWorkflowService_finalizeStage
-LegacyMegaWorkflowService_finalizeStage --> Order_setStatus
-class "setStatus" as Order_setStatus #pink
-LegacyMegaWorkflowService_finalizeStage --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-LegacyMegaWorkflowService_finalizeStage --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-LegacyMegaWorkflowService_finalizeStage --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-LegacyMegaWorkflowService_finalizeStage --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_prepare
-class "prepare" as LegacyMegaWorkflowService_prepare
-LegacyMegaWorkflowService_prepare --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_prepare --> isEmpty
-class "isEmpty" as isEmpty #red
-LegacyMegaWorkflowService_prepare --> trim
+BLFcoCededActionBase_getCount --> trim
 class "trim" as trim #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_archiveStage
-class "archiveStage" as LegacyMegaWorkflowService_archiveStage
-LegacyMegaWorkflowService_archiveStage --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-LegacyMegaWorkflowService_archiveStage --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+BLFcoCededActionBase_getCount --> BLFcoCededActionBase_getCount
+class "getCount" as BLFcoCededActionBase_getCount #pink
+BLFcoCededActionBase_findByConditions --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-LegacyMegaWorkflowService_execute --> LegacyMegaWorkflowService_done
-class "done" as LegacyMegaWorkflowService_done
-LegacyMegaWorkflowService_done --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-LegacyMegaWorkflowService_done --> Order_getStatus
-class "getStatus" as Order_getStatus #pink
-submitOrder --> startsWith
+BLFcoCededActionBase_findByConditions --> trim
+class "trim" as trim #red
+BLFcoCededActionBase_findByConditions --> BLFcoCededActionBase_findByConditions
+class "findByConditions" as BLFcoCededActionBase_findByConditions #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimCoinsDto_getCurrency
+class "getCurrency" as ClaimCoinsDto_getCurrency #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimCoinsDto_setCurrency
+class "setCurrency" as ClaimCoinsDto_setCurrency #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDangerItemDto_getItemCode
+class "getItemCode" as ClaimDangerItemDto_getItemCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDangerItemDto_getItemDetailName
+class "getItemDetailName" as ClaimDangerItemDto_getItemDetailName #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDangerUnitDto_getPolicyNo
+class "getPolicyNo" as ClaimDangerUnitDto_getPolicyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDangerUnitDto_setPolicyNo
+class "setPolicyNo" as ClaimDangerUnitDto_setPolicyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDetailDto_setCertiType
+class "setCertiType" as ClaimDetailDto_setCertiType #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDetailDto_setClaimNo
+class "setClaimNo" as ClaimDetailDto_setClaimNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimDetailDto_setItemName
+class "setItemName" as ClaimDetailDto_setItemName #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimItemDto_setSumPaid
+class "setSumPaid" as ClaimItemDto_setSumPaid #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimRepayCalResultDto_getShareRate
+class "getShareRate" as ClaimRepayCalResultDto_getShareRate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimRepayCalResultDto_setShareRate
+class "setShareRate" as ClaimRepayCalResultDto_setShareRate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ClaimRepayCalResultDto_getTreatyNo
+class "getTreatyNo" as ClaimRepayCalResultDto_getTreatyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoCededDtoBase_getOutPolicyNo
+class "getOutPolicyNo" as FcoCededDtoBase_getOutPolicyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoCommissionDtoBase_setRemark
+class "setRemark" as FcoCommissionDtoBase_setRemark #pink
+FcoCommissionDtoBase_setRemark --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoCommissionDtoBase_setFlag
+class "setFlag" as FcoCommissionDtoBase_setFlag #pink
+FcoCommissionDtoBase_setFlag --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoCommissionDtoBase_getFlag
+class "getFlag" as FcoCommissionDtoBase_getFlag #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoItemDtoBase_getItemNo
+class "getItemNo" as FcoItemDtoBase_getItemNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoItemDtoBase_setRiskCode
+class "setRiskCode" as FcoItemDtoBase_setRiskCode #pink
+FcoItemDtoBase_setRiskCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoItemDtoBase_getRiskCode
+class "getRiskCode" as FcoItemDtoBase_getRiskCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPlanDtoBase_setPayNo
+class "setPayNo" as FcoPlanDtoBase_setPayNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPlanDtoBase_setPlanDate
+class "setPlanDate" as FcoPlanDtoBase_setPlanDate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPlanDtoBase_setPlanFee
+class "setPlanFee" as FcoPlanDtoBase_setPlanFee #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPolicyDtoBase_getComCode
+class "getComCode" as FcoPolicyDtoBase_getComCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPolicyDtoBase_setInsuredCode
+class "setInsuredCode" as FcoPolicyDtoBase_setInsuredCode #pink
+FcoPolicyDtoBase_setInsuredCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPolicyDtoBase_getInsuredCode
+class "getInsuredCode" as FcoPolicyDtoBase_getInsuredCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPolicyDtoBase_getInsuredName
+class "getInsuredName" as FcoPolicyDtoBase_getInsuredName #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FcoPolicyDtoBase_getStartDate
+class "getStartDate" as FcoPolicyDtoBase_getStartDate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FiClaimItemDtoBase_setLossNo
+class "setLossNo" as FiClaimItemDtoBase_setLossNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FpoPolicyDtoBase_setPrismPolicyNo
+class "setPrismPolicyNo" as FpoPolicyDtoBase_setPrismPolicyNo #pink
+FpoPolicyDtoBase_setPrismPolicyNo --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> FpoPolicyDtoBase_getPrismPolicyNo
+class "getPrismPolicyNo" as FpoPolicyDtoBase_getPrismPolicyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FpoPolicyDtoBase_getEndorseTimes
+class "getEndorseTimes" as FpoPolicyDtoBase_getEndorseTimes #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FpoPolicyDtoBase_setValidDate
+class "setValidDate" as FpoPolicyDtoBase_setValidDate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FpoPolicyDtoBase_getValidDate
+class "getValidDate" as FpoPolicyDtoBase_getValidDate #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> DBFcoCeded_findByPolicyNo
+class "findByPolicyNo" as DBFcoCeded_findByPolicyNo #pink
+DBFcoCeded_findByPolicyNo --> ClaimDangerUnitDto_setPolicyNo
+class "setPolicyNo" as ClaimDangerUnitDto_setPolicyNo #pink
+DBFcoCeded_findByPolicyNo --> ClaimRepayCalResultDto_setShareRate
+class "setShareRate" as ClaimRepayCalResultDto_setShareRate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setProposalNo
+class "setProposalNo" as FcoCededDtoBase_setProposalNo #pink
+FcoCededDtoBase_setProposalNo --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOutPolicyNo
+class "setOutPolicyNo" as FcoCededDtoBase_setOutPolicyNo #pink
+FcoCededDtoBase_setOutPolicyNo --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriStartDate
+class "setOriStartDate" as FcoCededDtoBase_setOriStartDate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriEndDate
+class "setOriEndDate" as FcoCededDtoBase_setOriEndDate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriCurrency
+class "setOriCurrency" as FcoCededDtoBase_setOriCurrency #pink
+FcoCededDtoBase_setOriCurrency --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriAmount
+class "setOriAmount" as FcoCededDtoBase_setOriAmount #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriPremium
+class "setOriPremium" as FcoCededDtoBase_setOriPremium #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setCededType
+class "setCededType" as FcoCededDtoBase_setCededType #pink
+FcoCededDtoBase_setCededType --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOutShareRate
+class "setOutShareRate" as FcoCededDtoBase_setOutShareRate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriComCode
+class "setOriComCode" as FcoCededDtoBase_setOriComCode #pink
+FcoCededDtoBase_setOriComCode --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOriComName
+class "setOriComName" as FcoCededDtoBase_setOriComName #pink
+FcoCededDtoBase_setOriComName --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOutReinsCode
+class "setOutReinsCode" as FcoCededDtoBase_setOutReinsCode #pink
+FcoCededDtoBase_setOutReinsCode --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOutReinsName
+class "setOutReinsName" as FcoCededDtoBase_setOutReinsName #pink
+FcoCededDtoBase_setOutReinsName --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setBrokerageCode
+class "setBrokerageCode" as FcoCededDtoBase_setBrokerageCode #pink
+FcoCededDtoBase_setBrokerageCode --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setBrokerageName
+class "setBrokerageName" as FcoCededDtoBase_setBrokerageName #pink
+FcoCededDtoBase_setBrokerageName --> rightTrim
+class "rightTrim" as rightTrim #red
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setInAmount
+class "setInAmount" as FcoCededDtoBase_setInAmount #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setInPremium
+class "setInPremium" as FcoCededDtoBase_setInPremium #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setCommRate
+class "setCommRate" as FcoCededDtoBase_setCommRate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setCommission
+class "setCommission" as FcoCededDtoBase_setCommission #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setBrokerageRate
+class "setBrokerageRate" as FcoCededDtoBase_setBrokerageRate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setBrokerage
+class "setBrokerage" as FcoCededDtoBase_setBrokerage #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setTaxRate
+class "setTaxRate" as FcoCededDtoBase_setTaxRate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setTax
+class "setTax" as FcoCededDtoBase_setTax #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOthRate
+class "setOthRate" as FcoCededDtoBase_setOthRate #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOthFee
+class "setOthFee" as FcoCededDtoBase_setOthFee #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setExchRateCNY
+class "setExchRateCNY" as FcoCededDtoBase_setExchRateCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setInAmountCNY
+class "setInAmountCNY" as FcoCededDtoBase_setInAmountCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setInPremiumCNY
+class "setInPremiumCNY" as FcoCededDtoBase_setInPremiumCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setCommissionCNY
+class "setCommissionCNY" as FcoCededDtoBase_setCommissionCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setBrokerageCNY
+class "setBrokerageCNY" as FcoCededDtoBase_setBrokerageCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setTaxCNY
+class "setTaxCNY" as FcoCededDtoBase_setTaxCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setOthFeeCNY
+class "setOthFeeCNY" as FcoCededDtoBase_setOthFeeCNY #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setInExTaxPremium
+class "setInExTaxPremium" as FcoCededDtoBase_setInExTaxPremium #pink
+DBFcoCeded_findByPolicyNo --> FcoCededDtoBase_setInVat
+class "setInVat" as FcoCededDtoBase_setInVat #pink
+DBFcoCeded_findByPolicyNo --> length
+class "length" as length #red
+DBFcoCeded_findByPolicyNo --> next
+class "next" as next #red
+DBFcoCeded_findByPolicyNo --> isDebugEnabled
+class "isDebugEnabled" as isDebugEnabled #red
+DBFcoCeded_findByPolicyNo --> debug
+class "debug" as debug #red
+DBFcoCeded_findByPolicyNo --> prepareStatement
+class "prepareStatement" as prepareStatement #red
+DBFcoCeded_findByPolicyNo --> setString
+class "setString" as setString #red
+DBFcoCeded_findByPolicyNo --> executePreparedQuery
+class "executePreparedQuery" as executePreparedQuery #red
+DBFcoCeded_findByPolicyNo --> getDateTime
+class "getDateTime" as getDateTime #red
+DBFcoCeded_findByPolicyNo --> close
+class "close" as close #red
+DBFcoCeded_findByPolicyNo --> getString
+class "getString" as getString #red
+DBFcoCeded_findByPolicyNo --> getDouble
+class "getDouble" as getDouble #red
+DBFcoCeded_findByPolicyNo --> toString
+class "toString" as toString #red
+DBFcoCeded_findByPolicyNo --> append
+class "append" as append #red
+BLReinsPaymentInterfAction_sendFacToPayment --> GrEPIInBillDtoBase_setSectNo
+class "setSectNo" as GrEPIInBillDtoBase_setSectNo #pink
+GrEPIInBillDtoBase_setSectNo --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> GrXInTreatyDtoBase_setPremiumRccCode
+class "setPremiumRccCode" as GrXInTreatyDtoBase_setPremiumRccCode #pink
+GrXInTreatyDtoBase_setPremiumRccCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> GrXInTreatyDtoBase_setClaimRccCode
+class "setClaimRccCode" as GrXInTreatyDtoBase_setClaimRccCode #pink
+GrXInTreatyDtoBase_setClaimRccCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+BLReinsPaymentInterfAction_sendFacToPayment --> BLAccTRAction_getReinsCode
+class "getReinsCode" as BLAccTRAction_getReinsCode #pink
+BLAccTRAction_getReinsCode --> BLEnquiryAction_findByConditions
+class "findByConditions" as BLEnquiryAction_findByConditions #pink
+BLEnquiryAction_findByConditions --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+BLEnquiryAction_findByConditions --> BLEnquiryAction_findByPK
+class "findByPK" as BLEnquiryAction_findByPK
+BLEnquiryAction_findByPK --> PrpDchannelDtoBase_getCodeName
+class "getCodeName" as PrpDchannelDtoBase_getCodeName #pink
+BLEnquiryAction_findByPK --> PrpDcodeDtoBase_getCodeEName
+class "getCodeEName" as PrpDcodeDtoBase_getCodeEName #pink
+BLEnquiryAction_findByPK --> PrpReinsVerifyDtoBase_getClassCode
+class "getClassCode" as PrpReinsVerifyDtoBase_getClassCode #pink
+BLEnquiryAction_findByPK --> PrpReinsVerifyDtoBase_getRiskCode
+class "getRiskCode" as PrpReinsVerifyDtoBase_getRiskCode #pink
+BLEnquiryAction_findByPK --> BLFeoEnquiryFacade_getFeoEnquiryDto
+class "getFeoEnquiryDto" as BLFeoEnquiryFacade_getFeoEnquiryDto #pink
+BLFeoEnquiryFacade_getFeoEnquiryDto --> BLFeoEnquiryAction_findByQuotationNo
+class "findByQuotationNo" as BLFeoEnquiryAction_findByQuotationNo #pink
+BLFeoEnquiryAction_findByQuotationNo --> BLPrpReinsVerifyActionBase_findByConditions
+class "findByConditions" as BLPrpReinsVerifyActionBase_findByConditions #pink
+BLPrpReinsVerifyActionBase_findByConditions --> BLPrpReinsVerifyActionBase_getCount
+class "getCount" as BLPrpReinsVerifyActionBase_getCount #pink
+BLPrpReinsVerifyActionBase_getCount --> length
+class "length" as length #red
+BLPrpReinsVerifyActionBase_getCount --> trim
+class "trim" as trim #red
+BLPrpReinsVerifyActionBase_getCount --> BLPrpReinsVerifyActionBase_getCount
+class "getCount" as BLPrpReinsVerifyActionBase_getCount #pink
+BLPrpReinsVerifyActionBase_findByConditions --> length
+class "length" as length #red
+BLPrpReinsVerifyActionBase_findByConditions --> trim
+class "trim" as trim #red
+BLPrpReinsVerifyActionBase_findByConditions --> getWherePartForGetCount
+class "getWherePartForGetCount" as getWherePartForGetCount #red
+BLPrpReinsVerifyActionBase_findByConditions --> BLPrpReinsVerifyActionBase_findByConditions
+class "findByConditions" as BLPrpReinsVerifyActionBase_findByConditions #pink
+BLFeoEnquiryAction_findByQuotationNo --> equals
+class "equals" as equals #red
+BLFeoEnquiryAction_findByQuotationNo --> size
+class "size" as size #red
+BLFeoEnquiryAction_findByQuotationNo --> iterator
+class "iterator" as iterator #red
+BLFeoEnquiryAction_findByQuotationNo --> next
+class "next" as next #red
+BLFeoEnquiryFacade_getFeoEnquiryDto --> close
+class "close" as close #red
+BLFeoEnquiryFacade_getFeoEnquiryDto --> open
+class "open" as open #red
+BLFeoEnquiryFacade_getFeoEnquiryDto --> get
+class "get" as get #red
+BLEnquiryAction_findByPK --> AccFRDetailDto_setClassName
+class "setClassName" as AccFRDetailDto_setClassName #pink
+BLEnquiryAction_findByPK --> AccFRDetailDto_setRiskName
+class "setRiskName" as AccFRDetailDto_setRiskName #pink
+BLEnquiryAction_findByPK --> SlipPrintDto_setRiskEName
+class "setRiskEName" as SlipPrintDto_setRiskEName #pink
+BLEnquiryAction_findByPK --> FeoEnquiryDto_setClassEName
+class "setClassEName" as FeoEnquiryDto_setClassEName #pink
+FeoEnquiryDto_setClassEName --> rightTrim
+class "rightTrim" as rightTrim #red
+BLEnquiryAction_findByPK --> UICodeAction_codeQuery
+class "codeQuery" as UICodeAction_codeQuery #pink
+UICodeAction_codeQuery --> UICodeAction_genQueryConditions
+class "genQueryConditions" as UICodeAction_genQueryConditions
+UICodeAction_genQueryConditions --> BLPrpDcompanyAction_getAllSubComCode
+class "getAllSubComCode" as BLPrpDcompanyAction_getAllSubComCode #pink
+BLPrpDcompanyAction_getAllSubComCode --> BLPrpDchannelActionBase_findByConditions
+class "findByConditions" as BLPrpDchannelActionBase_findByConditions #pink
+BLPrpDchannelActionBase_findByConditions --> BLPrpDchannelActionBase_getCount
+class "getCount" as BLPrpDchannelActionBase_getCount #pink
+BLPrpDchannelActionBase_getCount --> length
+class "length" as length #red
+BLPrpDchannelActionBase_getCount --> trim
+class "trim" as trim #red
+BLPrpDchannelActionBase_getCount --> BLPrpDchannelActionBase_getCount
+class "getCount" as BLPrpDchannelActionBase_getCount #pink
+BLPrpDchannelActionBase_findByConditions --> length
+class "length" as length #red
+BLPrpDchannelActionBase_findByConditions --> trim
+class "trim" as trim #red
+BLPrpDchannelActionBase_findByConditions --> BLPrpDchannelActionBase_findByConditions
+class "findByConditions" as BLPrpDchannelActionBase_findByConditions #pink
+BLPrpDcompanyAction_getAllSubComCode --> PrpDcompanyDtoBase_getComCode
+class "getComCode" as PrpDcompanyDtoBase_getComCode #pink
+BLPrpDcompanyAction_getAllSubComCode --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+BLPrpDcompanyAction_getAllSubComCode --> equals
+class "equals" as equals #red
+BLPrpDcompanyAction_getAllSubComCode --> size
+class "size" as size #red
+BLPrpDcompanyAction_getAllSubComCode --> iterator
+class "iterator" as iterator #red
+BLPrpDcompanyAction_getAllSubComCode --> hasNext
+class "hasNext" as hasNext #red
+BLPrpDcompanyAction_getAllSubComCode --> next
+class "next" as next #red
+BLPrpDcompanyAction_getAllSubComCode --> BLPrpDcompanyAction_getAllSubComCode
+class "getAllSubComCode" as BLPrpDcompanyAction_getAllSubComCode
+UICodeAction_genQueryConditions --> PrpDComAccountDtoBase_getComCode
+class "getComCode" as PrpDComAccountDtoBase_getComCode #pink
+UICodeAction_genQueryConditions --> equals
+class "equals" as equals #red
+UICodeAction_genQueryConditions --> iterator
+class "iterator" as iterator #red
+UICodeAction_genQueryConditions --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_genQueryConditions --> next
+class "next" as next #red
+UICodeAction_genQueryConditions --> startsWith
 class "startsWith" as startsWith #red
-submitOrder --> OrderServiceImpl_buildOrder
-class "buildOrder" as OrderServiceImpl_buildOrder
-OrderServiceImpl_buildOrder --> OrderForm_setPaymentChannel
-class "setPaymentChannel" as OrderForm_setPaymentChannel #pink
-OrderServiceImpl_buildOrder --> OrderForm_setQuantity
-class "setQuantity" as OrderForm_setQuantity #pink
-OrderServiceImpl_buildOrder --> Order_setProductCode
-class "setProductCode" as Order_setProductCode #pink
-OrderServiceImpl_buildOrder --> Order_setCreatedAt
-class "setCreatedAt" as Order_setCreatedAt #pink
-OrderServiceImpl_buildOrder --> Order_setUpdatedAt
-class "setUpdatedAt" as Order_setUpdatedAt #pink
-OrderServiceImpl_buildOrder --> nextInt
-class "nextInt" as nextInt #red
-OrderServiceImpl_buildOrder --> OrderForm_setOrderId
-class "setOrderId" as OrderForm_setOrderId #pink
-OrderServiceImpl_buildOrder --> DateUtil_nowMillis
-class "nowMillis" as DateUtil_nowMillis #pink
-DateUtil_nowMillis --> currentTimeMillis
-class "currentTimeMillis" as currentTimeMillis #red
-OrderServiceImpl_buildOrder --> abs
-class "abs" as abs #red
-submitOrder --> OrderServiceImpl_markFail
-class "markFail" as OrderServiceImpl_markFail
-OrderServiceImpl_markFail --> LegacyTicketMonsterService_update
-class "update" as LegacyTicketMonsterService_update #pink
-LegacyTicketMonsterService_update --> LegacyTicketMonsterService_remove
-class "remove" as LegacyTicketMonsterService_remove
-LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
-class "reopen" as LegacyTicketMonsterService_reopen
-LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
-class "sync" as LegacyTicketMonsterService_sync
-LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
-class "async" as LegacyTicketMonsterService_async
-LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
-class "review" as LegacyTicketMonsterService_review
-LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
-class "approve" as LegacyTicketMonsterService_approve
-LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
-class "reject" as LegacyTicketMonsterService_reject
-OrderServiceImpl_markFail --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+UICodeAction_genQueryConditions --> split
+class "split" as split #red
+UICodeAction_codeQuery --> UICodeAction_endorTypeToCodeDto
+class "endorTypeToCodeDto" as UICodeAction_endorTypeToCodeDto
+UICodeAction_endorTypeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_endorTypeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_endorTypeToCodeDto --> CodeNameDto_getCodeCode
+class "getCodeCode" as CodeNameDto_getCodeCode #pink
+UICodeAction_endorTypeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_endorTypeToCodeDto --> PrpDRiskKindDtoBase_getCodeCName
+class "getCodeCName" as PrpDRiskKindDtoBase_getCodeCName #pink
+UICodeAction_endorTypeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_endorTypeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_endorTypeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_openCoverReinsCodeToCodeDto
+class "openCoverReinsCodeToCodeDto" as UICodeAction_openCoverReinsCodeToCodeDto
+UICodeAction_openCoverReinsCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_openCoverReinsCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> CodeNameDto_getBrokerFlag
+class "getBrokerFlag" as CodeNameDto_getBrokerFlag #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> CodeNameDto_setBrokerFlag
+class "setBrokerFlag" as CodeNameDto_setBrokerFlag #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> CodeNameDto_getShareRate
+class "getShareRate" as CodeNameDto_getShareRate #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> CodeNameDto_setShareRate
+class "setShareRate" as CodeNameDto_setShareRate #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> PrpDAccountDtoBase_getReinsCode
+class "getReinsCode" as PrpDAccountDtoBase_getReinsCode #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> PrpDReinsRelateDto_getReinsName
+class "getReinsName" as PrpDReinsRelateDto_getReinsName #pink
+UICodeAction_openCoverReinsCodeToCodeDto --> equals
+class "equals" as equals #red
+UICodeAction_openCoverReinsCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_openCoverReinsCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_openCoverReinsCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_openCoverReinsCodeToCodeDto --> split
+class "split" as split #red
+UICodeAction_codeQuery --> UICodeAction_reinsCodeToCodeDto
+class "reinsCodeToCodeDto" as UICodeAction_reinsCodeToCodeDto
+UICodeAction_reinsCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setPremiumRCCCode
+class "setPremiumRCCCode" as CodeNameDto_setPremiumRCCCode #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_getPremiumRCCCode
+class "getPremiumRCCCode" as CodeNameDto_getPremiumRCCCode #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setClaimRCCCode
+class "setClaimRCCCode" as CodeNameDto_setClaimRCCCode #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_getClaimRCCCode
+class "getClaimRCCCode" as CodeNameDto_getClaimRCCCode #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setAssessLevel
+class "setAssessLevel" as CodeNameDto_setAssessLevel #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_getAssessLevel
+class "getAssessLevel" as CodeNameDto_getAssessLevel #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setAssessLevel2
+class "setAssessLevel2" as CodeNameDto_setAssessLevel2 #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_getAssessLevel2
+class "getAssessLevel2" as CodeNameDto_getAssessLevel2 #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setAssessLevel3
+class "setAssessLevel3" as CodeNameDto_setAssessLevel3 #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_getAssessLevel3
+class "getAssessLevel3" as CodeNameDto_getAssessLevel3 #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_getCode
+class "getCode" as CodeNameDto_getCode #pink
+UICodeAction_reinsCodeToCodeDto --> CodeNameDto_setCode
+class "setCode" as CodeNameDto_setCode #pink
+UICodeAction_reinsCodeToCodeDto --> PrpDAccountDtoBase_getReinsCode
+class "getReinsCode" as PrpDAccountDtoBase_getReinsCode #pink
+UICodeAction_reinsCodeToCodeDto --> PrpDReinsDtoBase_getShortName
+class "getShortName" as PrpDReinsDtoBase_getShortName #pink
+UICodeAction_reinsCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_reinsCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_reinsCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_comCodeToCodeDto
+class "comCodeToCodeDto" as UICodeAction_comCodeToCodeDto
+UICodeAction_comCodeToCodeDto --> BLPrpDcompanyAction_getComCName
+class "getComCName" as BLPrpDcompanyAction_getComCName #pink
+BLPrpDcompanyAction_getComCName --> BLPrpDchannelActionBase_findByPrimaryKey
+class "findByPrimaryKey" as BLPrpDchannelActionBase_findByPrimaryKey #pink
+BLPrpDchannelActionBase_findByPrimaryKey --> BLPrpDchannelActionBase_findByPrimaryKey
+class "findByPrimaryKey" as BLPrpDchannelActionBase_findByPrimaryKey #pink
+BLPrpDcompanyAction_getComCName --> BLPrpDcompanyAction_getComCName
+class "getComCName" as BLPrpDcompanyAction_getComCName
+UICodeAction_comCodeToCodeDto --> PrpDcompanyDtoBase_getComEName
+class "getComEName" as PrpDcompanyDtoBase_getComEName #pink
+UICodeAction_comCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_comCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_comCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_comCodeToCodeDto --> CodeNameDto_setCodeEName
+class "setCodeEName" as CodeNameDto_setCodeEName #pink
+UICodeAction_comCodeToCodeDto --> PrpDComAccountDtoBase_getComCode
+class "getComCode" as PrpDComAccountDtoBase_getComCode #pink
+UICodeAction_comCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_comCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_comCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_userCodeToCodeDto
+class "userCodeToCodeDto" as UICodeAction_userCodeToCodeDto
+UICodeAction_userCodeToCodeDto --> PrpDuserDtoBase_getUserCode
+class "getUserCode" as PrpDuserDtoBase_getUserCode #pink
+UICodeAction_userCodeToCodeDto --> PrpDuserDtoBase_getUserName
+class "getUserName" as PrpDuserDtoBase_getUserName #pink
+UICodeAction_userCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_userCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_userCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_userCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_userCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_userCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_classCodeToCodeDto
+class "classCodeToCodeDto" as UICodeAction_classCodeToCodeDto
+UICodeAction_classCodeToCodeDto --> PrpDclassDtoBase_getClassCode
+class "getClassCode" as PrpDclassDtoBase_getClassCode #pink
+UICodeAction_classCodeToCodeDto --> PrpDclassDtoBase_getClassName
+class "getClassName" as PrpDclassDtoBase_getClassName #pink
+UICodeAction_classCodeToCodeDto --> PrpDclassDtoBase_getClassEName
+class "getClassEName" as PrpDclassDtoBase_getClassEName #pink
+UICodeAction_classCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_classCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_classCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_classCodeToCodeDto --> CodeNameDto_setCodeEName
+class "setCodeEName" as CodeNameDto_setCodeEName #pink
+UICodeAction_classCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_classCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_classCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_riskCodeToCodeDto
+class "riskCodeToCodeDto" as UICodeAction_riskCodeToCodeDto
+UICodeAction_riskCodeToCodeDto --> PrpDriskDtoBase_getRiskCName
+class "getRiskCName" as PrpDriskDtoBase_getRiskCName #pink
+UICodeAction_riskCodeToCodeDto --> PrpDriskDtoBase_getRiskEName
+class "getRiskEName" as PrpDriskDtoBase_getRiskEName #pink
+UICodeAction_riskCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_riskCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_riskCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_riskCodeToCodeDto --> CodeNameDto_setCodeEName
+class "setCodeEName" as CodeNameDto_setCodeEName #pink
+UICodeAction_riskCodeToCodeDto --> FdOwnRiskConfigDtoBase_getRiskCode
+class "getRiskCode" as FdOwnRiskConfigDtoBase_getRiskCode #pink
+UICodeAction_riskCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_riskCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_riskCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_itemKindToCodeDto
+class "itemKindToCodeDto" as UICodeAction_itemKindToCodeDto
+UICodeAction_itemKindToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_itemKindToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_itemKindToCodeDto --> CodeNameDto_getCodeCode
+class "getCodeCode" as CodeNameDto_getCodeCode #pink
+UICodeAction_itemKindToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_itemKindToCodeDto --> PrpDRiskKindDtoBase_getCodeCName
+class "getCodeCName" as PrpDRiskKindDtoBase_getCodeCName #pink
+UICodeAction_itemKindToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_itemKindToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_itemKindToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_accItemToCodeDto
+class "accItemToCodeDto" as UICodeAction_accItemToCodeDto
+UICodeAction_accItemToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_accItemToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_accItemToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_accItemToCodeDto --> PrpDAccItemDtoBase_getAccItemCode
+class "getAccItemCode" as PrpDAccItemDtoBase_getAccItemCode #pink
+UICodeAction_accItemToCodeDto --> PrpDAccItemDtoBase_getPositiveCName
+class "getPositiveCName" as PrpDAccItemDtoBase_getPositiveCName #pink
+UICodeAction_accItemToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_accItemToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_accItemToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_currencyCodeToCodeDto
+class "currencyCodeToCodeDto" as UICodeAction_currencyCodeToCodeDto
+UICodeAction_currencyCodeToCodeDto --> PrpDcurrencyDtoBase_getCurrencyCode
+class "getCurrencyCode" as PrpDcurrencyDtoBase_getCurrencyCode #pink
+UICodeAction_currencyCodeToCodeDto --> PrpDcurrencyDtoBase_getCurrencyCName
+class "getCurrencyCName" as PrpDcurrencyDtoBase_getCurrencyCName #pink
+UICodeAction_currencyCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_currencyCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_currencyCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_currencyCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_currencyCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_currencyCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_kindCodeToCodeDto
+class "kindCodeToCodeDto" as UICodeAction_kindCodeToCodeDto
+UICodeAction_kindCodeToCodeDto --> PrpDkindDtoBase_getKindCName
+class "getKindCName" as PrpDkindDtoBase_getKindCName #pink
+UICodeAction_kindCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_kindCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_kindCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_kindCodeToCodeDto --> FdOwnRiskConfigDtoBase_getKindCode
+class "getKindCode" as FdOwnRiskConfigDtoBase_getKindCode #pink
+UICodeAction_kindCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_kindCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_kindCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_planeCodeToCodeDto
+class "planeCodeToCodeDto" as UICodeAction_planeCodeToCodeDto
+UICodeAction_planeCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_planeCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_planeCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_planeCodeToCodeDto --> PrpDPlaneDtoBase_getPlaneType
+class "getPlaneType" as PrpDPlaneDtoBase_getPlaneType #pink
+UICodeAction_planeCodeToCodeDto --> PrpDPlaneDtoBase_getFleetName
+class "getFleetName" as PrpDPlaneDtoBase_getFleetName #pink
+UICodeAction_planeCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_planeCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_planeCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_treatyCodeToCodeDto
+class "treatyCodeToCodeDto" as UICodeAction_treatyCodeToCodeDto
+UICodeAction_treatyCodeToCodeDto --> ClaimLargeLossDto_getTreatyName
+class "getTreatyName" as ClaimLargeLossDto_getTreatyName #pink
+UICodeAction_treatyCodeToCodeDto --> ClaimRepayCalResultDto_getTreatyNo
+class "getTreatyNo" as ClaimRepayCalResultDto_getTreatyNo #pink
+UICodeAction_treatyCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_treatyCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_treatyCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_treatyCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_treatyCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_treatyCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_businessChannelCodeToCodeDto
+class "businessChannelCodeToCodeDto" as UICodeAction_businessChannelCodeToCodeDto
+UICodeAction_businessChannelCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_businessChannelCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_businessChannelCodeToCodeDto --> CodeNameDto_getCodeCode
+class "getCodeCode" as CodeNameDto_getCodeCode #pink
+UICodeAction_businessChannelCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_businessChannelCodeToCodeDto --> CodeNameDto_getCodeName
+class "getCodeName" as CodeNameDto_getCodeName #pink
+UICodeAction_businessChannelCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_businessChannelCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_businessChannelCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_codeCodeToCodeDto
+class "codeCodeToCodeDto" as UICodeAction_codeCodeToCodeDto
+UICodeAction_codeCodeToCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_codeCodeToCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_codeCodeToCodeDto --> CodeNameDto_getCodeCode
+class "getCodeCode" as CodeNameDto_getCodeCode #pink
+UICodeAction_codeCodeToCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_codeCodeToCodeDto --> PrpDRiskKindDtoBase_getCodeCName
+class "getCodeCName" as PrpDRiskKindDtoBase_getCodeCName #pink
+UICodeAction_codeCodeToCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_codeCodeToCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_codeCodeToCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_reRiskCodeDto
+class "reRiskCodeDto" as UICodeAction_reRiskCodeDto
+UICodeAction_reRiskCodeDto --> PrpdproductDtoBase_getPolicyCode
+class "getPolicyCode" as PrpdproductDtoBase_getPolicyCode #pink
+UICodeAction_reRiskCodeDto --> PrpdproductDtoBase_getPolicyDescc
+class "getPolicyDescc" as PrpdproductDtoBase_getPolicyDescc #pink
+UICodeAction_reRiskCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_reRiskCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_reRiskCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_reRiskCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_reRiskCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_reRiskCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_reKindCodeDto
+class "reKindCodeDto" as UICodeAction_reKindCodeDto
+UICodeAction_reKindCodeDto --> PrpdproductDtoBase_getCoverageCode
+class "getCoverageCode" as PrpdproductDtoBase_getCoverageCode #pink
+UICodeAction_reKindCodeDto --> PrpdproductDtoBase_getCoveragecName
+class "getCoveragecName" as PrpdproductDtoBase_getCoveragecName #pink
+UICodeAction_reKindCodeDto --> BLAccTBAction_add
+class "add" as BLAccTBAction_add #pink
+BLAccTBAction_add --> toString
+class "toString" as toString #red
+BLAccTBAction_add --> doubleValue
+class "doubleValue" as doubleValue #red
+BLAccTBAction_add --> BLAccTBAction_add
+class "add" as BLAccTBAction_add
+UICodeAction_reKindCodeDto --> CodeNameDto_setCodeCode
+class "setCodeCode" as CodeNameDto_setCodeCode #pink
+UICodeAction_reKindCodeDto --> CodeNameDto_setCodeName
+class "setCodeName" as CodeNameDto_setCodeName #pink
+UICodeAction_reKindCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_reKindCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_reKindCodeDto --> next
+class "next" as next #red
+UICodeAction_codeQuery --> UICodeAction_reLiabCodeDto
+class "reLiabCodeDto" as UICodeAction_reLiabCodeDto
+UICodeAction_reLiabCodeDto --> iterator
+class "iterator" as iterator #red
+UICodeAction_reLiabCodeDto --> hasNext
+class "hasNext" as hasNext #red
+UICodeAction_codeQuery --> UIBusinessToolsFacade_execute
+class "execute" as UIBusinessToolsFacade_execute #pink
+UIBusinessToolsFacade_execute --> XssHttpServletRequestWrapper_getParameter
+class "getParameter" as XssHttpServletRequestWrapper_getParameter #pink
+XssHttpServletRequestWrapper_getParameter --> XssClean_xssClean
+class "xssClean" as XssClean_xssClean #pink
+XssClean_xssClean --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> OrderServiceImpl_markSuccess
-class "markSuccess" as OrderServiceImpl_markSuccess
-OrderServiceImpl_markSuccess --> LegacyTicketMonsterService_update
-class "update" as LegacyTicketMonsterService_update #pink
-LegacyTicketMonsterService_update --> LegacyTicketMonsterService_remove
-class "remove" as LegacyTicketMonsterService_remove
-LegacyTicketMonsterService_remove --> LegacyTicketMonsterService_reopen
-class "reopen" as LegacyTicketMonsterService_reopen
-LegacyTicketMonsterService_reopen --> LegacyTicketMonsterService_sync
-class "sync" as LegacyTicketMonsterService_sync
-LegacyTicketMonsterService_sync --> LegacyTicketMonsterService_async
-class "async" as LegacyTicketMonsterService_async
-LegacyTicketMonsterService_async --> LegacyTicketMonsterService_review
-class "review" as LegacyTicketMonsterService_review
-LegacyTicketMonsterService_review --> LegacyTicketMonsterService_approve
-class "approve" as LegacyTicketMonsterService_approve
-LegacyTicketMonsterService_approve --> LegacyTicketMonsterService_reject
-class "reject" as LegacyTicketMonsterService_reject
-OrderServiceImpl_markSuccess --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
-class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-submitOrder --> OrderServiceImpl_validateUser
-class "validateUser" as OrderServiceImpl_validateUser
-submitOrder --> OrderServiceImpl_validateProduct
-class "validateProduct" as OrderServiceImpl_validateProduct
-OrderServiceImpl_validateProduct --> isEmpty
+XssClean_xssClean --> append
+class "append" as append #red
+XssClean_xssClean --> isEmpty
 class "isEmpty" as isEmpty #red
-OrderServiceImpl_validateProduct --> trim
-class "trim" as trim #red
-submitOrder --> OrderServiceImpl_validateQuantity
-class "validateQuantity" as OrderServiceImpl_validateQuantity
-submitOrder --> OrderServiceAsync_submitOrder
-class "submitOrder" as OrderServiceAsync_submitOrder #pink
-OrderServiceAsync_submitOrder --> OrderServiceAsync_submitOrder
-class "submitOrder" as OrderServiceAsync_submitOrder #pink
-submitOrder --> LegacyCodeUtil_debug
-class "debug" as LegacyCodeUtil_debug #pink
-LegacyCodeUtil_debug --> length
+XssClean_xssClean --> charAt
+class "charAt" as charAt #red
+XssClean_xssClean --> replaceAll
+class "replaceAll" as replaceAll #red
+XssClean_xssClean --> htmlEscape
+class "htmlEscape" as htmlEscape #red
+XssHttpServletRequestWrapper_getParameter --> equals
+class "equals" as equals #red
+XssHttpServletRequestWrapper_getParameter --> XssHttpServletRequestWrapper_getParameter
+class "getParameter" as XssHttpServletRequestWrapper_getParameter #pink
+UIBusinessToolsFacade_execute --> UIBusinessToolsAction_insuranceAbility
+class "insuranceAbility" as UIBusinessToolsAction_insuranceAbility #pink
+UIBusinessToolsAction_insuranceAbility --> XssHttpServletRequestWrapper_getParameter
+class "getParameter" as XssHttpServletRequestWrapper_getParameter #pink
+XssHttpServletRequestWrapper_getParameter --> XssClean_xssClean
+class "xssClean" as XssClean_xssClean #pink
+XssClean_xssClean --> length
 class "length" as length #red
-LegacyCodeUtil_debug --> replace
-class "replace" as replace #red
-OrderCreateAction_execute --> OrderCreateAction_validateInput
-class "validateInput" as OrderCreateAction_validateInput
-OrderCreateAction_validateInput --> OrderForm_getUserId
-class "getUserId" as OrderForm_getUserId #pink
-OrderCreateAction_validateInput --> OrderForm_getProductCode
-class "getProductCode" as OrderForm_getProductCode #pink
-OrderCreateAction_validateInput --> OrderForm_getQuantity
-class "getQuantity" as OrderForm_getQuantity #pink
-OrderCreateAction_validateInput --> isEmpty
+XssClean_xssClean --> append
+class "append" as append #red
+XssClean_xssClean --> isEmpty
 class "isEmpty" as isEmpty #red
-OrderCreateAction_validateInput --> trim
-class "trim" as trim #red
-OrderCreateAction_execute --> OrderForm_getPaymentChannel
-class "getPaymentChannel" as OrderForm_getPaymentChannel #pink
-OrderCreateAction_execute --> OrderForm_getQuantity
-class "getQuantity" as OrderForm_getQuantity #pink
-OrderCreateAction_execute --> Order_getOrderId
-class "getOrderId" as Order_getOrderId #pink
-OrderCreateAction_execute --> DateUtil_formatNow
-class "formatNow" as DateUtil_formatNow #pink
-DateUtil_formatNow --> format
-class "format" as format #red
+XssClean_xssClean --> charAt
+class "charAt" as charAt #red
+XssClean_xssClean --> replaceAll
+class "replaceAll" as replaceAll #red
+XssClean_xssClean --> htmlEscape
+class "htmlEscape" as htmlEscape #red
+XssHttpServletRequestWrapper_getParameter --> equals
+class "equals" as equals #red
+XssHttpServletRequestWrapper_getParameter --> XssHttpServletRequestWrapper_getParameter
+class "getParameter" as XssHttpServletRequestWrapper_getParameter #pink
+UIBusinessToolsAction_insuranceAbility --> UIPrpDAccItemAction_delete
+class "delete" as UIPrpDAccItemAction_delete #pink
+UIPrpDAccItemAction_delete --> UIBusinessToolsFacade_execute
+class "execute" as UIBusinessToolsFacade_execute #pink
+UIPrpDAccItemAction_delete --> println
+class "println" as println #red
+UIBusinessToolsAction_insuranceAbility --> UIBusinessToolsFacade_execute
+class "execute" as UIBusinessToolsFacade_execute #pink
+UIBusinessToolsAction_insuranceAbility --> equals
+class "equals" as equals #red
+UIBusinessToolsAction_insuranceAbility --> length
+class "length" as length #red
+UIBusinessToolsAction_insuranceAbility --> hasNext
+class "hasNext" as hasNext #red
+UIBusinessToolsAction_insuranceAbility --> next
+class "next" as next #red
+UIBusinessToolsAction_insuranceAbility --> close
+class "close" as close #red
+UIBusinessToolsAction_insuranceAbility --> toString
+class "toString" as toString #red
+UIBusinessToolsAction_insuranceAbility --> append
+class "append" as append #red
+UIBusinessToolsAction_insuranceAbility --> lastIndexOf
+class "lastIndexOf" as lastIndexOf #red
+UIBusinessToolsAction_insuranceAbility --> setContentType
+class "setContentType" as setContentType #red
+UIBusinessToolsAction_insuranceAbility --> print
+class "print" as print #red
+UIBusinessToolsAction_insuranceAbility --> getWriter
+class "getWriter" as getWriter #red
+UIBusinessToolsAction_insuranceAbility --> replaceAll
+class "replaceAll" as replaceAll #red
+UIBusinessToolsFacade_execute --> equals
+class "equals" as equals #red
+UIBusinessToolsFacade_execute --> findForward
+class "findForward" as findForward #red
+UICodeAction_codeQuery --> equals
+class "equals" as equals #red
+UICodeAction_codeQuery --> substring
+class "substring" as substring #red
+UICodeAction_codeQuery --> split
+class "split" as split #red
+BLEnquiryAction_findByPK --> length
+class "length" as length #red
+BLEnquiryAction_findByPK --> iterator
+class "iterator" as iterator #red
+BLEnquiryAction_findByPK --> hasNext
+class "hasNext" as hasNext #red
+BLEnquiryAction_findByPK --> BLEnquiryAction_findByPK
+class "findByPK" as BLEnquiryAction_findByPK #pink
+BLEnquiryAction_findByConditions --> SlipPrintDto_getEnquiryNo
+class "getEnquiryNo" as SlipPrintDto_getEnquiryNo #pink
+BLEnquiryAction_findByConditions --> iterator
+class "iterator" as iterator #red
+BLEnquiryAction_findByConditions --> hasNext
+class "hasNext" as hasNext #red
+BLEnquiryAction_findByConditions --> next
+class "next" as next #red
+BLEnquiryAction_findByConditions --> BLEnquiryAction_findByConditions
+class "findByConditions" as BLEnquiryAction_findByConditions #pink
+BLAccTRAction_getReinsCode --> AccTRDetailItemDto_getBrokerFlag
+class "getBrokerFlag" as AccTRDetailItemDto_getBrokerFlag #pink
+BLAccTRAction_getReinsCode --> equals
+class "equals" as equals #red
+BLAccTRAction_getReinsCode --> iterator
+class "iterator" as iterator #red
+BLAccTRAction_getReinsCode --> hasNext
+class "hasNext" as hasNext #red
+BLAccTRAction_getReinsCode --> next
+class "next" as next #red
+BLAccTRAction_getReinsCode --> put
+class "put" as put #red
+BLAccTRAction_getReinsCode --> FhReinsDto_setFhFinalReinsDtoList
+class "setFhFinalReinsDtoList" as FhReinsDto_setFhFinalReinsDtoList #pink
+BLAccTRAction_getReinsCode --> BLAccTRAction_getReinsCode
+class "getReinsCode" as BLAccTRAction_getReinsCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccCashLossDto_setPayCode
+class "setPayCode" as AccCashLossDto_setPayCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccCashLossDto_getPayCode
+class "getPayCode" as AccCashLossDto_getPayCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccCashLossDto_getBalance
+class "getBalance" as AccCashLossDto_getBalance #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccFacQueryDto_getAccNo
+class "getAccNo" as AccFacQueryDto_getAccNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccFacQueryDto_getAccType
+class "getAccType" as AccFacQueryDto_getAccType #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccFacQueryDto_getDrCertifyNo
+class "getDrCertifyNo" as AccFacQueryDto_getDrCertifyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccFacQueryDto_setReinsCode
+class "setReinsCode" as AccFacQueryDto_setReinsCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccFacQueryDto_setCenterCode
+class "setCenterCode" as AccFacQueryDto_setCenterCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccItemDto_getItemValue
+class "getItemValue" as AccItemDto_getItemValue #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccRepayDto_setAccPeriod
+class "setAccPeriod" as AccRepayDto_setAccPeriod #pink
+AccRepayDto_setAccPeriod --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> AccTBDetailItemDto_getFReinsCode
+class "getFReinsCode" as AccTBDetailItemDto_getFReinsCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> AccTBDetailItemDto_getfReinsCode
+class "getfReinsCode" as AccTBDetailItemDto_getfReinsCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ExistAccDto_getOptType
+class "getOptType" as ExistAccDto_getOptType #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> ExistAccDto_getAccKind
+class "getAccKind" as ExistAccDto_getAccKind #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> PaymentDto_setAddTax
+class "setAddTax" as PaymentDto_setAddTax #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> SpecialReinsConditionDto_setCommFee
+class "setCommFee" as SpecialReinsConditionDto_setCommFee #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FsoReplanDtoBase_setWithholdingVatFee
+class "setWithholdingVatFee" as FsoReplanDtoBase_setWithholdingVatFee #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FzPayAccDtoBase_getReCertifyNo
+class "getReCertifyNo" as FzPayAccDtoBase_getReCertifyNo #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> FzPayItemDtoBase_getItemValue1
+class "getItemValue1" as FzPayItemDtoBase_getItemValue1 #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> UICssTag_getName
+class "getName" as UICssTag_getName #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> PrpJreinsFacDtoBase_setReCertiNo
+class "setReCertiNo" as PrpJreinsFacDtoBase_setReCertiNo #pink
+PrpJreinsFacDtoBase_setReCertiNo --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> PrpJreinsFeeDtoBase_setBranchCode
+class "setBranchCode" as PrpJreinsFeeDtoBase_setBranchCode #pink
+PrpJreinsFeeDtoBase_setBranchCode --> rightTrim
+class "rightTrim" as rightTrim #red
+BLReinsPaymentInterfAction_sendFacToPayment --> CodeNameDto_getPremiumRCCCode
+class "getPremiumRCCCode" as CodeNameDto_getPremiumRCCCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> CodeNameDto_getClaimRCCCode
+class "getClaimRCCCode" as CodeNameDto_getClaimRCCCode #pink
+BLReinsPaymentInterfAction_sendFacToPayment --> equals
+class "equals" as equals #red
+BLReinsPaymentInterfAction_sendFacToPayment --> size
+class "size" as size #red
+BLReinsPaymentInterfAction_sendFacToPayment --> iterator
+class "iterator" as iterator #red
+BLReinsPaymentInterfAction_sendFacToPayment --> hasNext
+class "hasNext" as hasNext #red
+BLReinsPaymentInterfAction_sendFacToPayment --> next
+class "next" as next #red
+BLReinsPaymentInterfAction_sendFacToPayment --> substring
+class "substring" as substring #red
+BLReinsPaymentInterfAction_sendFacToPayment --> current
+class "current" as current #red
+BLReinsPaymentInterfAction_sendFacToPayment --> valueOf
+class "valueOf" as valueOf #red
+BLReinsPaymentInterfAction_sendFacToPayment --> get
+class "get" as get #red
+BLReinsPaymentInterfAction_sendFacToPayment --> getClass
+class "getClass" as getClass #red
+BLReinsPaymentInterfAction_sendFacToPayment --> getGuPolicyService
+class "getGuPolicyService" as getGuPolicyService #red
+BLReinsPaymentInterfAction_sendFacToPayment --> findByPrimaryKeyGuMain
+class "findByPrimaryKeyGuMain" as findByPrimaryKeyGuMain #red
+BLReinsPaymentInterfAction_sendFacToPayment --> setBillNo
+class "setBillNo" as setBillNo #red
 @enduml

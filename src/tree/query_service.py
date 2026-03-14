@@ -103,11 +103,54 @@ class GraphQueryService:
             RETURN m.name as method_name, m.file_path as file_path
         """, {'class_name': class_name})
         return result
+
+    def _entry_score(self, method: Dict) -> int:
+        """Heuristic score for entry method candidates.
+
+        Higher score means more likely to be an externally-invoked entrypoint.
+        """
+        method_name = (method.get('method_name') or '').lower()
+        class_name = (method.get('class_name') or '').lower()
+        file_path = (method.get('file_path') or '').lower().replace('\\', '/')
+        out_degree = int(method.get('out_degree') or 0)
+        layer = self._extract_layer(file_path)
+
+        score = 0
+
+        # Layer/path signal
+        if layer in {'controller', 'action'}:
+            score += 8
+        if any(token in file_path for token in ('/interf/', '/interface/', '/api/', '/web/', '/struts/')):
+            score += 4
+
+        # Class naming signal
+        if class_name.endswith('action') or class_name.endswith('controller'):
+            score += 8
+        if class_name.endswith('interf') or class_name.endswith('api'):
+            score += 4
+
+        # Method naming signal
+        if method_name in {'execute', 'invoke', 'process', 'dispatch'}:
+            score += 7
+        if method_name.startswith(('do', 'handle', 'submit', 'query', 'list', 'get', 'find', 'send')):
+            score += 2
+
+        # Entrypoints usually have fanout
+        if out_degree >= 3:
+            score += 2
+        if out_degree >= 10:
+            score += 2
+
+        # Filter obvious non-entry helpers
+        if method_name.startswith(('set', 'get', 'is')) and out_degree == 0:
+            score -= 5
+
+        return score
     
     # ==================== 调用链查询 ====================
     
     def get_entry_methods(self) -> List[Dict]:
-        """获取入口方法（Controller/Action层的方法，兼容 Windows 路径）"""
+        """获取入口方法（多信号启发式，兼容传统 Action/Interf 风格项目）。"""
         all_methods = self._run_query("""
             MATCH (m:Method)-[:BELONGS_TO]->(c:Class)
             OPTIONAL MATCH (m)-[r:CALLS]->()
@@ -115,10 +158,18 @@ class GraphQueryService:
             RETURN m.name as method_name, m.class_name as class_name, c.file_path as file_path, out_degree
             ORDER BY out_degree DESC, method_name ASC
             LIMIT $limit
-        """, {'limit': self._normalize_limit(200)})
-        # 用 _extract_layer() 在 Python 侧过滤，避免 Cypher CONTAINS 的路径分隔符问题
-        entry_layers = {'controller', 'action'}
-        return [m for m in all_methods if self._extract_layer(m['file_path']) in entry_layers]
+        """, {'limit': self._normalize_limit(1000)})
+
+        scored = []
+        for method in all_methods:
+            score = self._entry_score(method)
+            if score >= 8:
+                item = dict(method)
+                item['entry_score'] = score
+                scored.append(item)
+
+        scored.sort(key=lambda x: (x.get('entry_score', 0), x.get('out_degree', 0)), reverse=True)
+        return scored[:200]
     
     def get_method_calls(self, method_name: str, class_name: str = None, limit: int = None) -> List[Dict]:
         """获取方法调用的其他方法"""

@@ -20,6 +20,9 @@ def main():
     parser.add_argument("--min-critical-chain-retention", type=float, default=1.0, help="关键链保留率下限")
     parser.add_argument("--max-critical-hop-dropout", type=float, default=0.1, help="关键跳点丢失率上限")
     parser.add_argument("--max-util-unknown-ratio", type=float, default=0.85, help="util unknown 占比上限")
+    parser.add_argument("--min-critical-chain-coverage", type=float, default=0.0, help="关键链覆盖率下限")
+    parser.add_argument("--min-critical-definition-presence", type=float, default=0.0, help="关键链定义命中率下限")
+    parser.add_argument("--critical-chains", default=None, help="关键链路配置文件路径（JSON）")
     parser.add_argument(
         "--output",
         default="output/quality/graph_quality_thresholds.json",
@@ -28,7 +31,7 @@ def main():
     args = parser.parse_args()
 
     ensure_graph_data(args.bootstrap)
-    report = build_report(args.max_depth)
+    report = build_report(args.max_depth, critical_chains_path=args.critical_chains)
     save_report(report, args.output)
 
     metrics = report["metrics"]
@@ -67,6 +70,14 @@ def main():
             metrics["util_unknown_ratio"] <= args.max_util_unknown_ratio,
             f"util unknown 占比超阈值: {metrics['util_unknown_ratio']:.2%} > {args.max_util_unknown_ratio:.2%}",
         ),
+        (
+            metrics["critical_chain_coverage"] >= args.min_critical_chain_coverage,
+            f"关键链覆盖率低于阈值: {metrics['critical_chain_coverage']:.2%} < {args.min_critical_chain_coverage:.2%}",
+        ),
+        (
+            metrics["critical_definition_presence"] >= args.min_critical_definition_presence,
+            f"关键链定义命中率低于阈值: {metrics['critical_definition_presence']:.2%} < {args.min_critical_definition_presence:.2%}",
+        ),
     ]
 
     failures = [message for passed, message in checks if not passed]
@@ -78,7 +89,9 @@ def main():
     print(f"业务断链率: {metrics['business_broken_chain_rate']:.2%}")
     print(f"可达率: {metrics['reachability_rate']:.2%}")
     print(f"关键链路命中率: {metrics['key_chain_hit_rate']:.2%}")
+    print(f"关键链定义命中率: {metrics['critical_definition_presence']:.2%}")
     print(f"关键链路逐跳命中率: {details['key_chain_hop_hit_rate']:.2%}")
+    print(f"关键链覆盖率: {metrics['critical_chain_coverage']:.2%}")
     print(f"关键链保留率: {metrics['critical_chain_retention']:.2%}")
     print(f"关键跳点丢失率: {metrics['critical_hop_dropout']:.2%}")
     print(f"util unknown 占比: {metrics['util_unknown_ratio']:.2%}")

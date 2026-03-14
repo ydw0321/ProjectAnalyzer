@@ -22,10 +22,11 @@ def main():
         default=20,
         help="最多打印多少条 unknown 明细",
     )
+    parser.add_argument("--critical-chains", default=None, help="关键链路配置文件路径（JSON）")
     args = parser.parse_args()
 
     ensure_graph_data(args.bootstrap)
-    report = build_report(args.max_depth)
+    report = build_report(args.max_depth, critical_chains_path=args.critical_chains)
     save_report(report, args.output)
 
     counts = report["details"]["unknown_breakdown"]
