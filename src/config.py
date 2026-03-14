@@ -47,6 +47,10 @@ class Config:
 
     # 调用关系匹配：启用后优先按 类名+方法名+参数个数 匹配，减少同名/重载污染
     USE_SIGNATURE_MATCH = _get_bool_env("USE_SIGNATURE_MATCH", True)
+    # 容差匹配：当精确+唯一回退均失败时，允许参数个数差 ≤ TOLERANT_MAX_DIFF 的方法被选中
+    # 适用于 varargs 调用、可选参数等模式；默认关闭以避免误匹配
+    SIGNATURE_MATCH_TOLERANT = _get_bool_env("SIGNATURE_MATCH_TOLERANT", False)
+    SIGNATURE_TOLERANT_MAX_DIFF = _get_int_env("SIGNATURE_TOLERANT_MAX_DIFF", 1)
 
     EXCLUDE_DIRS = {'.git', 'target', 'build', 'node_modules', '__pycache__', '.idea', '.vscode'}
     JAVA_FILE_EXT = '.java'

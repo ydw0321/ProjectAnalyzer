@@ -17,6 +17,9 @@ def main():
     parser.add_argument("--min-reachability-rate", type=float, default=0.75, help="可达率下限")
     parser.add_argument("--min-key-chain-hit-rate", type=float, default=1.0, help="关键链路命中率下限")
     parser.add_argument("--min-key-chain-hop-hit-rate", type=float, default=1.0, help="关键链路逐跳命中率下限")
+    parser.add_argument("--min-critical-chain-retention", type=float, default=1.0, help="关键链保留率下限")
+    parser.add_argument("--max-critical-hop-dropout", type=float, default=0.1, help="关键跳点丢失率上限")
+    parser.add_argument("--max-util-unknown-ratio", type=float, default=0.85, help="util unknown 占比上限")
     parser.add_argument(
         "--output",
         default="output/quality/graph_quality_thresholds.json",
@@ -52,6 +55,18 @@ def main():
             details["key_chain_hop_hit_rate"] >= args.min_key_chain_hop_hit_rate,
             f"关键链路逐跳命中率低于阈值: {details['key_chain_hop_hit_rate']:.2%} < {args.min_key_chain_hop_hit_rate:.2%}",
         ),
+        (
+            metrics["critical_chain_retention"] >= args.min_critical_chain_retention,
+            f"关键链保留率低于阈值: {metrics['critical_chain_retention']:.2%} < {args.min_critical_chain_retention:.2%}",
+        ),
+        (
+            metrics["critical_hop_dropout"] <= args.max_critical_hop_dropout,
+            f"关键跳点丢失率超阈值: {metrics['critical_hop_dropout']:.2%} > {args.max_critical_hop_dropout:.2%}",
+        ),
+        (
+            metrics["util_unknown_ratio"] <= args.max_util_unknown_ratio,
+            f"util unknown 占比超阈值: {metrics['util_unknown_ratio']:.2%} > {args.max_util_unknown_ratio:.2%}",
+        ),
     ]
 
     failures = [message for passed, message in checks if not passed]
@@ -64,6 +79,9 @@ def main():
     print(f"可达率: {metrics['reachability_rate']:.2%}")
     print(f"关键链路命中率: {metrics['key_chain_hit_rate']:.2%}")
     print(f"关键链路逐跳命中率: {details['key_chain_hop_hit_rate']:.2%}")
+    print(f"关键链保留率: {metrics['critical_chain_retention']:.2%}")
+    print(f"关键跳点丢失率: {metrics['critical_hop_dropout']:.2%}")
+    print(f"util unknown 占比: {metrics['util_unknown_ratio']:.2%}")
 
     if failures:
         print("\n❌ 阈值测试失败:")

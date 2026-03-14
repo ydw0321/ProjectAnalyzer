@@ -225,6 +225,7 @@ class GraphStore:
             "direct_unknown_rows": 0,
             "signature_exact_hits": 0,
             "unique_fallback_hits": 0,
+            "tolerant_hits": 0,
             "unmatched_to_unknown": 0,
             "internal_unmatched_dropped": 0,
         }
@@ -285,41 +286,62 @@ class GraphStore:
         signature_index = self._build_signature_index(signature_index=signature_index)
 
         def select_mode(class_name, method_name, arg_count):
-            candidates = signature_index.get((class_name, method_name), [])
+            """返回 (mode, best_param_count_or_None)。
+            mode 取值: 'exact' | 'fallback' | 'tolerant' | 'none'
+            best_param_count: tolerant 模式下最近候选参数数，其余为 None。
+            """
+            candidates = signature_index.get((class_name, method_name), set())
             if not candidates:
-                return "none"
-            if Config.USE_SIGNATURE_MATCH and arg_count in candidates:
-                return "exact"
-            if Config.USE_SIGNATURE_MATCH and len(candidates) == 1:
-                return "fallback"
-            if not Config.USE_SIGNATURE_MATCH:
-                return "fallback"
-            return "none"
+                return "none", None
+            if Config.USE_SIGNATURE_MATCH:
+                if arg_count in candidates:
+                    return "exact", arg_count
+                if len(candidates) == 1:
+                    return "fallback", None
+                if Config.SIGNATURE_MATCH_TOLERANT:
+                    closest = min(candidates, key=lambda c: abs(arg_count - c))
+                    if abs(arg_count - closest) <= Config.SIGNATURE_TOLERANT_MAX_DIFF:
+                        return "tolerant", closest
+                return "none", None
+            else:
+                return "fallback", None
 
         internal_exact_rows = []
         internal_fallback_rows = []
+        internal_tolerant_rows = []
         for row in internal_rows:
-            mode = select_mode(row["target_class"], row["callee"], row["arg_count"])
+            mode, best_pc = select_mode(row["target_class"], row["callee"], row["arg_count"])
             if mode == "exact":
                 internal_exact_rows.append(row)
                 stats["signature_exact_hits"] += 1
             elif mode == "fallback":
                 internal_fallback_rows.append(row)
                 stats["unique_fallback_hits"] += 1
+            elif mode == "tolerant":
+                r = dict(row)
+                r["best_param_count"] = best_pc
+                internal_tolerant_rows.append(r)
+                stats["tolerant_hits"] += 1
             else:
                 stats["internal_unmatched_dropped"] += 1
 
         external_exact_rows = []
         external_fallback_rows = []
+        external_tolerant_rows = []
         external_unmatched_rows = []
         for row in external_rows:
-            mode = select_mode(row["callee_class"], row["callee"], row["arg_count"])
+            mode, best_pc = select_mode(row["callee_class"], row["callee"], row["arg_count"])
             if mode == "exact":
                 external_exact_rows.append(row)
                 stats["signature_exact_hits"] += 1
             elif mode == "fallback":
                 external_fallback_rows.append(row)
                 stats["unique_fallback_hits"] += 1
+            elif mode == "tolerant":
+                r = dict(row)
+                r["best_param_count"] = best_pc
+                external_tolerant_rows.append(r)
+                stats["tolerant_hits"] += 1
             else:
                 external_unmatched_rows.append(row)
 
@@ -335,8 +357,10 @@ class GraphStore:
         total_write_rows = (
             len(internal_exact_rows)
             + len(internal_fallback_rows)
+            + len(internal_tolerant_rows)
             + len(external_exact_rows)
             + len(external_fallback_rows)
+            + len(external_tolerant_rows)
             + len(unknown_rows)
         )
 
@@ -355,7 +379,7 @@ class GraphStore:
                         MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
                         MATCH (callee:Method {name: row.callee, class_name: row.target_class, param_count: row.arg_count})
                         MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
-                        SET r.arg_count = row.arg_count
+                        SET r.arg_count = row.arg_count, r.match_mode = 'exact'
                         """,
                         internal_exact_rows,
                         batch_size,
@@ -371,7 +395,7 @@ class GraphStore:
                         MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
                         MATCH (callee:Method {name: row.callee, class_name: row.target_class})
                         MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
-                        SET r.arg_count = row.arg_count
+                        SET r.arg_count = row.arg_count, r.match_mode = 'fallback'
                         """,
                         internal_fallback_rows,
                         batch_size,
@@ -387,7 +411,7 @@ class GraphStore:
                         MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
                         MATCH (callee:Method {name: row.callee, class_name: row.callee_class, param_count: row.arg_count})
                         MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
-                        SET r.arg_count = row.arg_count
+                        SET r.arg_count = row.arg_count, r.match_mode = 'exact'
                         """,
                         external_exact_rows,
                         batch_size,
@@ -403,12 +427,44 @@ class GraphStore:
                         MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
                         MATCH (callee:Method {name: row.callee, class_name: row.callee_class})
                         MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
-                        SET r.arg_count = row.arg_count
+                        SET r.arg_count = row.arg_count, r.match_mode = 'fallback'
                         """,
                         external_fallback_rows,
                         batch_size,
                         progress=progress,
                         stage_label="external-fallback",
+                    )
+
+                if internal_tolerant_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MATCH (callee:Method {name: row.callee, class_name: row.target_class, param_count: row.best_param_count})
+                        MERGE (caller)-[r:CALLS {type: 'internal'}]->(callee)
+                        SET r.arg_count = row.arg_count, r.match_mode = 'tolerant'
+                        """,
+                        internal_tolerant_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="internal-tolerant",
+                    )
+
+                if external_tolerant_rows:
+                    self._run_chunked_query(
+                        session,
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller, class_name: row.caller_class})
+                        MATCH (callee:Method {name: row.callee, class_name: row.callee_class, param_count: row.best_param_count})
+                        MERGE (caller)-[r:CALLS {via_field: row.via_field, type: 'external'}]->(callee)
+                        SET r.arg_count = row.arg_count, r.match_mode = 'tolerant'
+                        """,
+                        external_tolerant_rows,
+                        batch_size,
+                        progress=progress,
+                        stage_label="external-tolerant",
                     )
 
                 if unknown_rows:
@@ -471,8 +527,9 @@ class GraphStore:
                 )
 
     def resolve_external_unknown_calls(self):
-        """将可唯一匹配的 external_unknown 调用补链到 Method 节点"""
+        """将可唯一匹配的 external_unknown 调用补链到 Method 节点，再用启发式多候选补链"""
         with self.driver.session() as session:
+            # Pass 1: 唯一名称精确补链
             result = session.run(
                 """
                 MATCH (caller:Method)-[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
@@ -481,13 +538,18 @@ class GraphStore:
                 WITH caller, r, ext, collect(candidate) AS candidates
                 WHERE size(candidates) = 1
                 WITH caller, r, ext, candidates[0] AS target
-                MERGE (caller)-[:CALLS {type: 'external', inferred: true}]->(target)
+                MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
+                SET c.inferred_reason = 'unique_name', c.confidence = 1.0
                 DELETE r
                 RETURN count(*) AS resolved
                 """
             )
-            resolved = result.single()["resolved"]
+            resolved_p1 = result.single()["resolved"]
 
+        # Pass 2: 路径邻近度启发式多候选补链
+        resolved_p2 = self._resolve_by_heuristics()
+
+        with self.driver.session() as session:
             session.run(
                 """
                 MATCH (ext:ExternalMethod)
@@ -496,7 +558,92 @@ class GraphStore:
                 """
             )
 
-            return resolved
+        return resolved_p1 + resolved_p2
+
+    def _resolve_by_heuristics(self) -> int:
+        """对剩余多候选 external_unknown 调用用文件路径邻近度启发式补链。
+        仅当 caller 与 candidate 有至少 1 层公共路径前缀时才补链，
+        记录 inferred_reason 与 confidence 属性。
+        """
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
+                WITH caller, ext
+                MATCH (candidate:Method {name: ext.name})
+                WITH caller.name AS caller_name,
+                     caller.class_name AS caller_class,
+                     caller.file_path AS caller_file,
+                     ext.name AS method_name,
+                     collect({class_name: candidate.class_name,
+                              file_path: candidate.file_path}) AS candidates
+                WHERE size(candidates) > 1
+                RETURN caller_name, caller_class, caller_file, method_name, candidates
+                """
+            )
+            rows = [dict(r) for r in result]
+
+        if not rows:
+            return 0
+
+        def path_overlap(path_a: str, path_b: str) -> int:
+            parts_a = (path_a or "").replace("\\", "/").split("/")[:-1]
+            parts_b = (path_b or "").replace("\\", "/").split("/")[:-1]
+            count = 0
+            for pa, pb in zip(parts_a, parts_b):
+                if pa == pb:
+                    count += 1
+                else:
+                    break
+            return count
+
+        resolved_data = []
+        for row in rows:
+            caller_file = row.get("caller_file") or ""
+            candidates = row["candidates"]
+            ranked = sorted(
+                candidates,
+                key=lambda c: path_overlap(caller_file, c.get("file_path") or ""),
+                reverse=True,
+            )
+            best = ranked[0]
+            overlap = path_overlap(caller_file, best.get("file_path") or "")
+            if overlap >= 1:
+                confidence = round(min(1.0, 0.3 + 0.15 * overlap), 2)
+                resolved_data.append({
+                    "caller_name": row["caller_name"],
+                    "caller_class": row["caller_class"],
+                    "method_name": row["method_name"],
+                    "target_class": best["class_name"],
+                    "confidence": confidence,
+                    "inferred_reason": f"path_proximity:{overlap}",
+                })
+
+        if not resolved_data:
+            return 0
+
+        with self.driver.session() as session:
+            session.run(
+                """
+                UNWIND $rows AS row
+                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                MATCH (target:Method {name: row.method_name, class_name: row.target_class})
+                MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
+                SET c.inferred_reason = row.inferred_reason, c.confidence = row.confidence
+                """,
+                rows=resolved_data,
+            )
+            session.run(
+                """
+                UNWIND $rows AS row
+                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                      -[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod {name: row.method_name})
+                DELETE r
+                """,
+                rows=resolved_data,
+            )
+
+        return len(resolved_data)
 
     def get_hot_nodes(self, limit=50):
         """获取被调用最多的方法节点"""

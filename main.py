@@ -218,6 +218,7 @@ def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_gr
             "📈 匹配统计: "
             f"精确命中={call_stats.get('signature_exact_hits', 0)}, "
             f"唯一回退={call_stats.get('unique_fallback_hits', 0)}, "
+            f"容差命中={call_stats.get('tolerant_hits', 0)}, "
             f"转unknown={call_stats.get('unmatched_to_unknown', 0)}, "
             f"内部丢弃={call_stats.get('internal_unmatched_dropped', 0)}"
         )
@@ -231,7 +232,7 @@ def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_gr
         )
 
         resolved_unknown = graph_store.resolve_external_unknown_calls()
-        print(f"✅ external_unknown 自动补链完成 (补链: {resolved_unknown})")
+        print(f"✅ external_unknown 自动补链完成 (补链总数: {resolved_unknown}，含启发式路径补链)")
 
     # 阶段2：分析热点节点
     hot_nodes, call_counts = phase2_collect_call_stats(method_index, all_calls)

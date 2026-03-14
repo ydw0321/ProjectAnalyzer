@@ -197,6 +197,12 @@ def classify_unknown_method(method_name):
     return "business_unknown"
 
 
+def _is_util_class_name(class_name):
+    name = (class_name or "").lower()
+    util_markers = ("util", "utils", "helper", "common")
+    return any(marker in name for marker in util_markers)
+
+
 def get_unknown_call_breakdown(query):
     with query.driver.session() as session:
         result = session.run(
@@ -237,6 +243,19 @@ def build_report(max_depth=10):
     total_calls = call_stats.get("total", 0)
     unknown_calls = call_stats.get("external_unknown", 0)
     business_unknown = unknown_breakdown["counts"].get("business_unknown", 0)
+    unknown_items = unknown_breakdown["items"]
+
+    critical_classes = {
+        class_name
+        for chain in CRITICAL_CHAINS
+        for class_name, _ in chain["hops"]
+    }
+    critical_unknown_calls = sum(
+        1 for item in unknown_items if item.get("caller_class") in critical_classes
+    )
+    util_unknown_calls = sum(
+        1 for item in unknown_items if _is_util_class_name(item.get("caller_class"))
+    )
 
     broken_chain_rate = (unknown_calls / total_calls) if total_calls else 0.0
     business_broken_chain_rate = (business_unknown / total_calls) if total_calls else 0.0
@@ -251,6 +270,9 @@ def build_report(max_depth=10):
         if chain_eval["total_hops"]
         else 0.0
     )
+    critical_chain_retention = key_chain_hop_hit_rate
+    critical_hop_dropout = 1.0 - critical_chain_retention
+    util_unknown_ratio = (util_unknown_calls / unknown_calls) if unknown_calls else 0.0
 
     return {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -259,6 +281,9 @@ def build_report(max_depth=10):
             "business_broken_chain_rate": business_broken_chain_rate,
             "reachability_rate": reachability_rate,
             "key_chain_hit_rate": key_chain_hit_rate,
+            "critical_chain_retention": critical_chain_retention,
+            "critical_hop_dropout": critical_hop_dropout,
+            "util_unknown_ratio": util_unknown_ratio,
         },
         "details": {
             "total_methods": total_methods,
@@ -273,6 +298,8 @@ def build_report(max_depth=10):
             "total_key_chains": chain_eval["total_chains"],
             "matched_key_hops": chain_eval["hit_hops"],
             "total_key_hops": chain_eval["total_hops"],
+            "critical_unknown_calls": critical_unknown_calls,
+            "util_unknown_calls": util_unknown_calls,
             "unknown_breakdown": unknown_breakdown["counts"],
         },
         "critical_chain_results": chain_eval["chains"],
@@ -295,6 +322,9 @@ def print_report(report):
     print(f"  业务断链率: {metrics['business_broken_chain_rate']:.2%} ({unknown_breakdown['business_unknown']}/{details['total_calls']})")
     print(f"  可达率: {metrics['reachability_rate']:.2%} ({details['reachable_methods']}/{details['total_methods']})")
     print(f"  关键链路命中率: {metrics['key_chain_hit_rate']:.2%} ({details['matched_key_chains']}/{details['total_key_chains']})")
+    print(f"  关键链保留率: {metrics['critical_chain_retention']:.2%}")
+    print(f"  关键跳点丢失率: {metrics['critical_hop_dropout']:.2%}")
+    print(f"  util unknown 占比: {metrics['util_unknown_ratio']:.2%}")
     print()
     print("补充指标:")
     print(f"  关键链路逐跳命中率: {details['key_chain_hop_hit_rate']:.2%} ({details['matched_key_hops']}/{details['total_key_hops']})")

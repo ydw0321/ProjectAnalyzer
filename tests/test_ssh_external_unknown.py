@@ -15,7 +15,7 @@ def test_external_unknown_for_ssh():
     old_path = Config.PROJECT_PATH
     try:
         Config.PROJECT_PATH = "./fixtures/ssh"
-        main(enable_llm=False)
+        main(run_neo4j=True, run_vector=False, reset_graph=True)
 
         with GraphStore() as gs:
             with gs.driver.session() as session:

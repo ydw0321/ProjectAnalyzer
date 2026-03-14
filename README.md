@@ -311,6 +311,8 @@ python scripts/generate_docs.py
 | LLM_TIMEOUT | LLM 超时秒数 | 60 |
 | LLM_INDEX_MAX_WORKERS | 向量索引并发线程数 | 8 |
 | USE_SIGNATURE_MATCH | 是否启用签名匹配 | true |
+| SIGNATURE_MATCH_TOLERANT | 是否启用签名容差匹配（灰度） | false |
+| SIGNATURE_TOLERANT_MAX_DIFF | 容差匹配允许的参数个数最大差值 | 1 |
 | NEO4J_WRITE_BATCH_SIZE | Neo4j 批量写入大小 | 10000 |
 
 ## 常见问题

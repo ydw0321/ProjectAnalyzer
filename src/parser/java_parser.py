@@ -67,6 +67,7 @@ class JavaParser:
         methods = []
         calls = []  # 同文件内调用
         methods_by_class = {}
+        method_return_types = {}
 
         class_info = {'name': '', 'start': 0, 'end': 0}
 
@@ -101,16 +102,19 @@ class JavaParser:
                 method_code = source_code[start_byte:end_byte]
                 
                 param_count = self._count_method_params(node)
+                return_type = self._extract_method_return_type(node, source_code)
 
                 methods.append({
                     'name': method_name,
                     'class_name': class_info['name'],
                     'param_count': param_count,
+                    'return_type': return_type,
                     'code': method_code,
                     'start_byte': start_byte,
                     'end_byte': end_byte
                 })
                 methods_by_class.setdefault(class_info['name'], {}).setdefault(method_name, set()).add(param_count)
+                method_return_types.setdefault(class_info['name'], {})[method_name] = return_type
 
                 local_vars = self._extract_local_vars_regex(method_code)
                 param_vars = self._extract_method_params(node, source_code)
@@ -160,6 +164,23 @@ class JavaParser:
                             # import 辅助消歧：优先使用明确导入的类
                             if not target_class and receiver_root in imported_simple_names:
                                 target_class = receiver_root
+
+                            # 链式调用简化推断：obj.getX().method()
+                            # 仅做第一跳返回类型推断，避免引入高开销 AST 推演。
+                            if not target_class and '.' in receiver_text and '(' in receiver_text:
+                                target_class = self._infer_chain_receiver_type(
+                                    receiver_text,
+                                    current_class,
+                                    fmap,
+                                    method_return_types,
+                                )
+
+                            # 类型转换: ((TypeName) expr).method() — 从 cast_expression 提取类型
+                            if not target_class and receiver.type == 'cast_expression':
+                                cast_type_node = receiver.child_by_field_name('type')
+                                if cast_type_node:
+                                    cast_type = source_code[cast_type_node.start_byte:cast_type_node.end_byte]
+                                    target_class = self._normalize_type_name(cast_type)
 
                     arg_count = self._count_call_args(node)
                     
@@ -238,17 +259,22 @@ class JavaParser:
         return imports
     
     def _extract_fields_regex(self, source_code):
-        """使用正则表达式提取字段声明"""
+        """使用正则表达式提取字段声明（支持 package-private、带注解的字段）"""
         fields = []
-        # 匹配 private/public/protected 字段声明
-        pattern = r'(?:private|public|protected)\s+([\w<>]+(?:<[\w\s,]+>)?)\s+(\w+)\s*[;=]'
+        # 匹配字段声明：访问修饰符可选，类型名首字母大写（引用类型），字段名首字母小写或下划线
+        # 支持 private/public/protected/static/final/transient/volatile 任意组合，或无修饰符
+        pattern = (
+            r'(?:(?:@\w+(?:\([^)]*\))?\s+)*)'      # 可选注解（如 @Autowired）
+            r'(?:(?:private|public|protected|static|final|transient|volatile)\s+)*'  # 可选修饰符
+            r'([A-Z]\w*(?:<[^>]*>)?)\s+'            # 类型名（首字母大写，可含泛型）
+            r'([a-z_]\w*)'
+            r'\s*[;=]'
+        )
         for match in re.finditer(pattern, source_code):
             type_name = match.group(1)
             field_name = match.group(2)
-            # 简化类型名
             if '.' in type_name:
                 type_name = type_name.split('.')[-1]
-            # 移除泛型
             if '<' in type_name:
                 type_name = type_name.split('<')[0]
             fields.append({
@@ -325,6 +351,47 @@ class JavaParser:
                 count += 1
         return count
 
+    def _extract_method_return_type(self, method_node, source_code):
+        """提取方法返回类型，用于链式调用 receiver 推断。"""
+        type_node = method_node.child_by_field_name('type')
+        if not type_node:
+            return 'void'
+        type_text = source_code[type_node.start_byte:type_node.end_byte]
+        return self._normalize_type_name(type_text)
+
+    def _infer_chain_receiver_type(self, receiver_text, current_class, fmap, method_return_types):
+        """推断链式 receiver 最后一跳目标类。
+        示例: order.getUserService().save() -> 推断 UserService
+        当前只做 1 跳返回类型推断：base.firstCall().<current>
+        """
+        chain = (receiver_text or '').strip()
+        if not chain:
+            return None
+
+        # 兼容 this.xxx 或 this.getX() 起始
+        base_expr = chain.split('.', 1)[0]
+        base_class = None
+        if base_expr == 'this':
+            base_class = current_class
+        elif base_expr in fmap:
+            base_class = fmap.get(base_expr)
+        elif base_expr and base_expr[0].isupper():
+            base_class = base_expr
+
+        if not base_class:
+            return None
+
+        first_call_match = re.search(r'\.\s*([A-Za-z_]\w*)\s*\(', chain)
+        if not first_call_match:
+            return None
+
+        first_call = first_call_match.group(1)
+        return_map = method_return_types.get(base_class, {})
+        inferred_type = return_map.get(first_call)
+        if not inferred_type or inferred_type == 'void':
+            return None
+        return inferred_type
+
     def _count_call_args(self, call_node):
         args_node = call_node.child_by_field_name('arguments')
         if not args_node:
@@ -342,12 +409,26 @@ class JavaParser:
     def _extract_local_vars_regex(self, method_code):
         """提取方法体内局部变量声明（用于调用目标类推断）"""
         local_vars = {}
-        pattern = r'([A-Z][\w\.]*(?:<[^>]+>)?)\s+(\w+)\s*(?:=|;|,)'
 
+        # 普通局部变量声明: TypeName varName = ... 或 TypeName varName;
+        pattern = r'([A-Z][\w\.]*(?:<[^>]+>)?)\s+(\w+)\s*(?:=|;|,)'
         for match in re.finditer(pattern, method_code):
             type_name = self._normalize_type_name(match.group(1))
             var_name = match.group(2)
+            local_vars[var_name] = type_name
 
+        # for-each 循环变量: for (TypeName var : collection)
+        foreach_pattern = r'\bfor\s*\(\s*([A-Z]\w*(?:<[^>]+>)?)\s+(\w+)\s*:'
+        for match in re.finditer(foreach_pattern, method_code):
+            type_name = self._normalize_type_name(match.group(1))
+            var_name = match.group(2)
+            local_vars[var_name] = type_name
+
+        # try-with-resources: try (TypeName var = ...)
+        try_pattern = r'\btry\s*\(\s*([A-Z]\w*(?:<[^>]+>)?)\s+(\w+)\s*='
+        for match in re.finditer(try_pattern, method_code):
+            type_name = self._normalize_type_name(match.group(1))
+            var_name = match.group(2)
             local_vars[var_name] = type_name
 
         return local_vars
