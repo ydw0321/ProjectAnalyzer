@@ -1,0 +1,34 @@
+# Spring / MyBatis reflection pattern rules
+# These patterns are loaded by JavaParser to improve call-graph resolution
+# for framework-managed dependencies that Java's static analysis cannot see.
+
+# --- Dependency-Injection field annotations ---
+# Any field annotated with one of these is treated as an injected dependency.
+# The field's declared type is used as the callee_class for calls on that field.
+injection_annotations:
+  - Autowired       # Spring @Autowired
+  - Resource        # javax.annotation.Resource / Jakarta EE
+  - Inject          # javax.inject.Inject (CDI / Guice)
+  - Value           # Spring @Value (scalar, skip type resolution)
+
+# --- Class-level stereotype annotations ---
+# Classes carrying these annotations are Spring-managed beans.
+# Used to identify resolvable targets for injection.
+bean_annotations:
+  - Service
+  - Component
+  - Repository
+  - Controller
+  - RestController
+  - Configuration
+  - Bean
+
+# --- MyBatis Mapper interface annotations ---
+# Interfaces annotated with these are MyBatis dynamic proxies.
+# Calls targeting them are inferred with reason 'mybatis_mapper'.
+mapper_annotations:
+  - Mapper
+  - MapperScan     # class-level, marks proxy registration
+
+# --- Minimum confidence for mapper-proxy inference ---
+mapper_proxy_confidence: 0.80

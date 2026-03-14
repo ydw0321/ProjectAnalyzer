@@ -5,7 +5,12 @@ from collections import defaultdict
 from tqdm import tqdm
 from src.logging_utils import setup_logging
 from src.config import Config
-from src.scanner.scanner import scan_java_files
+from src.scanner.scanner import (
+    scan_java_files,
+    load_hash_cache,
+    save_hash_cache,
+    compute_delta,
+)
 from src.parser.java_parser import JavaParser
 from src.storage.graph_store import GraphStore
 from src.tree import ArchitectureTreeGenerator
@@ -15,8 +20,13 @@ def is_business_layer(file_path: str) -> bool:
     return True
 
 
-def phase1_parse_and_index(graph_store=None):
-    """解析业务层并可选地存储到图数据库"""
+def phase1_parse_and_index(graph_store=None, files_filter=None):
+    """解析业务层并可选地存储到图数据库
+
+    files_filter: if not None, a set/list of file paths — only methods/calls
+    from these files are written to Neo4j (incremental mode).  The full parse
+    still runs over all files so the global signature index is complete.
+    """
     print("📊 阶段1：解析业务层...")
 
     parser = JavaParser()
@@ -24,12 +34,16 @@ def phase1_parse_and_index(graph_store=None):
     
     business_files = [f for f in java_files if is_business_layer(f)]
     print(f"📂 业务层文件: {len(business_files)} 个")
+    if files_filter is not None:
+        filter_norm = {os.path.normpath(f) for f in files_filter}
+        print(f"🔄 增量模式：仅写入 {len(filter_norm)} 个变更文件")
 
     method_index = []
     all_calls = []    # 包含 internal_calls 和 external_calls
     method_signature_index = {}
     class_nodes = []
     method_nodes = []
+    all_class_annotations: dict = {}  # {class_name: [annotation, ...]}
 
     for file_path in tqdm(business_files, desc="解析业务层"):
         result = parser.extract_with_calls(file_path)
@@ -38,14 +52,30 @@ def phase1_parse_and_index(graph_store=None):
         methods = result.get('methods', [])
         internal_calls = result.get('internal_calls', [])
         external_calls = result.get('external_calls', [])
+        file_class_anns = result.get('class_annotations', {})
 
-        # 收集类节点到 Neo4j
-        if graph_store and classes:
+        # 合并类注解信息
+        for cname, anns in file_class_anns.items():
+            all_class_annotations.setdefault(cname, []).extend(anns)
+
+        write_to_neo4j = graph_store and (
+            files_filter is None or os.path.normpath(file_path) in filter_norm
+        )
+
+        # 收集类节点到 Neo4j（携带注解元数据）
+        if write_to_neo4j and classes:
             for class_name in classes:
-                class_nodes.append({'name': class_name, 'file_path': file_path})
+                anns = all_class_annotations.get(class_name, [])
+                class_nodes.append({
+                    'name': class_name,
+                    'file_path': file_path,
+                    'is_mapper': any(a in ('Mapper', 'MapperScan') for a in anns),
+                    'is_service': any(a in ('Service', 'Component', 'Repository',
+                                            'Controller', 'RestController', 'Configuration') for a in anns),
+                })
 
         # 收集方法节点到 Neo4j
-        if graph_store:
+        if write_to_neo4j:
             for method in methods:
                 method_nodes.append({
                     'name': method['name'],
@@ -54,9 +84,10 @@ def phase1_parse_and_index(graph_store=None):
                     'param_count': method.get('param_count', 0),
                 })
 
-        # 收集调用关系（包括内部和外部）
-        all_calls.extend(internal_calls)
-        all_calls.extend(external_calls)
+        # 收集调用关系（包括内部和外部）— only for neo4j-target files
+        if write_to_neo4j or files_filter is None:
+            all_calls.extend(internal_calls)
+            all_calls.extend(external_calls)
 
         for method in methods:
             class_name = method.get('class_name', '')
@@ -178,7 +209,7 @@ def phase3_index_all(method_index, hot_nodes, call_counts, index_all: bool = Fal
         print(f"✅ 分析完成！已存储 {min(top_k, len(ranked_methods))} 个方法")
 
 
-def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_graph=False):
+def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_graph=False, incremental=False):
     setup_logging()
     print("🚀 Code-GraphRAG 构建流水线\n")
 
@@ -201,8 +232,31 @@ def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_gr
     elif reset_graph:
         print("⚠️ 已忽略 --reset-graph（当前未执行 Neo4j 阶段）")
 
+    # 增量模式：计算变更文件集合
+    files_filter = None
+    new_hash_cache = None
+    if incremental and not reset_graph:
+        print("🔍 增量模式：计算文件差异...")
+        old_cache = load_hash_cache(Config.PROJECT_PATH)
+        _, changed_files, removed_files, new_hash_cache = compute_delta(Config.PROJECT_PATH, old_cache)
+        files_filter = changed_files
+        print(f"  变更/新增: {len(changed_files)} 个文件，已删除: {len(removed_files)} 个文件")
+        if run_neo4j and graph_store:
+            purge_paths = changed_files + removed_files
+            if purge_paths:
+                print(f"🗑️  清除 {len(purge_paths)} 个文件的旧图数据...")
+                graph_store.delete_file_data(purge_paths)
+        if not changed_files and not removed_files:
+            print("✅ 无变更文件，跳过图写入。")
+            if graph_store:
+                graph_store.close()
+            print("\n✨ 完成！")
+            return
+    elif incremental and reset_graph:
+        print("⚠️ --incremental 与 --reset-graph 同时使用时忽略增量（全量重建）")
+
     # 阶段1：解析源码（按模式可选写入 Neo4j）
-    method_index, all_calls, method_signature_index = phase1_parse_and_index(graph_store)
+    method_index, all_calls, method_signature_index = phase1_parse_and_index(graph_store, files_filter=files_filter)
 
     # 阶段1.5：存储调用关系到 Neo4j
     if run_neo4j and graph_store and all_calls:
@@ -298,6 +352,11 @@ def main(run_neo4j=True, run_vector=True, index_all=False, index_top=0, reset_gr
                 graph_store.close()
             sys.exit(1)
 
+    # 保存增量缓存（成功完成后）
+    if incremental and new_hash_cache is not None:
+        save_hash_cache(Config.PROJECT_PATH, new_hash_cache)
+        print(f"💾 文件哈希缓存已更新 ({len(new_hash_cache)} 个文件)")
+
     # 关闭图数据库连接
     if graph_store:
         graph_store.close()
@@ -338,6 +397,11 @@ if __name__ == "__main__":
         action="store_true",
         help="执行前清空 Neo4j 图数据，避免不同样本集运行结果累积",
     )
+    parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help="增量模式：仅重新解析并写入自上次运行以来发生变化的 Java 文件（基于 SHA-256 文件哈希缓存）",
+    )
     args = parser.parse_args()
 
     if args.neo4j_only and args.vector_only:
@@ -355,4 +419,5 @@ if __name__ == "__main__":
         index_all=args.index_all,
         index_top=args.index_top,
         reset_graph=args.reset_graph,
+        incremental=args.incremental,
     )

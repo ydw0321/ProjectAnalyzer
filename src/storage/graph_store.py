@@ -1,3 +1,4 @@
+import os
 from neo4j import GraphDatabase
 from src.config import Config
 from tqdm import tqdm
@@ -81,6 +82,8 @@ class GraphStore:
                     """
                     UNWIND $rows AS row
                     MERGE (c:Class {name: row.name, file_path: row.file_path})
+                    SET c.is_mapper  = coalesce(row.is_mapper,  false),
+                        c.is_service = coalesce(row.is_service, false)
                     """,
                     class_nodes,
                     batch_size,
@@ -107,6 +110,40 @@ class GraphStore:
         """清空当前 Neo4j 图数据（仅删除节点和关系，不修改数据库配置）"""
         with self.driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n")
+
+    def delete_file_data(self, file_paths: list) -> None:
+        """增量模式：删除指定文件对应的所有节点和关系，以便重新写入。
+
+        Deletes Class and Method nodes whose file_path matches any of the given
+        paths (or their normalized form), along with all relationships touching
+        those nodes (DETACH DELETE).  ExternalMethod / unknown edges that only
+        referenced a deleted Method as caller are also cleaned up transitively.
+        """
+        if not file_paths:
+            return
+        # Normalize paths the same way Neo4j stores them
+        norm_paths = [os.path.normpath(p) for p in file_paths]
+        with self.driver.session() as session:
+            # Delete Method nodes (and all their edges) for these files
+            session.run(
+                """
+                UNWIND $paths AS fp
+                MATCH (m:Method)
+                WHERE m.file_path = fp OR m.file_path = replace(fp, '\\\\', '/')
+                DETACH DELETE m
+                """,
+                paths=norm_paths,
+            )
+            # Delete Class nodes for these files
+            session.run(
+                """
+                UNWIND $paths AS fp
+                MATCH (c:Class)
+                WHERE c.file_path = fp OR c.file_path = replace(fp, '\\\\', '/')
+                DETACH DELETE c
+                """,
+                paths=norm_paths,
+            )
 
     def _classify_unknown_method(self, method_name: str) -> str:
         if method_name in JDK_LIKELY_METHODS:
@@ -643,7 +680,76 @@ class GraphStore:
                 rows=resolved_data,
             )
 
-        return len(resolved_data)
+        pass2_count = len(resolved_data)
+
+        # Pass 3: MyBatis Mapper proxy resolution
+        # If an external_unknown edge targets a method whose name matches a method
+        # on a Class node marked is_mapper=true, infer the edge.
+        pass3_count = self._resolve_mapper_calls()
+
+        return pass2_count + pass3_count
+
+    def _resolve_mapper_calls(self) -> int:
+        """Pass 3: 将剩余 external_unknown 中目标方法属于 @Mapper 类的边补链。
+
+        Looks for remaining CALLS{type:'external_unknown'} edges where the
+        ExternalMethod's name can be matched to a Method belonging to a
+        Class node with is_mapper=true.  Uses confidence=0.80 and
+        inferred_reason='mybatis_mapper'.
+        """
+        from src.config import Config
+        mapper_confidence = 0.80
+
+        try:
+            from yaml import safe_load as _yaml_load
+            import os as _os
+            _rules_path = _os.path.join(_os.path.dirname(__file__), "..", "..", "config", "reflection_patterns.yaml")
+            with open(_rules_path, "r", encoding="utf-8") as _f:
+                _rules = _yaml_load(_f) or {}
+            mapper_confidence = float(_rules.get("mapper_proxy_confidence", 0.80))
+        except Exception:
+            pass
+
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
+                WITH caller, ext
+                MATCH (target:Method {name: ext.name})-[:BELONGS_TO]->(c:Class {is_mapper: true})
+                RETURN caller.name AS caller_name,
+                       caller.class_name AS caller_class,
+                       ext.name AS method_name,
+                       target.class_name AS target_class
+                """
+            )
+            mapper_rows = [dict(r) for r in result]
+
+        if not mapper_rows:
+            return 0
+
+        with self.driver.session() as session:
+            session.run(
+                """
+                UNWIND $rows AS row
+                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                MATCH (target:Method {name: row.method_name, class_name: row.target_class})
+                MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
+                SET c.inferred_reason = 'mybatis_mapper', c.confidence = $confidence
+                """,
+                rows=mapper_rows,
+                confidence=mapper_confidence,
+            )
+            session.run(
+                """
+                UNWIND $rows AS row
+                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                      -[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod {name: row.method_name})
+                DELETE r
+                """,
+                rows=mapper_rows,
+            )
+
+        return len(mapper_rows)
 
     def get_hot_nodes(self, limit=50):
         """获取被调用最多的方法节点"""

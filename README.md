@@ -315,6 +315,24 @@ python scripts/generate_docs.py
 | SIGNATURE_TOLERANT_MAX_DIFF | 容差匹配允许的参数个数最大差值 | 1 |
 | NEO4J_WRITE_BATCH_SIZE | Neo4j 批量写入大小 | 10000 |
 
+### 增量解析模式
+
+使用 `--incremental` 标志可在大型项目中大幅缩短重新分析时间：仅对自上次运行以来发生变更（新增或修改）的 Java 文件重新解析并写入 Neo4j，未变更文件跳过写入。
+
+```bash
+python main.py --neo4j-only --incremental
+```
+
+文件哈希缓存存储在 `{PROJECT_PATH}/.parse_cache.json`（已加入 `.gitignore`）。
+
+### Spring / MyBatis 注解感知
+
+解析器自动识别 `@Autowired`、`@Resource`、`@Inject` 注解字段（包括多行写法），并将注入字段的声明类型用于调用关系解析，减少 `external_unknown` 边。
+
+同时，`@Mapper` 注解接口会在 Neo4j Class 节点上标记 `is_mapper=true`；`resolve_external_unknown_calls` 的第三趟补链（`mybatis_mapper`，confidence=0.80）会自动将目标为 Mapper 代理方法的 `external_unknown` 边补链到正确的接口方法。
+
+注解规则集在 `config/reflection_patterns.yaml` 中维护，可直接修改无需改代码。
+
 ## 常见问题
 
 ### 1. 是否需要 npm？

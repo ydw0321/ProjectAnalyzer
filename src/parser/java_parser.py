@@ -1,10 +1,30 @@
 from tree_sitter import Language, Parser
 from tree_sitter_java import language as java_language
+import os
 import re
+import yaml
 import logging
 
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Reflection / injection rule set loaded from config/reflection_patterns.yaml
+# ---------------------------------------------------------------------------
+_RULES_FILE = os.path.join(
+    os.path.dirname(__file__), "..", "..", "config", "reflection_patterns.yaml"
+)
+
+
+def _load_reflection_rules() -> dict:
+    try:
+        with open(_RULES_FILE, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except Exception:
+        return {}
+
+
+_REFLECTION_RULES: dict = _load_reflection_rules()
 
 
 class JavaParser:
@@ -62,7 +82,14 @@ class JavaParser:
         
         # 建立字段映射
         field_map = {f['name']: f['type'] for f in fields}
-        
+
+        # Spring/DI 注解字段增强：捕获多行注解场景（@Autowired 独占一行等）
+        spring_fields = self._extract_spring_annotations(source_code)
+        field_map.update(spring_fields)
+
+        # 类级别注解（Spring bean、MyBatis Mapper 等）
+        class_annotations: dict = self._get_class_annotations(source_code)
+
         classes = []
         methods = []
         calls = []  # 同文件内调用
@@ -247,7 +274,8 @@ class JavaParser:
             'imports': imports,
             'internal_calls': internal_calls,
             'external_calls': external_calls,
-            'all_calls': calls
+            'all_calls': calls,
+            'class_annotations': class_annotations,
         }
     
     def _extract_imports(self, source_code):
@@ -284,7 +312,64 @@ class JavaParser:
                 'end_byte': match.end()
             })
         return fields
-    
+
+    def _extract_spring_annotations(self, source_code: str) -> dict:
+        """Multi-line aware extraction of DI-annotated fields (Spring/CDI/etc.).
+
+        Returns a field-name → type mapping for fields annotated with any of
+        the injection_annotations declared in reflection_patterns.yaml.
+        """
+        injection_anns = _REFLECTION_RULES.get("injection_annotations", [])
+        # @Value holds a string literal, not a class type — skip it
+        non_type_anns = {"Value"}
+        active = [a for a in injection_anns if a not in non_type_anns]
+        if not active:
+            return {}
+
+        ann_pattern = "|".join(re.escape(a) for a in active)
+        # Match patterns like:
+        #   @Autowired
+        #   private UserService userService;
+        # Allows optional modifiers and any text between annotation and field.
+        pattern = re.compile(
+            r"@(?:" + ann_pattern + r")\b[^;{]*?"
+            r"([A-Z]\w*(?:<[^>]+>)?)\s+([a-z_]\w*)\s*[;=]",
+            re.DOTALL,
+        )
+        result = {}
+        for m in pattern.finditer(source_code):
+            type_name = m.group(1).split("<")[0]
+            result[m.group(2)] = type_name
+        return result
+
+    def _get_class_annotations(self, source_code: str) -> dict:
+        """Extract class-level stereotype annotations.
+
+        Returns {class_name: [annotation_name, ...]} for each class in the
+        source, using the bean_annotations and mapper_annotations lists from
+        reflection_patterns.yaml.
+        """
+        bean_anns = set(_REFLECTION_RULES.get("bean_annotations", []))
+        mapper_anns = set(_REFLECTION_RULES.get("mapper_annotations", []))
+        tracked = bean_anns | mapper_anns
+        if not tracked:
+            return {}
+
+        ann_pat = "|".join(re.escape(a) for a in tracked)
+        # Match class/interface declaration preceded by one or more tracked annotations
+        # within a window of ~400 chars (handles intervening Javadoc/other annotations)
+        class_block_pat = re.compile(
+            r"(@(?:" + ann_pat + r")\b(?:\([^)]*\))?)"
+            r"[\s\S]{0,400}?"
+            r"(?:class|interface)\s+([A-Z]\w*)",
+        )
+        result: dict = {}
+        for m in class_block_pat.finditer(source_code):
+            ann_name = m.group(1).lstrip("@").split("(")[0]
+            class_name = m.group(2)
+            result.setdefault(class_name, []).append(ann_name)
+        return result
+
     def _extract_field(self, node, source_code):
         """提取字段声明"""
         try:
