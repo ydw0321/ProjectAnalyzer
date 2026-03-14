@@ -564,64 +564,88 @@ class GraphStore:
                 )
 
     def resolve_external_unknown_calls(self):
-        """将可唯一匹配的 external_unknown 调用补链到 Method 节点，再用启发式多候选补链"""
-        with self.driver.session() as session:
-            # Pass 1: 唯一名称精确补链
-            result = session.run(
-                """
-                MATCH (caller:Method)-[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
-                WITH caller, r, ext
-                MATCH (candidate:Method {name: ext.name})
-                WITH caller, r, ext, collect(candidate) AS candidates
-                WHERE size(candidates) = 1
-                WITH caller, r, ext, candidates[0] AS target
-                MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
-                SET c.inferred_reason = 'unique_name', c.confidence = 1.0
-                DELETE r
-                RETURN count(*) AS resolved
-                """
-            )
-            resolved_p1 = result.single()["resolved"]
+        """将可唯一匹配的 external_unknown 调用补链到 Method 节点，再用启发式多候选补链。
 
-        # Pass 2: 路径邻近度启发式多候选补链
+        所有 Pass 均使用分批事务（chunked transactions），避免大项目 OOM。
+        """
+        _BATCH = 2000  # rows per transaction
+
+        # Pass 1: 唯一名称精确补链（循环直到无剩余）
+        resolved_p1 = 0
+        while True:
+            with self.driver.session() as session:
+                # Fetch a batch of resolvable (unique-name) edges
+                result = session.run(
+                    """
+                    MATCH (caller:Method)-[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
+                    WITH caller, r, ext
+                    MATCH (candidate:Method {name: ext.name})
+                    WITH caller, r, ext, collect(candidate) AS candidates
+                    WHERE size(candidates) = 1
+                    WITH caller, r, ext, candidates[0] AS target
+                    RETURN caller.name AS caller_name, caller.class_name AS caller_class,
+                           ext.name AS method_name, target.class_name AS target_class
+                    LIMIT $lim
+                    """,
+                    lim=_BATCH,
+                )
+                batch = [dict(r) for r in result]
+
+            if not batch:
+                break
+
+            with self.driver.session() as session:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                          -[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod {name: row.method_name})
+                    MATCH (target:Method {name: row.method_name, class_name: row.target_class})
+                    MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
+                    SET c.inferred_reason = 'unique_name', c.confidence = 1.0
+                    DELETE r
+                    """,
+                    rows=batch,
+                )
+            resolved_p1 += len(batch)
+            if len(batch) < _BATCH:
+                break
+
+        # Pass 2: 路径邻近度启发式多候选补链（分批）
         resolved_p2 = self._resolve_by_heuristics()
 
-        with self.driver.session() as session:
-            session.run(
-                """
-                MATCH (ext:ExternalMethod)
-                WHERE NOT (()-[:CALLS]->(ext))
-                DELETE ext
-                """
-            )
+        # Pass 3: MyBatis Mapper proxy（在 _resolve_by_heuristics 内部已调用）
+
+        # 清理孤立 ExternalMethod 节点（分批避免大事务）
+        while True:
+            with self.driver.session() as session:
+                result = session.run(
+                    """
+                    MATCH (ext:ExternalMethod)
+                    WHERE NOT (()-[:CALLS]->(ext))
+                    WITH ext LIMIT 5000
+                    DELETE ext
+                    RETURN count(*) AS deleted
+                    """
+                )
+                deleted = result.single()["deleted"]
+            if deleted == 0:
+                break
 
         return resolved_p1 + resolved_p2
 
     def _resolve_by_heuristics(self) -> int:
         """对剩余多候选 external_unknown 调用用文件路径邻近度启发式补链。
-        仅当 caller 与 candidate 有至少 1 层公共路径前缀时才补链，
-        记录 inferred_reason 与 confidence 属性。
-        """
-        with self.driver.session() as session:
-            result = session.run(
-                """
-                MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
-                WITH caller, ext
-                MATCH (candidate:Method {name: ext.name})
-                WITH caller.name AS caller_name,
-                     caller.class_name AS caller_class,
-                     caller.file_path AS caller_file,
-                     ext.name AS method_name,
-                     collect({class_name: candidate.class_name,
-                              file_path: candidate.file_path}) AS candidates
-                WHERE size(candidates) > 1
-                RETURN caller_name, caller_class, caller_file, method_name, candidates
-                """
-            )
-            rows = [dict(r) for r in result]
 
-        if not rows:
-            return 0
+        全程使用两次「平坦」查询（无 collect() 聚合）并分批，彻底规避 Neo4j 事务 OOM。
+        Step 1: 获取有 ≥2 个候选类的方法名列表（仅字符串）。
+        Step 2: 对每批方法名 → 子查询A 获候选类 + 子查询B 获调用方，Python 侧打分。
+        Step 3: 批量写入结果。
+        """
+        from collections import defaultdict
+
+        _NAME_BATCH = 200   # method names per sub-query (keep each tx small)
+        _WRITE_BATCH = 1000  # write rows per transaction
 
         def path_overlap(path_a: str, path_b: str) -> int:
             parts_a = (path_a or "").replace("\\", "/").split("/")[:-1]
@@ -634,72 +658,137 @@ class GraphStore:
                     break
             return count
 
-        resolved_data = []
-        for row in rows:
-            caller_file = row.get("caller_file") or ""
-            candidates = row["candidates"]
-            ranked = sorted(
-                candidates,
-                key=lambda c: path_overlap(caller_file, c.get("file_path") or ""),
-                reverse=True,
-            )
-            best = ranked[0]
-            overlap = path_overlap(caller_file, best.get("file_path") or "")
-            if overlap >= 1:
-                confidence = round(min(1.0, 0.3 + 0.15 * overlap), 2)
-                resolved_data.append({
-                    "caller_name": row["caller_name"],
-                    "caller_class": row["caller_class"],
-                    "method_name": row["method_name"],
-                    "target_class": best["class_name"],
-                    "confidence": confidence,
-                    "inferred_reason": f"path_proximity:{overlap}",
-                })
-
-        if not resolved_data:
-            return 0
-
+        # Step 1: distinct method names called via external_unknown that have ≥2 impl classes
+        # Two-pass: first get all distinct ext.name values (no aggregation inside),
+        # then count candidates in Python. This avoids a large collect() on the server.
         with self.driver.session() as session:
-            session.run(
+            result = session.run(
                 """
-                UNWIND $rows AS row
-                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
-                MATCH (target:Method {name: row.method_name, class_name: row.target_class})
-                MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
-                SET c.inferred_reason = row.inferred_reason, c.confidence = row.confidence
-                """,
-                rows=resolved_data,
-            )
-            session.run(
+                MATCH ()-[:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
+                RETURN DISTINCT ext.name AS method_name
                 """
-                UNWIND $rows AS row
-                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
-                      -[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod {name: row.method_name})
-                DELETE r
-                """,
-                rows=resolved_data,
             )
+            ext_names = [r["method_name"] for r in result]
 
-        pass2_count = len(resolved_data)
+        if not ext_names:
+            return self._resolve_mapper_calls()
+
+        # For each distinct external name, count how many distinct Methods exist
+        # Use UNWIND batches to avoid processing all at once
+        multi_candidates: dict[str, list[dict]] = {}  # name -> [{class_name, file_path}]
+        for bi in range(0, len(ext_names), _NAME_BATCH):
+            batch = ext_names[bi: bi + _NAME_BATCH]
+            with self.driver.session() as session:
+                result = session.run(
+                    """
+                    UNWIND $names AS method_name
+                    MATCH (candidate:Method {name: method_name})
+                    RETURN method_name,
+                           candidate.class_name AS class_name,
+                           candidate.file_path AS file_path
+                    """,
+                    names=batch,
+                )
+                for r in result:
+                    nm = r["method_name"]
+                    multi_candidates.setdefault(nm, []).append(
+                        {"class_name": r["class_name"], "file_path": r["file_path"]}
+                    )
+        # Keep only names with multiple impl classes (multi-candidate)
+        multi_names = [
+            nm for nm, cands in multi_candidates.items() if len(cands) > 1
+        ]
+
+        if not multi_names:
+            return self._resolve_mapper_calls()
+
+        total_resolved = 0
+
+        # Step 2: for each batch of method names, get all callers (flat, no collect)
+        for bi in range(0, len(multi_names), _NAME_BATCH):
+            batch_names = multi_names[bi: bi + _NAME_BATCH]
+
+            with self.driver.session() as session:
+                result = session.run(
+                    """
+                    UNWIND $names AS method_name
+                    MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]
+                          ->(ext:ExternalMethod {name: method_name})
+                    RETURN caller.name AS caller_name,
+                           caller.class_name AS caller_class,
+                           caller.file_path AS caller_file,
+                           method_name
+                    """,
+                    names=batch_names,
+                )
+                caller_rows = [dict(r) for r in result]
+
+            if not caller_rows:
+                continue
+
+            # Python-side scoring: pick best candidate by path overlap
+            resolved_data = []
+            for row in caller_rows:
+                caller_file = row.get("caller_file") or ""
+                method_name = row["method_name"]
+                candidates = multi_candidates.get(method_name, [])
+                if not candidates:
+                    continue
+                ranked = sorted(
+                    candidates,
+                    key=lambda c: path_overlap(caller_file, c.get("file_path") or ""),
+                    reverse=True,
+                )
+                best = ranked[0]
+                overlap = path_overlap(caller_file, best.get("file_path") or "")
+                if overlap >= 1:
+                    confidence = round(min(1.0, 0.3 + 0.15 * overlap), 2)
+                    resolved_data.append({
+                        "caller_name": row["caller_name"],
+                        "caller_class": row["caller_class"],
+                        "method_name": method_name,
+                        "target_class": best["class_name"],
+                        "confidence": confidence,
+                        "inferred_reason": f"path_proximity:{overlap}",
+                    })
+
+            if not resolved_data:
+                continue
+
+            # Step 3: Write resolved edges in chunks
+            for wstart in range(0, len(resolved_data), _WRITE_BATCH):
+                chunk = resolved_data[wstart: wstart + _WRITE_BATCH]
+                with self.driver.session() as session:
+                    session.run(
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                        MATCH (target:Method {name: row.method_name, class_name: row.target_class})
+                        MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
+                        SET c.inferred_reason = row.inferred_reason, c.confidence = row.confidence
+                        """,
+                        rows=chunk,
+                    )
+                    session.run(
+                        """
+                        UNWIND $rows AS row
+                        MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                              -[r:CALLS {type: 'external_unknown'}]
+                              ->(ext:ExternalMethod {name: row.method_name})
+                        DELETE r
+                        """,
+                        rows=chunk,
+                    )
+            total_resolved += len(resolved_data)
 
         # Pass 3: MyBatis Mapper proxy resolution
-        # If an external_unknown edge targets a method whose name matches a method
-        # on a Class node marked is_mapper=true, infer the edge.
         pass3_count = self._resolve_mapper_calls()
 
-        return pass2_count + pass3_count
+        return total_resolved + pass3_count
 
     def _resolve_mapper_calls(self) -> int:
-        """Pass 3: 将剩余 external_unknown 中目标方法属于 @Mapper 类的边补链。
-
-        Looks for remaining CALLS{type:'external_unknown'} edges where the
-        ExternalMethod's name can be matched to a Method belonging to a
-        Class node with is_mapper=true.  Uses confidence=0.80 and
-        inferred_reason='mybatis_mapper'.
-        """
-        from src.config import Config
+        """Pass 3: 将剩余 external_unknown 中目标方法属于 @Mapper 类的边补链（分批）。"""
         mapper_confidence = 0.80
-
         try:
             from yaml import safe_load as _yaml_load
             import os as _os
@@ -710,46 +799,55 @@ class GraphStore:
         except Exception:
             pass
 
-        with self.driver.session() as session:
-            result = session.run(
-                """
-                MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
-                WITH caller, ext
-                MATCH (target:Method {name: ext.name})-[:BELONGS_TO]->(c:Class {is_mapper: true})
-                RETURN caller.name AS caller_name,
-                       caller.class_name AS caller_class,
-                       ext.name AS method_name,
-                       target.class_name AS target_class
-                """
-            )
-            mapper_rows = [dict(r) for r in result]
+        _BATCH = 2000
+        total = 0
+        while True:
+            with self.driver.session() as session:
+                result = session.run(
+                    """
+                    MATCH (caller:Method)-[:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod)
+                    WITH caller, ext
+                    MATCH (target:Method {name: ext.name})-[:BELONGS_TO]->(c:Class {is_mapper: true})
+                    RETURN caller.name AS caller_name,
+                           caller.class_name AS caller_class,
+                           ext.name AS method_name,
+                           target.class_name AS target_class
+                    LIMIT $lim
+                    """,
+                    lim=_BATCH,
+                )
+                mapper_rows = [dict(r) for r in result]
 
-        if not mapper_rows:
-            return 0
+            if not mapper_rows:
+                break
 
-        with self.driver.session() as session:
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
-                MATCH (target:Method {name: row.method_name, class_name: row.target_class})
-                MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
-                SET c.inferred_reason = 'mybatis_mapper', c.confidence = $confidence
-                """,
-                rows=mapper_rows,
-                confidence=mapper_confidence,
-            )
-            session.run(
-                """
-                UNWIND $rows AS row
-                MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
-                      -[r:CALLS {type: 'external_unknown'}]->(ext:ExternalMethod {name: row.method_name})
-                DELETE r
-                """,
-                rows=mapper_rows,
-            )
+            with self.driver.session() as session:
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                    MATCH (target:Method {name: row.method_name, class_name: row.target_class})
+                    MERGE (caller)-[c:CALLS {type: 'external', inferred: true}]->(target)
+                    SET c.inferred_reason = 'mybatis_mapper', c.confidence = $confidence
+                    """,
+                    rows=mapper_rows,
+                    confidence=mapper_confidence,
+                )
+                session.run(
+                    """
+                    UNWIND $rows AS row
+                    MATCH (caller:Method {name: row.caller_name, class_name: row.caller_class})
+                          -[r:CALLS {type: 'external_unknown'}]
+                          ->(ext:ExternalMethod {name: row.method_name})
+                    DELETE r
+                    """,
+                    rows=mapper_rows,
+                )
+            total += len(mapper_rows)
+            if len(mapper_rows) < _BATCH:
+                break
 
-        return len(mapper_rows)
+        return total
 
     def get_hot_nodes(self, limit=50):
         """获取被调用最多的方法节点"""
